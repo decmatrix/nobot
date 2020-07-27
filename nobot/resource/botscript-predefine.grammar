@@ -1,0 +1,11 @@
+<predefined-list> --> <predefined> <predefined-list> |
+                      <empty>
+
+<predefinde> --> <combo-predefine>
+
+<combo-predefined> --> '+combo' <id> '{' <combo-block> '}'
+
+<id> --> [go to botscript.grammar]
+
+<combo-block> --> <call-definition/combo> <combo-block> |
+                  <empty>
