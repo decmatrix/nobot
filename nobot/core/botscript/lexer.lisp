@@ -1,8 +1,7 @@
 (uiop:define-package :nobot/core/botscript/lexer
     (:use :cl
           :anaphora
-          :alexandria
-          :nobot/core/utils)
+          :alexandria)
   (:export :parse-file))
 
 (in-package :nobot/core/botscript/lexer)
@@ -23,7 +22,7 @@
          (*buffer* nil)
          (*token-buff* nil)
          (*fix-cur-pos* nil)
-         (*path-to-file* path-to-file)
+         (*path-to-file* ,path-to-file)
          (*fstream* ,fstream))
      ,@body))
 
@@ -60,12 +59,12 @@
                (fix-cur-pos)
                (read-chars ch
                            :keyword))
-              ((alpha-char-p)
+              ((alpha-char-p ch)
                (update-pos-x)
                (fix-cur-pos)
                (read-chars ch
                            :id))
-              ((digit-char-p)
+              ((digit-char-p ch)
                (update-pos-x)
                (fix-cur-pos)
                (read-chars ch
@@ -86,19 +85,19 @@
 
 (defun is-white-space-char-? (ch)
   (some (curry #'eq ch)
-        '(#\space #Tab #\newline #Backspace #\Return #\Linefeed #\Page)))
+        '(#\space #\Tab #\newline #\Backspace #\Return #\Linefeed #\Page)))
 
 (defun is-keyword-? (word)
   (some (curry #'eq word)
         '(|#EXE| !use $combo @def)))
 
 ;;TODO: do benchmark with this macros
-(defmacro read-chars (prev-char type &key before-char)
+(defmacro read-chars (prev-char type)
   ":id, :keyword, :num-string"
   (with-gensyms (ch word) ;; TODO: gensym macros no need, see alexandria lib
     `(clear-buffer)
     `(push-char-to-buffer ,prev-char)
-    `(loop for ,ch = (read-char *fstream* nil 'eof)
+    `(loop for (if ,ch = (read-char *fstream* nil 'eof))
         if (eq ,ch #\newline) do (update-pos-y)
         else do (update-pos-x)  
         while (and ,ch
