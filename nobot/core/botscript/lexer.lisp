@@ -1,100 +1,52 @@
 (uiop:define-package :nobot/core/botscript/lexer
     (:use :cl
           :anaphora
-          :alexandria)
-  (:export :parse-file))
+          :alexandria
+          :nobot/core/botscript/nodes)
+  (:export :disassemble-source))
 
 (in-package :nobot/core/botscript/lexer)
 
-;; TODO: too many lexical vars, maybe there use CLOS
-(defparameter *pos-x* nil)
-(defparameter *pos-y* nil)
-(defparameter *fix-cur-pos* nil)
-(defparameter *fstream* nil)
-(defparameter *buffer* nil)
-(defparameter *token-buff* nil)
-(defparameter *path-to-file* nil)
+(defun disassemble-source (source &key (type :file))
+  (unless source
+    (error "Expected source"))
+  (with-source ((:type type)
+                (:source source))
+    (do-char it)))
 
+(defun do-char (ch)
+  (cond
+    ((is-keyword-char-? ch)
+     (update-pos-x)
+     (fix-cur-pos)
+     (read-chars ch
+                 :keyword))
+    ((alpha-char-p ch)
+     (update-pos-x)
+     (fix-cur-pos)
+     (read-chars ch
+                 :id))
+    ((digit-char-p ch)
+     (update-pos-x)
+     (fix-cur-pos)
+     (read-chars ch
+                 :num-string))
+    ((eq ch #\newline)
+     (update-pos-y)) 
+    ((is-white-space-char-? ch)
+     (update-pos-x))
+    (t
+     (error "Unknown symbol [~A] in ~A in pos ~A ~A~%"
+            ch
+            *path-to-file*
+            (1+ *pos-x*)
+            *pos-y*))))
 
-(defmacro with-file-process ((fstream path-to-file) &body body)
-  `(let ((*pos-x* 1)
-         (*pos-y* 1)
-         (*buffer* nil)
-         (*token-buff* nil)
-         (*fix-cur-pos* nil)
-         (*path-to-file* ,path-to-file)
-         (*fstream* ,fstream))
-     ,@body))
-
-(defun fix-cur-pos ()
-  (setf *fix-cur-pos* (cons *pos-x* *pos-y*)))
-
-(defun clear-buffer ()
-  (setf *buffer* nil))
-
-(defun update-pos-x ()
-  (incf *pos-x*))
-
-(defun update-pos-y ()
-  (incf *pos-y*))
-
-(defun push-char-to-buffer (ch)
-  (setf *buffer* (append *buffer* (list ch)))) ;;nconc ?
-
-(defun push-token-to-buffer (token)
-  (setf *token-buff* (append *token-buff* (list token)))) ;; nconc ?
-
-(defun parse-file (path-to-file)
-  (unless path-to-file
-    (error "Expected path to file"))
-  (with-open-file (fstream path-to-file
-                           :direction :input
-                           :if-does-not-exist :error)
-    (with-file-process (fstream path-to-file)
-      (loop for ch = (read-char *fstream* nil 'eof)
-         while (not (eq ch 'eof))
-         do (cond
-              ((is-keyword-char-? ch)
-               (update-pos-x)
-               (fix-cur-pos)
-               (read-chars ch
-                           :keyword))
-              ((alpha-char-p ch)
-               (update-pos-x)
-               (fix-cur-pos)
-               (read-chars ch
-                           :id))
-              ((digit-char-p ch)
-               (update-pos-x)
-               (fix-cur-pos)
-               (read-chars ch
-                           :num-string))
-              ((eq ch #\newline)
-               (update-pos-y)) 
-              ((is-white-space-char-? ch)
-               (update-pos-x))
-              (t
-               (error "Unknown symbol [~A] in ~A in pos ~A ~A~%"
-                      ch
-                      *path-to-file*
-                      (1+ *pos-x*)
-                      *pos-y*)))))))
-
-(defun is-keyword-char-? (ch)
-  (find ch "#!@$"))
-
-(defun is-white-space-char-? (ch)
-  (some (curry #'eq ch)
-        '(#\space #\Tab #\newline #\Backspace #\Return #\Linefeed #\Page)))
-
-(defun is-keyword-? (word)
-  (some (curry #'eq word)
-        '(|#EXE| !use $combo @def)))
 
 ;;TODO: do benchmark with this macros
 (defmacro read-chars (prev-char type)
   ":id, :keyword, :num-string"
-  (with-gensyms (ch word) ;; TODO: gensym macros no need, see alexandria lib
+  (with-gensyms (ch word)
     `(clear-buffer)
     `(push-char-to-buffer ,prev-char)
     `(loop for (if ,ch = (read-char *fstream* nil 'eof))
@@ -121,3 +73,16 @@
                    (intern ,word :botscript)))
            (:num-string
             `(list '<number-string> (parse-integer ,word))))))))
+
+
+
+(defun is-keyword-char-? (ch)
+  (find ch "#!@$"))
+
+(defun is-white-space-char-? (ch)
+  (some (curry #'eq ch)
+        '(#\space #\Tab #\newline #\Backspace #\Return #\Linefeed #\Page)))
+
+(defun is-keyword-? (word)
+  (some (curry #'eq word)
+        '(|#EXE| !use $combo @def)))
