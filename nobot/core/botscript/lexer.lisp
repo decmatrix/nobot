@@ -1,80 +1,86 @@
-(uiop:define-package :nobot/core/botscript/lexer
+(uiop:define-package :botscript/lexer
     (:use :cl
           :anaphora
           :alexandria
-          :nobot/core/botscript/nodes)
+          :botscript/nodes)
   (:export :disassemble-source))
 
-(in-package :nobot/core/botscript/lexer)
+(in-package :botscript/lexer)
+
+(defparameter *non-terminals* (make-hash-table :test #'eq))
+(setf (gethash :keyword  *non-terminals*) (intern "<KEYWORD>" :cl-user))
+(setf (gethash :id *non-terminals*) (intern "<ID>" :cl-user))
+(setf (gethash :number-string *non-terminals*) (intern "<NUMBER-STRING>" :cl-user))
+(setf (gethash :unknown *non-terminals*) (intern "<UNKNOWN>" :cl-user))
 
 (defun disassemble-source (source &key (type :file))
   (unless source
     (error "Expected source"))
-  (with-source ((:type type)
-                (:source source))
+  (with-source (type source)
     (do-char it)))
 
 (defun do-char (ch)
   (cond
     ((is-keyword-char-? ch)
-     (update-pos-x)
-     (fix-cur-pos)
+     (update-pos-x *source*)
+     (fix-cur-position *source*)
      (read-chars ch
                  :keyword))
     ((alpha-char-p ch)
-     (update-pos-x)
-     (fix-cur-pos)
+     (update-pos-x *source*)
+     (fix-cur-position *source*)
      (read-chars ch
                  :id))
     ((digit-char-p ch)
-     (update-pos-x)
-     (fix-cur-pos)
+     (update-pos-x *source*)
+     (fix-cur-position *source*)
      (read-chars ch
                  :num-string))
     ((eq ch #\newline)
-     (update-pos-y)) 
+     (update-pos-y *source*)) 
     ((is-white-space-char-? ch)
-     (update-pos-x))
+     (update-pos-x *source*))
     (t
-     (error "Unknown symbol [~A] in ~A in pos ~A ~A~%"
+     (error "Unknown symbol [~A] in pos ~A ~A~%"
             ch
-            *path-to-file*
-            (1+ *pos-x*)
-            *pos-y*))))
+            (1+ (get-position-x *source*))
+            (get-position-y *source*)))))
 
 
-;;TODO: do benchmark with this macros
 (defmacro read-chars (prev-char type)
   ":id, :keyword, :num-string"
   (with-gensyms (ch word)
-    `(clear-buffer)
-    `(push-char-to-buffer ,prev-char)
-    `(loop for (if ,ch = (read-char *fstream* nil 'eof))
-        if (eq ,ch #\newline) do (update-pos-y)
-        else do (update-pos-x)  
-        while (and ,ch
-                   ,(case type
-                      (:id :keyword
-                           `(or
-                             (alphanumericp ,ch)
-                             (eq ,ch #\-)))
-                      (:num-string
-                       `(digit-char-p ,ch))))
-        do (push-char-to-buffer ,ch))
-    `(let ((,word (string-upcase (concatenate 'string *buffer*))))
-       (push-token-to-buffer
-        ,(case type
-           (:id
-            `(list '<id> (intern ,word :botscript)))
-           (:keyword
-            `(list (if (is-keyword-? ,word)
-                       '<keyword>
-                       '<unknown>)
-                   (intern ,word :botscript)))
-           (:num-string
-            `(list '<number-string> (parse-integer ,word))))))))
+    `(progn
+       (clear-char-buffer *source*)
+       (push-char-to-buffer ,prev-char *source*)
+       (loop for ,ch = (next-char *source*)
+          if (eq ,ch #\newline) do (update-pos-y *source*)
+          else do (update-pos-x *source*)  
+          while (and ,ch
+                     ,(case type
+                        ((:id :keyword)
+                         `(or
+                           (alphanumericp ,ch)
+                           (eq ,ch #\-)))
+                        (:num-string
+                         `(digit-char-p ,ch))))
+          do (push-char-to-buffer ,ch *source*))
+       (let ((,word (string-upcase (concatenate 'string (get-char-buffer *source*)))))
+         (push-token-to-buffer
+          ,(case type
+             (:id
+              `(list (get-non-terminal :id) ,word))
+             (:keyword
+              `(list (if (is-keyword-? ,word)
+                         (get-non-terminal :keyword)
+                         (get-non-terminal :unknown))
+                     (intern ,word :cl-user)))
+             (:num-string
+              `(list (get-non-terminal :number-string) (parse-integer ,word))))
+          *source*)))))
 
-
+(defun get-non-terminal (kword)
+  (gethash kword *non-terminals*))
 
 (defun is-keyword-char-? (ch)
   (find ch "#!@$"))
@@ -84,5 +90,5 @@
         '(#\space #\Tab #\newline #\Backspace #\Return #\Linefeed #\Page)))
 
 (defun is-keyword-? (word)
-  (some (curry #'eq word)
-        '(|#EXE| !use $combo @def)))
+  (some (curry #'equal word)
+        '("#EXE" "!USE" "$COMBO" "@DEF")))

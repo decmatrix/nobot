@@ -1,5 +1,4 @@
-(uiop:define-package :nobot/core/botscript
+(uiop:define-package :botscript
     (:use :cl
-          :nobot/core/botscript/lexer)
-  (:nicknames :botscript)
-  (:export :parse-file))
+          :botscript/lexer)
+  (:export #:disassemble-source))
