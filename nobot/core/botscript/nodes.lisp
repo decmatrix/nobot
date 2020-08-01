@@ -1,153 +1,174 @@
-(uiop:define-package :botscript/nodes
+(uiop:define-package :nobot/core/botscript/nodes
     (:use :cl
           :anaphora
           :alexandria)
   (:export #:*source*
-           #:with-source
-           #:fix-cur-position
-           #:clear-char-buffer
-           #:update-pos-x
-           #:update-pos-y
+           #:with-source-code
+           #:new-token
+           ;; from source node API
+           #:get-source
+           #:get-source-type
+           ;; from tokens source node API
+           #:get-tokens-seq
+           #:set-tokens-seq
+           #:set-converted-tokens-seq
+           #:get-converted-tokens-seq
+           ;; token node API
+           #:get-token-type
+           #:value-of-token
+           #:get-position
+           ;; from source code node API
            #:get-position-x
            #:get-position-y
+           #:update-pos-x
+           #:update-pos-y
+           #:fix-cur-position
+           #:clear-char-buffer
            #:push-char-to-buffer
-           #:push-token-to-buffer
+           #:push-token-to-bufferы
            #:get-cur-position
-           #:get-source
            #:get-char-buffer
+           #:get-token-buffer
+           ;; from file source node API
            #:get-file-stream
-           #:next-char))
+           ;; from string source node API
+           #:get-cur-index
+           ;; from file and string source node common API
+           #:next-char
+           ;; nodes
+           #:token-node
+           #:from-tokens-source-node))
 
-(in-package :botscript/nodes)
+
+;;TODO optimize close, accsessor divide to reader and writeser if as need
+(in-package :nobot/core/botscript/nodes)
 
 (defclass from-source-node ()
+  ((source
+    :initarg :source
+    :accessor get-source)
+   (type
+    :initarg :type
+    :accessor get-source-type)))
+
+(defclass from-tokens-source-node (from-source-node)
+  ((token-seq
+    :initform nil
+    :reader get-tokens-seq
+    :writer set-tokens-seq)
+   (converted-token-seq
+    :initform nil
+    :writer set-converted-tokens-seq
+    :reader get-converted-tokens-seq)))
+
+(defclass token-node ()
+  ((type
+    :initarg :type
+    :accessor get-token-type)
+   (value
+    :initarg :value
+    :accessor value-of-token)
+   (position
+    :initarg :position
+    :accessor get-position)))
+
+(defclass from-source-code-node (from-source-node)
   ((pos-x
     :initform 1
-    :accessor get-pos-x)
+    :accessor get-position-x)
    (pos-y
     :initform 1
-    :accessor get-pos-y)
+    :accessor get-position-y)
    (fixed-cur-pos
     :initform nil
     :accessor get-fixed-cur-pos)
    (token-buff
     :initform nil
-    :accessor get-token-buff)
+    :accessor get-token-buffer)
    (char-buffer
     :initform nil
-    :accessor get-char-buff)))
+    :accessor get-char-buffer)))
 
-(defclass from-file-source-node (from-source-node)
+(defclass from-file-source-node (from-source-code-node)
   ((fstream
-    :initarg :init-fstream
-    :accessor get-fstream)
-   (path
-    :initarg :init-path
-    :accessor get-path)))
+    :initarg :fstream
+    :accessor get-file-stream)))
 
-(defclass from-string-source-node (from-source-node)
-  ((string-source-sstring
-    :initarg :init-source-string
-    :accessor get-source-string)
-   (cur-index
+(defclass from-string-source-node (from-source-code-node)
+  ((cur-index
     :initform 0
     :accessor get-cur-index)))
 
 
-
 (defparameter *source* nil)
 
-(defmacro with-source ((type source) &body body)
+(defmacro with-source-code ((type source) &body body)
   `(let* ((*source* (case ,type
                       (:file
                        (make-instance 'from-file-source-node
-                                      :init-fstream (open ,source
-                                                          :direction :input
-                                                          :if-does-not-exist :error)
-                                      :path ,source))
+                                      :fstream (open ,source
+                                                     :direction :input
+                                                     :if-does-not-exist :error)
+                                      :source ,source
+                                      :type ,type))
                       (:string
                        (make-instance 'from-string-source-node
-                                      :init-source-string ,source))
+                                      :source ,source
+                                      :type ,type))
                       (t (error "Unknown type ~A" ,type)))))
-     (loop for it = (next-char *source*)
-        while it
-        do (progn
-             ,@body))
+     ,@body
      ,(when (eq type :file)
         '(close (get-fstream *source*)))
-     (get-token-buff *source*)))
+     (get-token-buffer *source*)))
 
 
+;;TODO: optimize methods and withput using *source* 
 (defgeneric fix-cur-position (obj))
 (defgeneric clear-char-buffer (obj))
-(defgeneric update-pox-x (obj))
+(defgeneric update-pos-x (obj))
 (defgeneric update-pos-y (obj))
-(defgeneric get-position-x (obj))
-(defgeneric get-position-y (obj))
 (defgeneric push-char-to-buffer (ch obj))
 (defgeneric push-token-to-buffer (token obj))
-(defgeneric get-char-buffer (obj))
 (defgeneric get-cur-position (obj))
-(defgeneric get-source (obj))
-(defgeneric get-file-stream (obj))
 (defgeneric next-char (obj))
 
-(defmethod fix-cur-position ((obj from-source-node))
+
+(defmethod fix-cur-position ((obj from-source-code-node))
   (setf (get-fixed-cur-pos obj)
-        (cons (get-pos-x obj)
-              (get-pos-y obj))))
+        (cons (get-position-x obj)
+              (get-position-y obj))))
 
-(defmethod clear-char-buffer ((obj from-source-node))
-  (setf (get-char-buff obj) nil))
+(defmethod clear-char-buffer ((obj from-source-code-node))
+  (setf (get-char-buffer obj) nil))
 
-(defmethod update-pos-x ((obj from-source-node))
-  (incf (get-pos-x obj)))
+(defmethod update-pos-x ((obj from-source-code-node))
+  (incf (get-position-x obj)))
 
-(defmethod update-pos-y ((obj from-source-node))
-  (incf (get-pos-y obj)))
+(defmethod update-pos-y ((obj from-source-code-node))
+  (incf (get-position-y obj)))
 
-(defmethod get-position-x ((obj from-source-node))
-  (get-pos-x obj))
+(defmethod push-char-to-buffer (ch (obj from-source-code-node))
+  (setf (get-char-buffer obj)
+        (append (get-char-buffer obj) (list ch)))) ;; TODO: maybe nconc ?
 
-(defmethod get-position-y ((obj from-source-node))
-  (get-pos-y obj))
+(defmethod push-token-to-buffer (token (obj from-source-code-node))
+  (setf (get-token-buffer obj)
+        (append (get-token-buffer obj) (list token)))) ;; TODO: maybe nconc ?
 
-(defmethod push-char-to-buffer (ch (obj from-source-node))
-  (setf (get-char-buff obj)
-        (append (get-char-buff obj) (list ch)))) ;; TODO: maybe nconc ?
-
-(defmethod push-token-to-buffer (token (obj from-source-node))
-  (setf (get-token-buff obj)
-        (append (get-token-buff obj) (list token)))) ;; TODO: maybe nconc ?
-
-(defmethod get-cur-position ((obj from-source-node))
-  (values (get-pos-x obj)
-          (get-pos-y obj)))
-
-(defmethod get-source ((obj from-file-source-node))
-  (get-path obj))
-
-(defmethod get-source ((obj from-string-source-node))
-  (get-source-string obj))
-
-(defmethod get-file-stream ((obj from-file-source-node))
-  (get-fstream obj))
+(defmethod get-cur-position ((obj from-source-code-node))
+  (values (get-position-x obj)
+          (get-position-y obj)))
 
 (defmethod next-char ((obj from-file-source-node))
-  (read-char (get-fstream obj) nil nil))
-
-(defmethod next-char ((obj from-string-source-node))
-  (awhen (aref (get-source-string obj) (get-cur-index obj))
-    (incf (get-cur-index obj))
-    it))
+  (read-char (get-file-stream obj) nil nil))
 
 (defmethod next-char ((obj from-string-source-node))
   (let ((idx (get-cur-index obj))
-        (source-str (get-source-string obj)))
+        (source-str (get-source obj)))
     (unless (eql idx (length source-str))
       (incf (get-cur-index obj))
       (aref source-str idx))))
 
-(defmethod get-char-buffer ((obj from-source-node))
-  (get-char-buff obj))
-
+(defun new-token (&rest args)
+  (apply (curry #'make-instance 'token-node)
+         args))

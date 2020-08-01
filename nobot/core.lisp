@@ -1,3 +1,3 @@
 (uiop:define-package :nobot/core
     (:use :cl
-          :botscript))
+          :nobot/core/botscript))

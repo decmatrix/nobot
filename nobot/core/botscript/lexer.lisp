@@ -1,12 +1,13 @@
-(uiop:define-package :botscript/lexer
+(uiop:define-package :nobot/core/botscript/lexer
     (:use :cl
           :anaphora
           :alexandria
-          :botscript/nodes)
+          :nobot/core/botscript/nodes)
   (:export :disassemble-source))
 
-(in-package :botscript/lexer)
+(in-package :nobot/core/botscript/lexer)
 
+;;TODO optimize for new-token
 (defparameter *non-terminals* (make-hash-table :test #'eq))
 (setf (gethash :keyword  *non-terminals*) (intern "<KEYWORD>" :cl-user))
 (setf (gethash :id *non-terminals*) (intern "<ID>" :cl-user))
@@ -16,8 +17,10 @@
 (defun disassemble-source (source &key (type :file))
   (unless source
     (error "Expected source"))
-  (with-source (type source)
-    (do-char it)))
+  (with-source-code (type source)
+    (loop for ch = (next-char *source*)
+       while ch
+       do (do-char ch))))
 
 (defun do-char (ch)
   (cond
@@ -67,16 +70,25 @@
           do (push-char-to-buffer ,ch *source*))
        (let ((,word (string-upcase (concatenate 'string (get-char-buffer *source*)))))
          (push-token-to-buffer
+          ;;TODO: optimize it
           ,(case type
              (:id
-              `(list (get-non-terminal :id) ,word))
+              `(new-token
+                :type (get-non-terminal :id)
+                :value ,word
+                :position (get-cur-position *source*)))
              (:keyword
-              `(list (if (is-keyword-? ,word)
-                         (get-non-terminal :keyword)
-                         (get-non-terminal :unknown))
-                     (intern ,word :cl-user)))
+              `(new-token
+                :type (if (is-keyword-? ,word)
+                          (get-non-terminal :keyword)
+                          (get-non-terminal :unknown))
+                :value (intern ,word :cl-user)
+                :position (get-cur-position *source*)))
              (:num-string
-              `(list (get-non-terminal :number-string) (parse-integer ,word))))
+              `(new-token
+                :type (get-non-terminal :number-string)
+                :value (parse-integer ,word)
+                :position (get-cur-position *source*))))
           *source*)))))
 
 (defun get-non-terminal (kword)
