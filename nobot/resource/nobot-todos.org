@@ -30,6 +30,7 @@
 ** TODO write bash script whose remove *.fasl , *~ etc
 ** TODO find a way how calculate size of lisp object
 ** TODO split the package nobot-utils into sub packages 
+** TODO write scripts who find debug functions like: print, format
 
 
 * Somehow
