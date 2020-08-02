@@ -1,0 +1,36 @@
+* Botscript and predefine
+** TODO write bash script for run it, or make file
+** DONE write lexer
+** TODO write parser
+** TODO write parse string function
+** DONE write lexer parse string function
+** TODO write tests for lexer
+** TODO write tests for parser
+** TODO write tests for pos in lexer
+** TODO write tests for error handling
+** TODO write tests for new lexemes representation
+** TODO come up with inline parser for predefine in block !use
+** DONE come up with cool representation tokens in lexer with pos and etc...
+** TODO come up with cool error handler, while use lisp error with special representation
+** DONE write function convert-tokens [[ TODO come up with cool representation tokens in lexer with pos and etc...][see]]
+* Python code gen
+** TODO write simple server generator
+** TODO write simple Telegram API bot generator
+** TODO write bot logic generator
+** TODO write tests
+
+* JS code gen
+** TODO write simple server generator
+** TODO write simple Telegram API bot generator
+** TODO write bot logic generator
+** TODO write tests
+* Common
+** TODO write benchmark function/macros or lib with this function
+** TODO !!! write own test utils
+** TODO write bash script whose remove *.fasl , *~ etc
+** TODO find a way how calculate size of lisp object
+** TODO split the package nobot-utils into sub packages 
+
+
+* Somehow
+** TODO improve lazy clalcs, lazy node - must have information
