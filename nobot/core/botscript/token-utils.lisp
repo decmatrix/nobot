@@ -42,7 +42,7 @@
   (and (eq (get-token-type obj1)
            (get-token-type obj2))
        (equals
-        (print (value-of-token obj1))
+        (value-of-token obj1)
         (value-of-token obj2))
        (and
         with-pos
