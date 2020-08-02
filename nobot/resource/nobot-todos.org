@@ -32,10 +32,5 @@
 ** TODO split the package nobot-utils into sub packages 
 
 
-
-* FOR COMMIT
-** refactored lexer
-** write token converted
-** write compare functions for tokens
-** write some utils
-** write lazy calulus utils
+* Somehow
+** TODO improve lazy clalcs, lazy node - must have information

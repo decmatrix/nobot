@@ -14,10 +14,18 @@
 (setf (gethash :number-string *non-terminals*) (intern "<NUMBER-STRING>" :cl-user))
 (setf (gethash :unknown *non-terminals*) (intern "<UNKNOWN>" :cl-user))
 
-(defun disassemble-source (source &key (type :file))
+(defun disassemble-source (source &key (type :file)
+                                    convert-tokens
+                                    convert-with-pos
+                                    convert-to-lazy-tokens
+                                    return-instance)
   (unless source
     (error "Expected source"))
-  (with-source-code (type source)
+  (with-source-code (type source
+                          :convert-tokens convert-tokens
+                          :convert-with-pos convert-with-pos
+                          :convert-to-lazy-tokens convert-to-lazy-tokens
+                          :return-instance return-instance)
     (loop for ch = (next-char *source*)
        while ch
        do (do-char ch))))
@@ -54,7 +62,7 @@
   ":id, :keyword, :num-string"
   (with-gensyms (ch word)
     `(progn
-       (clear-char-buffer *source*)
+       (clear-chars-buffer *source*)
        (push-char-to-buffer ,prev-char *source*)
        (loop for ,ch = (next-char *source*)
           if (eq ,ch #\newline) do (update-pos-y *source*)
@@ -68,7 +76,7 @@
                         (:num-string
                          `(digit-char-p ,ch))))
           do (push-char-to-buffer ,ch *source*))
-       (let ((,word (string-upcase (concatenate 'string (get-char-buffer *source*)))))
+       (let ((,word (string-upcase (concatenate 'string (get-chars-buffer *source*)))))
          (push-token-to-buffer
           ;;TODO: optimize it
           ,(case type

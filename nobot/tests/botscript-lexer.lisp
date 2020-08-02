@@ -1,7 +1,7 @@
 (uiop:define-package :nobot/tests/botscript-lexer
     (:use :cl
           :lisp-unit
-          :botscript))
+          :nobot/core/botscript))
 
 
 (in-package :nobot/tests/botscript-lexer)
