@@ -1,0 +1,2 @@
+* BUGS TODO
+** DONE some problems with positions

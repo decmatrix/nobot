@@ -1,11 +1,8 @@
-(uiop:define-package :nobot/core/botscript/nodes
+(uiop:define-package :nobot/botscript/nodes
     (:use :cl
           :anaphora
-          :alexandria
-          :nobot/core/botscript/token-utils)
-  (:export #:*source*
-           #:with-source-code
-           #:new-token
+          :alexandria)
+  (:export #:new-token
            #:make-tokens-source
            ;; from source node API
            #:get-source
@@ -22,13 +19,14 @@
            ;; from source code node API
            #:get-position-x
            #:get-position-y
-           #:update-pos-x
-           #:update-pos-y
+           #:update-pos
+           #:undo-update-pos
            #:fix-cur-position
            #:clear-chars-buffer
            #:push-char-to-buffer
            #:push-token-to-buffer
            #:get-cur-position
+           #:get-fixed-cur-position
            #:get-chars-buffer
            #:get-tokens-buffer
            ;; from file source node API
@@ -37,13 +35,17 @@
            #:get-cur-index
            ;; from file and string source node common API
            #:next-char
+           #:undo-next-char
            ;; nodes
            #:token-node
-           #:from-tokens-source-node))
+           #:from-source-node
+           #:from-tokens-source-node
+           #:from-source-code-node
+           #:from-file-source-node
+           #:from-string-source-node))
 
 
-;;TODO optimize clos, accsessor divide to reader and writeser if as need
-(in-package :nobot/core/botscript/nodes)
+(in-package :nobot/botscript/nodes)
 
 (defclass from-source-node ()
   ((source
@@ -76,14 +78,14 @@
 
 (defclass from-source-code-node (from-source-node)
   ((pos-x
-    :initform 1
+    :initform 0
     :accessor get-position-x)
    (pos-y
     :initform 1
     :accessor get-position-y)
    (fixed-cur-pos
     :initform nil
-    :accessor get-fixed-cur-pos)
+    :accessor get-fixed-cur-position)
    (token-buff
     :initform nil
     :accessor get-tokens-buffer)
@@ -102,75 +104,34 @@
     :accessor get-cur-index)))
 
 
-(defparameter *source* nil)
-
-(defmacro with-source-code ((type source &key
-                                  convert-tokens
-                                  convert-with-pos
-                                  convert-to-lazy-tokens
-                                  return-instance) &body body)
-  (with-gensyms (tokens-source-instance)
-    `(progn
-       (when (and ,return-instance ,convert-tokens)
-         (error "Use ~A with other keys or ~A"
-                "<convert-tokens>"
-                "<return-instance>"))
-       (when (and (or ,convert-with-pos ,convert-to-lazy-tokens)
-                  (not ,convert-tokens))
-         (error "Use ~A key before using the keys ~A and ~A"
-                "<convert-tokens>"
-                "<convert-with-pos>"
-                "<convert-to-lazy-tokens>"))
-       (let* ((*source* (case ,type
-                          (:file
-                           (make-instance 'from-file-source-node
-                                          :fstream (open ,source
-                                                         :direction :input
-                                                         :if-does-not-exist :error)
-                                          :source ,source
-                                          :type ,type))
-                          (:string
-                           (make-instance 'from-string-source-node
-                                          :source ,source
-                                          :type ,type))
-                          (t (error "Unknown type ~A" ,type)))))
-         ,@body
-         ,(when (eq type :file)
-            '(close (get-fstream *source*)))
-         (let ((,tokens-source-instance (make-tokens-source *source*)))
-           (if ,return-instance
-               ,tokens-source-instance
-               (if ,convert-tokens
-                   (convert-tokens ,tokens-source-instance
-                                   :with-pos ,convert-with-pos
-                                   :lazy ,convert-to-lazy-tokens)
-                   (get-tokens-seq ,tokens-source-instance))))))))
-
-
-;;TODO: optimize methods and withput using *source* 
 (defgeneric fix-cur-position (obj))
 (defgeneric clear-chars-buffer (obj))
-(defgeneric update-pos-x (obj))
-(defgeneric update-pos-y (obj))
+(defgeneric update-pos (ch obj))
+(defgeneric undo-update-pos (ch obj))
 (defgeneric push-char-to-buffer (ch obj))
 (defgeneric push-token-to-buffer (token obj))
 (defgeneric get-cur-position (obj))
 (defgeneric next-char (obj))
-(defgeneric make-tokens-source (obj))
+(defgeneric undo-next-char (ch obj))
+
 
 (defmethod fix-cur-position ((obj from-source-code-node))
-  (setf (get-fixed-cur-pos obj)
+  (setf (get-fixed-cur-position obj)
         (cons (get-position-x obj)
               (get-position-y obj))))
 
 (defmethod clear-chars-buffer ((obj from-source-code-node))
   (setf (get-chars-buffer obj) nil))
 
-(defmethod update-pos-x ((obj from-source-code-node))
-  (incf (get-position-x obj)))
+(defmethod update-pos (ch (obj from-source-code-node))
+  (if (eq ch #\newline)
+      (incf (get-position-y obj))
+      (incf (get-position-x obj))))
 
-(defmethod update-pos-y ((obj from-source-code-node))
-  (incf (get-position-y obj)))
+(defmethod undo-update-pos (ch (obj from-source-code-node))
+  (if (eq ch #\newline)
+      (decf (get-position-y obj))
+      (decf (get-position-x obj))))
 
 (defmethod push-char-to-buffer (ch (obj from-source-code-node))
   (setf (get-chars-buffer obj)
@@ -194,13 +155,11 @@
       (incf (get-cur-index obj))
       (aref source-str idx))))
 
-(defmethod make-tokens-source ((obj from-source-code-node))
-  (make-instance 'from-tokens-source-node
-                 :source (get-source obj)
-                 :type (get-source-type obj)
-                 :tokens-seq (get-tokens-buffer obj)))
+(defmethod undo-next-char :before (ch (obj from-source-code-node))
+  (undo-update-pos ch obj))
 
-(defun new-token (&rest args)
-  (apply (curry #'make-instance 'token-node)
-         args))
+(defmethod undo-next-char (ch (obj from-file-source-node))
+  (unread-char ch (get-file-stream obj)))
 
+(defmethod undo-next-char (ch (obj from-string-source-node))
+  (decf (get-cur-index obj)))

@@ -29,9 +29,9 @@
 ** TODO !!! write own test utils
 ** TODO write bash script whose remove *.fasl , *~ etc
 ** TODO find a way how calculate size of lisp object
-** TODO split the package nobot-utils into sub packages 
+** DONE split the package nobot-utils into sub packages 
 ** TODO write scripts who find debug functions like: print, format
 
 
 * Somehow
-** TODO improve lazy clalcs, lazy node - must have information
+** DONE improve lazy clalcs, lazy node - must have information
