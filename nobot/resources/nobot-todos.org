@@ -4,7 +4,8 @@
 ** TODO write parser
 ** TODO write parse string function
 ** DONE write lexer parse string function
-** TODO write tests for lexer
+** DONE write tests for lexer
+** TODO write print objects for nodes.lisp
 ** TODO write tests for parser
 ** TODO write tests for pos in lexer
 ** TODO write tests for error handling
