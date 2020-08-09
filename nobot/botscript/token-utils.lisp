@@ -19,15 +19,15 @@
 
 
 ;; init token types
-(progn
-  (setf (gethash :keyword *token-types*)
-        (intern (set-<> "keyword") :cl-user))
-  (setf (gethash :unknown *token-types*)
-        (intern (set-<> "unknown") :cl-user))
-  (setf (gethash :number-string *token-types*)
-        (intern (set-<> "number-string") :cl-user))
-  (setf (gethash :id *token-types*)
-        (intern (set-<> "id") :cl-user)))
+(mapcar
+ (lambda (str)
+   (let ((up-string (string-upcase str)))
+     (setf (gethash (intern up-string :keyword) *token-types*)
+           (intern (set-<> up-string) :cl-user))))
+ '("keyword"
+   "unknown"
+   "number-string"
+   "id"))
 
 
 (defgeneric convert-tokens (obj &key with-pos re-cached lazy))

@@ -1,7 +1,8 @@
 (uiop:define-package :nobot/utils/common-utils
     (:use :cl)
   (:export #:equals
-           #:set-<>))
+           #:set-<>
+           #:split-list))
 
 (in-package :nobot/utils/common-utils)
 
@@ -25,4 +26,4 @@
   (eq obj1 obj2))
 
 (defun set-<> (str)
-  (concatenate 'string '(#\<) (string-upcase str) '(#\>)))
+  (concatenate 'string '(#\<) str '(#\>)))

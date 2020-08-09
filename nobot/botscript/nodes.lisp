@@ -56,7 +56,7 @@
     :accessor get-source-type)))
 
 (defclass from-tokens-source-node (from-source-node)
-  ((token-seq
+  ((tokens-seq
     :initarg :tokens-seq
     :reader get-tokens-seq
     :writer set-tokens-seq)
@@ -103,7 +103,19 @@
     :initform 0
     :accessor get-cur-index)))
 
+(defclass token-pointer ()
+  ((pointer
+    :initform -1
+    :accessor get-index)
+   (tokens-seq
+    :initarg :tokens-seq
+    :accessor get-tokens-seq)
+   (toknes-seq-limit
+    :initarg :token-seq-limit
+    :accessor get-limit)))
 
+
+;; for lexer
 (defgeneric fix-cur-position (obj))
 (defgeneric clear-chars-buffer (obj))
 (defgeneric update-pos (ch obj))
@@ -114,7 +126,12 @@
 (defgeneric next-char (obj))
 (defgeneric undo-next-char (ch obj))
 
+;; for parser
+(defgeneric next-token (obj))
+(defgeneric reset-pointer (obj))
 
+
+;; for lexer
 (defmethod fix-cur-position ((obj from-source-code-node))
   (setf (get-fixed-cur-position obj)
         (cons (get-position-x obj)
@@ -163,3 +180,13 @@
 
 (defmethod undo-next-char (ch (obj from-string-source-node))
   (decf (get-cur-index obj)))
+
+
+;; for parser
+(defmethod next-token ((pointer token-pointer))
+  (let ((idx (get-index pointer)))
+    (unless (eql idx (get-limit pointer))
+      (nth idx (get-tokens-seq pointer)))))
+
+(defmethod reset-pointer ((pointer token-pointer))
+  (setf (get-index pointer) 0))

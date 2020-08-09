@@ -109,14 +109,3 @@
             ch
             (1+ (get-position-x *source*))
             (get-position-y *source*)))))
-
-(defun is-keyword-char-? (ch)
-  (find ch "#!@$"))
-
-(defun is-white-space-char-? (ch)
-  (some (curry #'eq ch)
-        '(#\space #\Tab #\newline #\Backspace #\Return #\Linefeed #\Page)))
-
-(defun is-keyword-? (word)
-  (some (curry #'equal word)
-        '("#EXE" "!USE" "$COMBO" "@DEF")))
