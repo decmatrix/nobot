@@ -2,13 +2,13 @@
     (:use :cl)
   (:export #:equals
            #:set-<>
-           #:split-list))
+           #:split-list
+           #:define-constant-?
+           #:reintern))
 
 (in-package :nobot/utils/common-utils)
 
 (defgeneric equals (obj1 obj2))
-
-
 
 (defmethod equals ((obj1 t) (obj2 t))
   nil)
@@ -27,3 +27,10 @@
 
 (defun set-<> (str)
   (concatenate 'string '(#\<) str '(#\>)))
+
+(defun reintern (sym &optional (package *package*))
+  (intern (symbol-name sym) package))
+
+(defmacro define-constant-? (name value)
+  `(unless (boundp ',name)
+     (defconstant ,name ,value)))

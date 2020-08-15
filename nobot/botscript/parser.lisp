@@ -1,5 +1,6 @@
 (uiop:define-package :nobot/botscript/parser
-    (:use :cl)
+    (:use :cl
+          :nobot/botscript/parser-utils)
   (:export #:parse-source
            #:parse-string
            #:parse-file))
@@ -7,56 +8,56 @@
 (in-package :nobot/botscript/parser)
 
 (defun parse-string (str)
-  (parse-source str :type :string))
+  (parse-source str :string))
 
 (defun parse-file (path)
-  (parse-source path :type :file))
+  (parse-source path :file))
 
 (defun parse-source (source type)
   (with-disassembled-source (source type)
     ))
 
-(defun !main ()
+(defun-state script ()
   )
 
-(defun @script ()
+(defun-state macros-block ()
   )
 
-(defun @macros-block ()
+(defun-state predefined-block ()
   )
 
-(defun @predefined-block ()
+(defun-state definition/combo-block ()
   )
 
-(defun @definition/combo-block ()
+(defun-state graph-logic ()
   )
 
-(defun @graph-logic ()
+(defun-state exe-macros ()
   )
 
-(defun @exe-macros ()
+(defun-state use-predefined ()
   )
 
-(defun @use-predefined ()
+(defun-state call-definition/combo ()
   )
 
-(defun @call-definition/combo ()
+(defun-state call-definition ()
   )
 
-(defun @call-definition ()
+(defun-state call-combo ()
   )
 
-(defun @call-combo ()
+(defun-state predefines ()
   )
 
-(defun @predefines ()
+(defun-state predefined-list ()
   )
 
-(defun @predefined-list ()
+(defun-state args-list ()
   )
 
-(defun @args-list ()
+(defun-state arg ()
   )
 
-(defun @arg ()
+(defun-state id ()
   )

@@ -5,6 +5,8 @@
           :nobot/utils
           :nobot/collections
           :nobot/botscript/nodes)
+  (:import-from :nobot/botscript/types
+                #:+token-types+)
   (:export #:convert-tokens
            #:convert-token
            #:same-tokens-?
@@ -14,21 +16,6 @@
            #:is-valid-token-type-?))
 
 (in-package :nobot/botscript/token-utils)
-
-(defparameter *token-types* (make-hash-table :test #'eq))
-
-
-;; init token types
-(mapcar
- (lambda (str)
-   (let ((up-string (string-upcase str)))
-     (setf (gethash (intern up-string :keyword) *token-types*)
-           (intern (set-<> up-string) :cl-user))))
- '("keyword"
-   "unknown"
-   "number-string"
-   "id"))
-
 
 (defgeneric convert-tokens (obj &key with-pos re-cached lazy))
 (defgeneric convert-token (obj &key with-pos))

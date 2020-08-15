@@ -1,5 +1,7 @@
 (uiop:define-package :nobot/utils/context-variables
     (:use :cl)
+  (:import-from :nobot/utils/common-utils
+                #:define-constant-?)
   (:export #:define-context-var
            #:setf-context-var))
 
@@ -7,16 +9,17 @@
 
 (defclass outside-context-node () ())
 
-(defconstant +is-outside-context+ (make-instance 'outside-context-node))
+(define-constant-? +is-outside-context+ (make-instance 'outside-context-node))
 
 (defmacro define-context-var (var-name)
-  `(defparameter ,var-name ,+is-outside-context+))
+  `(defparameter ,(intern (symbol-name var-name) *package*)
+     +is-outside-context+))
 
 ;; what if is not context var ?
 (defmacro setf-context-var (var-name value)
   `(if (is-outside-context-? ,var-name)
        (context-var-error)
-       (setf ,var-name )))
+       (setf ,var-name ,value)))
 
 (defun is-outside-context-? (var)
   (eq var +is-outside-context+))
