@@ -4,6 +4,8 @@
   (:import-from :nobot/utils
                 #:define-context-var
                 #:setf-context-var)
+  (:import-from :nobot/botscript/types
+                #:get-sort-symbol)
   (:export #:with-tree
            #:@revert-tree
            #:@revert-new-tree
@@ -18,13 +20,14 @@
 (defmacro with-tree ((sort-type) &body body)
   `(multiple-value-bind (res-body new-tree)
        (let* ((*current-sort-type*
-               (get-sort-symbol ,sort-type))
+               (get-sort-symbol ',sort-type))
               (*new-tree* (when *current-sort-type*
                                (list *current-sort-type*)))
               (*current-tree* *new-tree*))
          (values (progn ,@body) *current-tree*))
-     (when ,sort-type
-       (@insert-new-tree new-tree))))
+     (when ',sort-type
+       (@insert-new-tree new-tree))
+     res-body))
 
 (defun @revert-tree ()
   (setf-context-var *current-tree* nil))

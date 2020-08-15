@@ -6,7 +6,7 @@
   (:export #:*source*
            #:with-source-code
            #:is-keyword-char-?
-           #:is-whitespace-char-?
+           #:is-white-space-char-?
            #:is-keyword-?))
 
 (in-package :nobot/botscript/lexer-utils)

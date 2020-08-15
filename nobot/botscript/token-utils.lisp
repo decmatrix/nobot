@@ -113,15 +113,15 @@
                          (getf copy-args :type)
                        (remf copy-args :type))))
     (apply (curry #'make-instance 'token-node)
-           (nconc (list :type (gethash token-type *token-types*))
+           (nconc (list :type (gethash token-type +token-types+))
                   copy-args))))
 
 
 (defun is-valid-token-type-? (type &key (error t))
   (or (if (keywordp type)
-          (gethash type *token-types*)
+          (gethash type +token-types+)
           (some (compose (curry #'equal (string-upcase (symbol-name type)))
                          #'symbol-name)
-                (hash-table-values *token-types*)))
+                (hash-table-values +token-types+)))
       (when error
         (error "Unknown type of token: ~A" type))))

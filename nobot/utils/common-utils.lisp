@@ -31,6 +31,7 @@
 (defun reintern (sym &optional (package *package*))
   (intern (symbol-name sym) package))
 
-(defmacro define-constant-? (name value)
+(defmacro define-constant-? (name value &optional documentation)
   `(unless (boundp ',name)
-     (defconstant ,name ,value)))
+     (defconstant ,name ,value ,@(when documentation
+                                   `(,documentation)))))

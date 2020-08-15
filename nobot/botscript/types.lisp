@@ -57,7 +57,6 @@
       "arg"
       "id"))
 
-
 (defun get-sort-symbol (type)
   (let ((converted-sort-type (convert-sort-type type)))
     (aif (gethash converted-sort-type +sort-types+)
