@@ -10,7 +10,7 @@
 ** TODO write tests for pos in lexer
 ** TODO write tests for error handling
 ** TODO write tests for new lexemes representation
-** TODO come up with inline parser for predefine in block !use
+** TODO coem up with inline parser for predefine in block !use
 ** DONE come up with cool representation tokens in lexer with pos and etc...
 ** TODO come up with cool error handler, while use lisp error with special representation
 ** DONE write function convert-tokens [[ TODO come up with cool representation tokens in lexer with pos and etc...][see]]

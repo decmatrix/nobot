@@ -2,10 +2,8 @@
     (:use :cl
           :anaphora)
   (:import-from :nobot/utils
-                #:define-context-var
+                #:defcontextvar
                 #:setf-context-var)
-  (:import-from :nobot/botscript/types
-                #:get-sort-symbol)
   (:export #:with-tree
            #:@revert-tree
            #:@revert-new-tree
@@ -13,14 +11,13 @@
 
 (in-package :nobot/botscript/tree-utils)
 
-(define-context-var *current-tree*)
-(define-context-var *current-sort-type*)
-(define-context-var *new-tree*)
+(defcontextvar *current-tree*)
+(defcontextvar *current-sort-type*)
+(defcontextvar *new-tree*)
 
 (defmacro with-tree ((sort-type) &body body)
   `(multiple-value-bind (res-body new-tree)
-       (let* ((*current-sort-type*
-               (get-sort-symbol ',sort-type))
+       (let* ((*current-sort-type* ',sort-type)
               (*new-tree* (when *current-sort-type*
                                (list *current-sort-type*)))
               (*current-tree* *new-tree*))

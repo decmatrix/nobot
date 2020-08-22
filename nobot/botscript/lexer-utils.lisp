@@ -3,6 +3,8 @@
           :alexandria
           :nobot/botscript/nodes
           :nobot/botscript/token-utils)
+  (:import-from :nobot/utils
+                #:defcontextvar)
   (:export #:*source*
            #:with-source-code
            #:is-keyword-char-?
@@ -11,7 +13,7 @@
 
 (in-package :nobot/botscript/lexer-utils)
 
-(defparameter *source* nil)
+(defcontextvar *source*)
 
 (defmacro with-source-code ((type source &key
                                   convert-tokens

@@ -2,6 +2,8 @@
     (:use :cl
           :anaphora
           :alexandria)
+  (:import-from :nobot/utils
+                #:defcontextvar)
   (:export #:new-token
            #:make-tokens-source
            ;; from source node API
@@ -36,6 +38,10 @@
            ;; from file and string source node common API
            #:next-char
            #:undo-next-char
+           ;; token pointer API
+           #:make-token-pointer
+           #:reset-pointer
+           #:get-next-token
            ;; nodes
            #:token-node
            #:from-source-node
@@ -127,9 +133,9 @@
 (defgeneric undo-next-char (ch obj))
 
 ;; for parser
-(defgeneric next-token (obj))
+(defgeneric get-next-token (obj))
 (defgeneric reset-pointer (obj))
-
+(defgeneric make-token-pointer (obj))
 
 ;; for lexer
 (defmethod fix-cur-position ((obj from-source-code-node))
@@ -183,10 +189,16 @@
 
 
 ;; for parser
-(defmethod next-token ((pointer token-pointer))
+(defmethod get-next-token ((pointer token-pointer))
   (let ((idx (get-index pointer)))
     (unless (eql idx (get-limit pointer))
       (nth idx (get-tokens-seq pointer)))))
 
 (defmethod reset-pointer ((pointer token-pointer))
   (setf (get-index pointer) 0))
+
+(defmethod make-token-pointer ((obj from-tokens-source-node))
+  (let ((tokens-seq (get-tokens-seq obj)))
+    (make-instance 'token-pointer
+                   :tokens-seq tokens-seq
+                   :token-seq-limit (length tokens-seq))))

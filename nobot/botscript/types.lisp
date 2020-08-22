@@ -8,9 +8,12 @@
   (:export #:+token-types+
            #:+sort-types+
            #:get-sort-symbol
-           #:convert-sort-type))
+           #:convert-sort-type
+           #:use-sort-type-class))
 
 (in-package :nobot/botscript/types)
+
+(defvar *sort-types*)
 
 (defun convert-sort-type (type &key only-to-symbol)
   (let ((package (if only-to-symbol
@@ -32,6 +35,12 @@
      types-list)
     table))
 
+(defun get-sort-symbol (type)
+  (let ((converted-sort-type (convert-sort-type type)))
+    (aif (gethash converted-sort-type *sort-types*)
+      it
+      (error "Unknown sort type ~A" (symbol-name converted-sort-type)))))
+
 (define-constant-? +token-types+
     (define-types
       "keyword"
@@ -39,7 +48,7 @@
       "number-string"
       "id"))
 
-(define-constant-? +sort-types+
+(define-constant-? +botscript-sort-types+
     (define-types
       "script"
       "macros-block"
@@ -57,8 +66,11 @@
       "arg"
       "id"))
 
-(defun get-sort-symbol (type)
-  (let ((converted-sort-type (convert-sort-type type)))
-    (aif (gethash converted-sort-type +sort-types+)
-      it
-      (error "Unknown sort type ~A" (symbol-name converted-sort-type)))))
+(defun get-sort-table-by-sort-type-class (name)
+  (case name
+    (:botscript-sort-types
+     +botscript-sort-types+)
+    (t (error "Unknown sort type class: ~A" name))))
+
+(defun use-sort-type-class (sort-type-class)
+  (setf *sort-types* (get-sort-table-by-sort-type-class sort-type-class)))

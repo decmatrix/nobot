@@ -2,7 +2,7 @@
     (:use :cl)
   (:import-from :nobot/utils/common-utils
                 #:define-constant-?)
-  (:export #:define-context-var
+  (:export #:defcontextvar
            #:setf-context-var))
 
 (in-package :nobot/utils/context-variables)
@@ -11,7 +11,7 @@
 
 (define-constant-? +is-outside-context+ (make-instance 'outside-context-node))
 
-(defmacro define-context-var (var-name)
+(defmacro defcontextvar (var-name)
   `(defparameter ,(intern (symbol-name var-name) *package*)
      +is-outside-context+))
 

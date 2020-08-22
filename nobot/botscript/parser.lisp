@@ -14,50 +14,50 @@
   (parse-source path :file))
 
 (defun parse-source (source type)
-  (with-disassembled-source (source type)
-    ))
+  (with-disassembled-source (source type)   
+    (with-state-context (:botscript-sort-types script)
+      
+      (defun-state script ()
+        )
 
-(defun-state script ()
-  )
+      (defun-state macros-block ()
+        )
 
-(defun-state macros-block ()
-  )
+      (defun-state predefined-block ()
+        )
 
-(defun-state predefined-block ()
-  )
+      (defun-state definition/combo-block ()
+        )
 
-(defun-state definition/combo-block ()
-  )
+      (defun-state graph-logic ()
+        )
 
-(defun-state graph-logic ()
-  )
+      (defun-state exe-macros ()
+        )
 
-(defun-state exe-macros ()
-  )
+      (defun-state use-predefined ()
+        )
 
-(defun-state use-predefined ()
-  )
+      (defun-state call-definition/combo ()
+        )
 
-(defun-state call-definition/combo ()
-  )
+      (defun-state call-definition ()
+        )
 
-(defun-state call-definition ()
-  )
+      (defun-state call-combo ()
+        )
 
-(defun-state call-combo ()
-  )
+      (defun-state predefines ()
+        )
 
-(defun-state predefines ()
-  )
+      (defun-state predefined-list ()
+        )
 
-(defun-state predefined-list ()
-  )
+      (defun-state args-list ()
+        )
 
-(defun-state args-list ()
-  )
+      (defun-state arg ()
+        )
 
-(defun-state arg ()
-  )
-
-(defun-state id ()
-  )
+      (defun-state id ()
+        ))))

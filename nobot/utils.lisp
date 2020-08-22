@@ -10,5 +10,5 @@
    #:define-constant-?
    #:reintern
    ;; context variables package
-   #:define-context-var
+   #:defcontextvar
    #:setf-context-var))
