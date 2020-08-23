@@ -81,8 +81,8 @@
                (value-of-token-2 (second obj2)))
            (and (if without-type
                     t
-                    (eq type-of-token-1
-                        type-of-token-2))
+                    (equal (symbol-name type-of-token-1)
+                            (symbol-name type-of-token-2)))
                 (if without-value
                     t
                     (cond ((and (typep value-of-token-1 'symbol)
