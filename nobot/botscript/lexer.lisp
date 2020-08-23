@@ -4,11 +4,15 @@
           :alexandria
           :nobot/botscript/nodes
           :nobot/botscript/lexer-utils)
+  (:import-from :nobot/botscript/types
+                #:use-token-type-class)
   (:export #:disassemble-source
            #:disassemble-string
            #:disassemble-file))
 
 (in-package :nobot/botscript/lexer)
+
+(use-token-type-class :botscript-token-types)
 
 (defun disassemble-source (source &key (type :file)
                                     convert-tokens

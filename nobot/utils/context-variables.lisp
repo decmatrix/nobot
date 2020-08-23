@@ -18,12 +18,11 @@
 ;; what if is not context var ?
 (defmacro setf-context-var (var-name value)
   `(if (is-outside-context-? ,var-name)
-       (context-var-error)
+       (context-var-error (symbol-name ',var-name))
        (setf ,var-name ,value)))
 
 (defun is-outside-context-? (var)
   (eq var +is-outside-context+))
 
-(defun context-var-error ()
-  (error "Using context macros outside context,
-this operation was canceled"))
+(defun context-var-error (name-of-context-var)
+  (error "Using context var ~A outside context" name-of-context-var))

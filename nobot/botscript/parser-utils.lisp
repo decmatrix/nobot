@@ -32,7 +32,7 @@
   (let ((state-fun-name (intern (concatenate 'string "@" (string sort-type)))))
     `(prog1
          (defun ,state-fun-name ,args
-              (with-tree (,(get-sort-symbol sort-type))
+              (with-tree (,(get-sort-type-symbol sort-type))
                 ,@body))
        (setf (gethash ',sort-type *state-table*)
              (function ,state-fun-name)))))

@@ -6,21 +6,20 @@
           :nobot/collections
           :nobot/botscript/nodes)
   (:import-from :nobot/botscript/types
-                #:+token-types+)
+                #:get-token-type-symbol)
   (:export #:convert-tokens
            #:convert-token
            #:same-tokens-?
            #:same-tokens-seq-?
            #:make-tokens-source
-           #:new-token
-           #:is-valid-token-type-?))
+           #:new-token))
 
 (in-package :nobot/botscript/token-utils)
 
 (defgeneric convert-tokens (obj &key with-pos re-cached lazy))
 (defgeneric convert-token (obj &key with-pos))
-(defgeneric same-tokens-? (obj1 obj2 &key with-pos))
-(defgeneric same-tokens-seq-? (obj1 obj2 &key with-pos))
+(defgeneric same-tokens-? (obj1 obj2 &key without-pos without-value without-type))
+(defgeneric same-tokens-seq-? (obj1 obj2 &key without-pos without-value without-type))
 (defgeneric make-tokens-source (obj))
 
 (defmethod convert-tokens ((obj from-tokens-source-node) &key (with-pos t) re-cached lazy)
@@ -46,46 +45,63 @@
                 (list (get-position obj)))
         converted-token)))
 
-(defmethod same-tokens-? ((obj1 token-node) (obj2 token-node) &key (with-pos t))
-  (and (eq (get-token-type obj1)
-           (get-token-type obj2))
-       (equals
-        (value-of-token obj1)
-        (value-of-token obj2))
-       (if with-pos
+(defmethod same-tokens-? ((obj1 token-node) (obj2 token-node) &key
+                                                                without-pos
+                                                                without-value
+                                                                without-type)
+  (and (if without-type
+           t
+           (eq (get-token-type obj1)
+               (get-token-type obj2)))
+       (if without-value
+           t
+           (equals
+            (value-of-token obj1)
+            (value-of-token obj2)))
+       (if without-pos
+           t
            (equals
             (get-position obj1)
-            (get-position obj2))
-           t)))
+            (get-position obj2)))))
 
-(defmethod same-tokens-? ((obj1 list) (obj2 list) &key (with-pos t))
-  (let ((len (if with-pos
-                 3
-                 2)))
-    (and (eql (length obj1) len)
-         (eql (length obj2) len)
+(defmethod same-tokens-? ((obj1 list) (obj2 list) &key
+                                                    without-pos
+                                                    without-value
+                                                    without-type)
+  (let ((len (if without-pos
+                 2
+                 3)))
+    (and (if without-pos
+             t
+             (and (eql (length obj1) len)
+                  (eql (length obj2) len)))
          (let ((type-of-token-1 (first obj1))
                (type-of-token-2 (first obj2))
                (value-of-token-1 (second obj1))
                (value-of-token-2 (second obj2)))
-           (and (is-valid-token-type-? type-of-token-1
-                                       :error nil)
-                (is-valid-token-type-? type-of-token-2
-                                       :error nil)
-                (cond ((and (typep value-of-token-1 'symbol)
-                            (typep value-of-token-2 'symbol))
-                       (equals (string-upcase (symbol-name value-of-token-1))
-                               (string-upcase (symbol-name value-of-token-2))))
-                      ((and (typep value-of-token-1 'string)
-                            (typep value-of-token-2 'string))
-                       (equals (string-upcase value-of-token-1)
-                               (string-upcase value-of-token-2)))
-                      (t (equals value-of-token-1 value-of-token-2)))
-                (if with-pos
-                    (equals (third obj1) (third obj2))
-                    t))))))
+           (and (if without-type
+                    t
+                    (eq type-of-token-1
+                        type-of-token-2))
+                (if without-value
+                    t
+                    (cond ((and (typep value-of-token-1 'symbol)
+                                (typep value-of-token-2 'symbol))
+                           (equals (string-upcase (symbol-name value-of-token-1))
+                                   (string-upcase (symbol-name value-of-token-2))))
+                          ((and (typep value-of-token-1 'string)
+                                (typep value-of-token-2 'string))
+                           (equals (string-upcase value-of-token-1)
+                                   (string-upcase value-of-token-2)))
+                          (t (equals value-of-token-1 value-of-token-2))))
+                (if without-pos
+                    t
+                    (equals (third obj1) (third obj2))))))))
 
-(defmethod same-tokens-seq-? ((obj1 list) (obj2 list) &key (with-pos t))
+(defmethod same-tokens-seq-? ((obj1 list) (obj2 list) &key
+                                                        without-pos
+                                                        without-value
+                                                        without-type)
   (and
    (eql (length obj1)
         (length obj2))
@@ -93,13 +109,22 @@
             (and (eq (type-of token-1)
                      (type-of token-2))
                  (same-tokens-? token-1 token-2
-                                :with-pos with-pos)))
+                                :without-pos without-pos
+                                :without-value without-value
+                                :without-type without-type)))
           obj1
           obj2)))
 
-(defmethod same-tokens-seq-? ((obj1 from-tokens-source-node) (obj2 from-tokens-source-node) &key with-pos)
+(defmethod same-tokens-seq-? ((obj1 from-tokens-source-node)
+                              (obj2 from-tokens-source-node)
+                              &key
+                                without-pos
+                                without-value
+                                without-type)
   (same-tokens-seq-? (get-tokens-seq obj1) (get-tokens-seq obj2)
-                     :with-pos with-pos))
+                     :without-pos without-pos
+                     :without-value without-value
+                     :without-type without-type))
 
 (defmethod make-tokens-source ((obj from-source-code-node))
   (make-instance 'from-tokens-source-node
@@ -113,15 +138,5 @@
                          (getf copy-args :type)
                        (remf copy-args :type))))
     (apply (curry #'make-instance 'token-node)
-           (nconc (list :type (gethash token-type +token-types+))
+           (nconc (list :type (get-token-type-symbol token-type))
                   copy-args))))
-
-
-(defun is-valid-token-type-? (type &key (error t))
-  (or (if (keywordp type)
-          (gethash type +token-types+)
-          (some (compose (curry #'equal (string-upcase (symbol-name type)))
-                         #'symbol-name)
-                (hash-table-values +token-types+)))
-      (when error
-        (error "Unknown type of token: ~A" type))))
