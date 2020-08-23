@@ -10,15 +10,20 @@
                 #:define-context-var)
   (:export #:with-disassembled-source
            #:defun-state
-           #:with-state-context
+           #:with-state-context-run
            #:@goto
-           #:@next-token))
+           #:@next-token
+           #:@is-token-of-type
+           #:@is-token-of-value))
 
 (in-package :nobot/botscript/parser-utils)
 
 (defcontextvar *tokens-source*)
 (defcontextvar *token-pointer*)
 (defcontextvar *state-table*)
+
+(defgeneric @is-token-of-value (obj token-value))
+(defgeneric @is-token-of-type (obj token-type))
 
 ;;TODO optimize imports
 (defmacro with-disassembled-source ((source type) &body body)
@@ -37,7 +42,8 @@
        (setf (gethash ',sort-type *state-table*)
              (function ,state-fun-name)))))
 
-(defmacro with-state-context ((sort-type-class entry-state &optional tokens-source) &body body)
+(defmacro with-state-context-run ((sort-type-class entry-state &optional tokens-source)
+                                  &body body)
   (use-sort-type-class sort-type-class)
   `(let ((*state-table* (make-hash-table :test #'eq))
          (*token-pointer* (make-token-pointer (or ,tokens-source *tokens-source*))))
@@ -49,3 +55,13 @@
 
 (defun @next-token ()
   (get-next-token *token-pointer*))
+
+(defmethod @is-token-of-value ((obj token-node) token-value)
+  (when (equals (value-of-token obj)
+                token-value)
+    (@insert-new-tree (make-tree-from-token obj))))
+
+(defmethod @is-token-of-type ((obj token-node) token-type)
+  (when (eq (get-token-type obj)
+            (get-token-type-symbol (convert-type token-type)))
+    (@insert-new-tree (make-tree-from-token obj))))

@@ -3,7 +3,7 @@
 <macros-block> --> <exe-macros> <macros-block> |
                    <empty>
 
-<predefined-block> --> <use-predefine> <predefined-block> |
+<predefined-block> --> <use-predefined> <predefined-block> |
                        <empty>
 
 <definition/combo-block> --> <call-definition/combo> <definition/combo-block> |
@@ -32,16 +32,16 @@
 <arg> --> <id> |
           <number-string>
 
-<id> --> <letter> <char-string>
+# <id> --> <letter> <char-string>
 
-<char-string> --> <letter> <char-string> |
+# <char-string> --> <letter> <char-string> |
                   <number> <char-string> |
                   '-' <char-string> |
                   <empty>
 
-<number-string> --> <num> <number-string> |
+# <number-string> --> <num> <number-string> |
                     <empty>
 
-<letter> --> [a-z | A-z]
+# <letter> --> [a-z | A-z]
 
-<number> --> [0-9]
+# <number> --> [0-9]
