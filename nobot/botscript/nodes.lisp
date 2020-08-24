@@ -111,7 +111,7 @@
 
 (defclass token-pointer ()
   ((pointer
-    :initform -1
+    :initform 0
     :accessor get-index)
    (tokens-seq
     :initarg :tokens-seq

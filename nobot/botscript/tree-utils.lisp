@@ -25,7 +25,7 @@
 
 (defgeneric make-tree-from-token (obj))
 
-(defmacro with-tree ((sort-type) &body body)
+(defmacro with-tree ((&optional sort-type) &body body)
   `(multiple-value-bind (res-body new-tree)
        (let* ((*current-sort-type* ',sort-type)
               (*new-tree* (when *current-sort-type*
@@ -34,7 +34,9 @@
          (values (progn ,@body) *current-tree*))
      (when ',sort-type
        (@insert-new-tree new-tree))
-     res-body))
+     (if ',sort-type
+         res-body
+         new-tree)))
 
 (defun @revert-tree ()
   (setf-context-var *current-tree* nil))

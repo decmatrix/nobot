@@ -48,7 +48,8 @@
   `(let ((*state-table* (make-hash-table :test #'eq))
          (*token-pointer* (make-token-pointer (or ,tokens-source *tokens-source*))))
      ,@body
-     (@goto ,entry-state)))
+     (with-tree ()
+       (@goto ,entry-state))))
 
 (defmacro @goto (state-fun-name &rest args)
   `(apply (gethash ',state-fun-name *state-table*) ,args))
