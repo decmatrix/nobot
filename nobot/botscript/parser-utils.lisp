@@ -13,8 +13,10 @@
            #:with-state-context-run
            #:@goto
            #:@next-token
+           #:@prev-token
            #:@is-token-of-type
-           #:@is-token-of-value))
+           #:@is-token-of-value
+           #:with-token))
 
 (in-package :nobot/botscript/parser-utils)
 
@@ -57,6 +59,9 @@
 (defun @next-token ()
   (get-next-token *token-pointer*))
 
+(defun @prev-token ()
+  (get-prev-token *token-pointer*))
+
 (defmethod @is-token-of-value ((obj token-node) token-value)
   (when (equals (value-of-token obj)
                 token-value)
@@ -66,3 +71,14 @@
   (when (eq (get-token-type obj)
             (get-token-type-symbol (convert-type token-type)))
     (@insert-new-tree (make-tree-from-token obj))))
+
+(defmacro with-token ((next/prev) &body body)
+  "next or prev"
+  `(let ((,(intern "IT")
+          ,(case next/prev
+             (:next
+              '(@next-token))
+             (:prev
+              '(@prev-token))
+             (t (error "Unknown type of token in with-token macros: ~A" next/prev)))))
+     ,@body))

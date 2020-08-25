@@ -10,7 +10,7 @@
                 #:get-token-type
                 #:value-of-token)
   (:export #:with-tree
-           #:@revert-tree
+           #:@revert-current-tree
            #:@revert-new-tree
            #:@insert-new-tree
            #:@is-token-of-value
@@ -38,11 +38,11 @@
          res-body
          new-tree)))
 
-(defun @revert-tree ()
+(defun @revert-current-tree ()
   (setf-context-var *current-tree* nil))
 
 (defun @revert-new-tree ()
-  (setf-context-var *new-tree* nil))
+  (setf-context-var *current-tree* *new-tree*))
 
 (defun @insert-new-tree (new-tree)
   (labels ((%build-new-tree (tree)

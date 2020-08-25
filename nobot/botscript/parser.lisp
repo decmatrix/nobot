@@ -3,9 +3,15 @@
           :nobot/botscript/parser-utils)
   (:import-from :nobot/botscript/parser-utils
                 #:@goto
+                #:@revert-current-tree
                 #:@is-token-of-type
                 #:@is-token-of-value
-                #:@next-token)
+                #:@next-token
+                #:@prev-token)
+  (:import-from :nobot/botscript/types
+                #:get-sort-type-symbol)
+  (:import-from :nobot/botscript/lexer-utils
+                #:get-symbol-for-keyword)
   (:export #:parse-source
            #:parse-string
            #:parse-file))
@@ -25,17 +31,14 @@
       (defun-state script ()
         (and
          (@goto macros-block)
-         (@goto predefined-block)
-         (@goto definition/combo-block)
-         (@goto graph-logic)))
+         ;;(@goto predefined-block)
+         ;;(@goto definition/combo-block)
+         ;;(@goto graph-logic)
+         ))
 
       ;;TODO: error check
       (defun-state macros-block ()
-        (labels ((%macros-block ()
-                   (if (@goto exe-macros)
-                       (%macros-block)
-                       t)))
-          (%macros-block)))
+        (@goto exe-macros-list))
 
       ;;TODO: error check
       (defun-state predefined-block ()
@@ -53,12 +56,20 @@
 
       (defun-state graph-logic ()
         t)
+
+      (defun-state exe-macros-list ()
+        (labels ((%exe-macros-list ()
+                   (if (@goto exe-macros)
+                       (%exe-macros-list)
+                       t)))
+          (%exe-macros-list)))
       
       (defun-state exe-macros ()
-        (and
-         (@is-token-of-value (@next-token) '|#exe|)
-         (@is-token-of-type (@next-token) :id)
-         (@goto args-list)))
+        (with-token (:next)
+          (if (@is-token-of-value it (get-symbol-for-keyword "#EXE"))
+              (and (@is-token-of-type (@next-token) :id)
+                   (@goto args-list))
+              (@revert-current-tree))))
 
       (defun-state use-predefined ()
         (and

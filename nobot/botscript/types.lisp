@@ -74,6 +74,7 @@
       "predefined-block"
       "definition/combo-block"
       "graph-logic"
+      "exe-macros-list"
       "exe-macros"
       "use-predefined"
       "call-definition/combo"

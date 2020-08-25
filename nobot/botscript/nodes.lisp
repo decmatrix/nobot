@@ -42,6 +42,7 @@
            #:make-token-pointer
            #:reset-pointer
            #:get-next-token
+           #:get-prev-token
            ;; nodes
            #:token-node
            #:from-source-node
@@ -111,7 +112,7 @@
 
 (defclass token-pointer ()
   ((pointer
-    :initform 0
+    :initform -1
     :accessor get-index)
    (tokens-seq
     :initarg :tokens-seq
@@ -134,6 +135,7 @@
 
 ;; for parser
 (defgeneric get-next-token (obj))
+(defgeneric get-prev-token (obj))
 (defgeneric reset-pointer (obj))
 (defgeneric make-token-pointer (obj))
 
@@ -188,10 +190,15 @@
   (decf (get-cur-index obj)))
 
 
-;; for parser
+;; for parser TODO: move to token-pointer package
 (defmethod get-next-token ((pointer token-pointer))
-  (let ((idx (get-index pointer)))
+  (let ((idx (incf (get-index pointer))))
     (unless (eql idx (get-limit pointer))
+      (nth idx (get-tokens-seq pointer)))))
+
+(defmethod get-prev-token ((pointer token-pointer))
+  (let ((idx (decf (get-index pointer))))
+    (unless (eql idx -1)
       (nth idx (get-tokens-seq pointer)))))
 
 (defmethod reset-pointer ((pointer token-pointer))

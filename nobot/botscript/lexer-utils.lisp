@@ -4,16 +4,24 @@
           :nobot/botscript/nodes
           :nobot/botscript/token-utils)
   (:import-from :nobot/utils
-                #:defcontextvar)
+                #:defcontextvar
+                #:define-constant-?)
   (:export #:*source*
            #:with-source-code
            #:is-keyword-char-?
            #:is-white-space-char-?
-           #:is-keyword-?))
+           #:is-keyword-?
+           #:get-symbol-for-keyword))
 
 (in-package :nobot/botscript/lexer-utils)
 
 (defcontextvar *source*)
+
+(define-constant-? +keyword-table+
+    '("#EXE"
+      "!USE"
+      "$COMBO"
+      "@DEF"))
 
 (defmacro with-source-code ((type source &key
                                   convert-tokens
@@ -67,4 +75,8 @@
 
 (defun is-keyword-? (word)
   (some (curry #'equal word)
-        '("#EXE" "!USE" "$COMBO" "@DEF")))
+        +keyword-table+))
+
+(defun get-symbol-for-keyword (str)
+  (when (is-keyword-? str)
+    (intern (string-upcase str) :cl-user)))
