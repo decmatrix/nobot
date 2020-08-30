@@ -9,6 +9,7 @@
    #:split-list
    #:define-constant-?
    #:reintern
+   #:let-when
    ;; context variables package
    #:defcontextvar
    #:setf-context-var))

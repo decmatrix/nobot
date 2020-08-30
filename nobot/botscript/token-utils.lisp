@@ -7,21 +7,64 @@
           :nobot/botscript/nodes)
   (:import-from :nobot/botscript/types
                 #:get-token-type-symbol)
-  (:export #:convert-tokens
-           #:convert-token
-           #:same-tokens-?
-           #:same-tokens-seq-?
-           #:make-tokens-source
-           #:new-token))
+  (:export
+   ;; common token utils API
+   #:convert-tokens
+   #:convert-token
+   #:same-tokens-?
+   #:same-tokens-seq-?
+   #:make-tokens-source
+   #:new-token
+   ;; token pointer API
+   #:make-token-pointer
+   #:mv-ptr-to-prev-token
+   #:mv-ptr-to-next-token
+   #:get-next-token
+   #:get-prev-token
+   #:get-prev-token
+   #:get-curr-token
+   #:reset-pointer
+   #:ptr-is-out-of-bound-?))
 
 (in-package :nobot/botscript/token-utils)
 
+;; main utils API
 (defgeneric convert-tokens (obj &key with-pos re-cached lazy))
 (defgeneric convert-token (obj &key with-pos))
 (defgeneric same-tokens-? (obj1 obj2 &key without-pos without-value without-type))
 (defgeneric same-tokens-seq-? (obj1 obj2 &key without-pos without-value without-type))
 (defgeneric make-tokens-source (obj))
 
+;; token pointer utils API
+(defgeneric make-token-pointer (obj))
+(defgeneric mv-ptr-to-prev-token (obj))
+(defgeneric mv-ptr-to-next-token (obj))
+(defgeneric ptr-is-out-of-bound-? (obj))
+(defgeneric get-next-token (obj))
+(defgeneric get-prev-token (obj))
+(defgeneric get-curr-token (obj))
+(defgeneric reset-pointer (obj))
+
+
+;; maker API
+(defun new-token (&rest args)
+  (let* ((copy-args (copy-list args))
+         (token-type (prog1
+                         (getf copy-args :type)
+                       (remf copy-args :type))))
+    (apply (curry #'make-instance 'token-node)
+           (nconc (list :type (get-token-type-symbol token-type))
+                  copy-args))))
+
+
+(defmethod make-token-pointer ((obj from-tokens-source-node))
+  (let ((tokens-seq (get-tokens-seq obj)))
+    (make-instance 'token-pointer
+                   :tokens-seq tokens-seq
+                   :token-seq-limit (length tokens-seq))))
+
+
+;; token utils API impl
 (defmethod convert-tokens ((obj from-tokens-source-node) &key (with-pos t) re-cached lazy)
   (aif (and (not re-cached) (get-converted-tokens-seq obj))
        it
@@ -132,11 +175,33 @@
                  :type (get-source-type obj)
                  :tokens-seq (get-tokens-buffer obj)))
 
-(defun new-token (&rest args)
-  (let* ((copy-args (copy-list args))
-         (token-type (prog1
-                         (getf copy-args :type)
-                       (remf copy-args :type))))
-    (apply (curry #'make-instance 'token-node)
-           (nconc (list :type (get-token-type-symbol token-type))
-                  copy-args))))
+
+;; token pointer API impl
+(defmethod mv-ptr-to-next-token ((pointer token-pointer))
+  (incf (get-index pointer)))
+
+(defmethod mv-ptr-to-prev-token ((pointer token-pointer))
+  (decf (get-index pointer)))
+
+(defmethod ptr-is-out-of-bound-? ((pointer token-pointer))
+  (let ((idx (get-index pointer))
+        (limit (get-limit pointer)))
+    (or (>= idx limit)
+        (<= idx -1))))
+
+(defmethod get-next-token ((pointer token-pointer))
+  (let ((idx (mv-ptr-to-next-token pointer)))
+    (unless (ptr-is-out-of-bound-? pointer)
+      (nth idx (get-tokens-seq pointer)))))
+
+(defmethod get-prev-token ((pointer token-pointer))
+  (let ((idx (mv-ptr-to-prev-token pointer)))
+    (unless (ptr-is-out-of-bound-? pointer)
+      (nth idx (get-tokens-seq pointer)))))
+
+(defmethod get-cur-index ((pointer token-pointer))
+  (when (ptr-is-out-of-bound-? pointer)
+    (nth (get-index pointer) (get-tokens-seq pointer))))
+
+(defmethod reset-pointer ((pointer token-pointer))
+  (setf (get-index pointer) 0))

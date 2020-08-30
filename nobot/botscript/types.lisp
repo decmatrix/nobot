@@ -77,11 +77,8 @@
       "exe-macros-list"
       "exe-macros"
       "use-predefined"
-      "call-definition/combo"
       "call-definition"
       "call-combo"
-      "predefines"
-      "predefined-list"
       "args-list"
       "arg"
       "id"))

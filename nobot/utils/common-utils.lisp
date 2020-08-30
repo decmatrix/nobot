@@ -1,10 +1,13 @@
 (uiop:define-package :nobot/utils/common-utils
     (:use :cl)
+  (:import-from :alexandria
+                #:with-gensyms)
   (:export #:equals
            #:set-<>
            #:split-list
            #:define-constant-?
-           #:reintern))
+           #:reintern
+           #:let-when))
 
 (in-package :nobot/utils/common-utils)
 
@@ -35,3 +38,11 @@
   `(unless (boundp ',name)
      (defconstant ,name ,value ,@(when documentation
                                    `(,documentation)))))
+
+(defmacro let-when (bindings &body body)
+  (with-gensyms (block)
+    `(block ,block
+       (let ,(loop :for (symbol value) :in bindings
+                :collect `(,symbol (or ,value
+                                       (return-from ,block nil))))
+         ,@body))))

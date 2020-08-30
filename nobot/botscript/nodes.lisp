@@ -10,7 +10,6 @@
            #:get-source
            #:get-source-type
            ;; from tokens source node API
-           #:get-tokens-seq
            #:set-tokens-seq
            #:set-converted-tokens-seq
            #:get-converted-tokens-seq
@@ -38,18 +37,19 @@
            ;; from file and string source node common API
            #:next-char
            #:undo-next-char
+           ;; from tokens source and token pointer common API
+           #:get-tokens-seq
            ;; token pointer API
-           #:make-token-pointer
-           #:reset-pointer
-           #:get-next-token
-           #:get-prev-token
+           #:get-index
+           #:get-limit
            ;; nodes
            #:token-node
            #:from-source-node
            #:from-tokens-source-node
            #:from-source-code-node
            #:from-file-source-node
-           #:from-string-source-node))
+           #:from-string-source-node
+           #:token-pointer))
 
 
 (in-package :nobot/botscript/nodes)
@@ -121,8 +121,6 @@
     :initarg :token-seq-limit
     :accessor get-limit)))
 
-
-;; for lexer
 (defgeneric fix-cur-position (obj))
 (defgeneric clear-chars-buffer (obj))
 (defgeneric update-pos (ch obj))
@@ -133,13 +131,7 @@
 (defgeneric next-char (obj))
 (defgeneric undo-next-char (ch obj))
 
-;; for parser
-(defgeneric get-next-token (obj))
-(defgeneric get-prev-token (obj))
-(defgeneric reset-pointer (obj))
-(defgeneric make-token-pointer (obj))
 
-;; for lexer
 (defmethod fix-cur-position ((obj from-source-code-node))
   (setf (get-fixed-cur-position obj)
         (cons (get-position-x obj)
@@ -189,23 +181,3 @@
 (defmethod undo-next-char (ch (obj from-string-source-node))
   (decf (get-cur-index obj)))
 
-
-;; for parser TODO: move to token-pointer package
-(defmethod get-next-token ((pointer token-pointer))
-  (let ((idx (incf (get-index pointer))))
-    (unless (eql idx (get-limit pointer))
-      (nth idx (get-tokens-seq pointer)))))
-
-(defmethod get-prev-token ((pointer token-pointer))
-  (let ((idx (decf (get-index pointer))))
-    (unless (eql idx -1)
-      (nth idx (get-tokens-seq pointer)))))
-
-(defmethod reset-pointer ((pointer token-pointer))
-  (setf (get-index pointer) 0))
-
-(defmethod make-token-pointer ((obj from-tokens-source-node))
-  (let ((tokens-seq (get-tokens-seq obj)))
-    (make-instance 'token-pointer
-                   :tokens-seq tokens-seq
-                   :token-seq-limit (length tokens-seq))))

@@ -3,6 +3,7 @@
           :alexandria
           :nobot/utils
           :nobot/botscript/tree-utils
+          :nobot/botscript/token-utils
           :nobot/botscript/lexer
           :nobot/botscript/nodes
           :nobot/botscript/types)
@@ -14,8 +15,11 @@
            #:@goto
            #:@next-token
            #:@prev-token
+           #:@curr-token
+           #:@put-back-token
            #:@is-token-of-type
            #:@is-token-of-value
+           #:@revert-state-action
            #:with-token))
 
 (in-package :nobot/botscript/parser-utils)
@@ -62,16 +66,34 @@
 (defun @prev-token ()
   (get-prev-token *token-pointer*))
 
+(defun @curr-token ()
+  (get-curr-token *token-pointer*))
+
+(defun @put-back-token ()
+  (mv-ptr-to-prev-token *token-pointer*))
+
+(defun @revert-state-action ()
+  (@revert-tree)
+  (@put-back-token)
+  nil)
+
 (defmethod @is-token-of-value ((obj token-node) token-value)
   (when (equals (value-of-token obj)
                 token-value)
     (@insert-new-tree (make-tree-from-token obj))))
+
+(defmethod @is-token-of-value ((obj (eql nil)) token-value)
+  nil)
 
 (defmethod @is-token-of-type ((obj token-node) token-type)
   (when (eq (get-token-type obj)
             (get-token-type-symbol (convert-type token-type)))
     (@insert-new-tree (make-tree-from-token obj))))
 
+(defmethod @is-token-of-type ((obj (eql nil)) token-value)
+  nil)
+
+;;TODO: 3 times inter, make one
 (defmacro with-token ((next/prev) &body body)
   "next or prev"
   `(let ((,(intern "IT")
@@ -80,5 +102,6 @@
               '(@next-token))
              (:prev
               '(@prev-token))
-             (t (error "Unknown type of token in with-token macros: ~A" next/prev)))))
+             (t
+              (error "Unknown type of token in with-token macros: ~A" next/prev)))))
      ,@body))

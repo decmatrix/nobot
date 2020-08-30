@@ -1,34 +1,24 @@
 <script> --> <macros-block> <predefined-block> <definition/combo-block> <graph-logic>
 
-<macros-block> --> <exe-macros-list>
-
-<macros-block> --> <exe-macros-list>
+<macros-block> --> <exe-macros> <macros-list> |
+                   <empty>
 
 <predefined-block> --> <use-predefined> <predefined-block> |
                        <empty>
 
-<definition/combo-block> --> <call-definition/combo> <definition/combo-block> |
+<definition/combo-block> --> <call-definition> <definition/combo-block> |
+                             <call-combo> <definition/combo-block> |
                              <empty>
 
 <graph-logic> --> ???
-
-<exe-macros-list> --> <exe-macros> <macros-list> |
-                      <empty>
  
 <exe-macros> --> '#exe' <id> <args-list>
 
-<use-predefined> --> '!use' <predefines>
-
-<call-definition/combo> --> <call-definition> |
-                            <call-combo>
+<use-predefined> --> '!use' <id>
 
 <call-definition> --> '@def' <id> <args-list>
 
 <call-combo> --> '$combo' <id>
-
-<predefines> --> <id>
-
-<predefined-list> --> [go to botscript-predefine.grammar]
 
 <args-list> --> <arg> <args-list> |
                 <empty>
