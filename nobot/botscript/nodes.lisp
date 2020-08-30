@@ -34,6 +34,8 @@
            #:get-file-stream
            ;; from string source node API
            #:get-cur-index
+           ;; from parse tree source API
+           #:get-parse-tree
            ;; from file and string source node common API
            #:next-char
            #:undo-next-char
@@ -49,6 +51,7 @@
            #:from-source-code-node
            #:from-file-source-node
            #:from-string-source-node
+           #:from-parse-tree-source-node
            #:token-pointer))
 
 
@@ -109,6 +112,11 @@
   ((cur-index
     :initform 0
     :accessor get-cur-index)))
+
+(defclass from-parse-tree-source-node (from-source-node)
+  ((parse-tree
+    :initarg :parse-tree
+    :accessor get-parse-tree)))
 
 (defclass token-pointer ()
   ((pointer

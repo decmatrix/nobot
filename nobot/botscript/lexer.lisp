@@ -42,8 +42,6 @@
                       :convert-tokens t
                       :convert-with-pos convert-with-pos))
 
-
-
 (defmacro read-chars (prev-char type)
   ":id, :keyword, :num-string"
   (with-gensyms (ch word)

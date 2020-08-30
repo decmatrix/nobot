@@ -20,6 +20,7 @@
            #:@is-token-of-type
            #:@is-token-of-value
            #:@revert-state-action
+           #:get-tokens-source
            #:with-token))
 
 (in-package :nobot/botscript/parser-utils)
@@ -28,8 +29,15 @@
 (defcontextvar *token-pointer*)
 (defcontextvar *state-table*)
 
+(defgeneric make-parse-tree-source (tree obj))
 (defgeneric @is-token-of-value (obj token-value))
 (defgeneric @is-token-of-type (obj token-type))
+
+(defmethod make-parse-tree-source ((tree list) (obj from-tokens-source-node))
+  (make-instance 'from-parse-tree-source-node
+                 :parse-tree tree
+                 :source (get-source obj)
+                 :type (get-source-type obj)))
 
 ;;TODO optimize imports
 (defmacro with-disassembled-source ((source type) &body body)
@@ -38,6 +46,9 @@
                               :type ,type
                               :return-instance t)))
      ,@body))
+
+(defun get-tokens-source ()
+  *tokens-source*)
 
 (defmacro defun-state (sort-type (&rest args) &body body)
   (let ((state-fun-name (intern (concatenate 'string "@" (string sort-type)))))
@@ -48,14 +59,22 @@
        (setf (gethash ',sort-type *state-table*)
              (function ,state-fun-name)))))
 
-(defmacro with-state-context-run ((sort-type-class entry-state &optional tokens-source)
+(defmacro with-state-context-run ((sort-type-class tokens-source
+                                                   &key
+                                                   entry-state
+                                                   return-instance)
                                   &body body)
   (use-sort-type-class sort-type-class)
   `(let ((*state-table* (make-hash-table :test #'eq))
-         (*token-pointer* (make-token-pointer (or ,tokens-source *tokens-source*))))
+         (*token-pointer* (make-token-pointer ,tokens-source)))
      ,@body
-     (with-tree ()
-       (@goto ,entry-state))))
+     (let ((tree
+            (with-tree ()
+              (@goto ,(or entry-state
+                          (car (get-sort-type-list)))))))
+       (if ,return-instance
+           (make-parse-tree-source tree ,tokens-source)
+           tree))))
 
 (defmacro @goto (state-fun-name &rest args)
   `(apply (gethash ',state-fun-name *state-table*) ,args))
@@ -93,7 +112,6 @@
 (defmethod @is-token-of-type ((obj (eql nil)) token-value)
   nil)
 
-;;TODO: 3 times inter, make one
 (defmacro with-token ((next/prev) &body body)
   "next or prev"
   `(let ((,(intern "IT")
