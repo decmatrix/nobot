@@ -4,11 +4,15 @@
           :alexandria
           :nobot/botscript/nodes
           :nobot/botscript/lexer-utils)
+  (:import-from :nobot/botscript/types
+                #:use-token-type-class)
   (:export #:disassemble-source
            #:disassemble-string
            #:disassemble-file))
 
 (in-package :nobot/botscript/lexer)
+
+(use-token-type-class :botscript-token-types)
 
 (defun disassemble-source (source &key (type :file)
                                     convert-tokens
@@ -37,8 +41,6 @@
                       :type :file
                       :convert-tokens t
                       :convert-with-pos convert-with-pos))
-
-
 
 (defmacro read-chars (prev-char type)
   ":id, :keyword, :num-string"
@@ -109,14 +111,3 @@
             ch
             (1+ (get-position-x *source*))
             (get-position-y *source*)))))
-
-(defun is-keyword-char-? (ch)
-  (find ch "#!@$"))
-
-(defun is-white-space-char-? (ch)
-  (some (curry #'eq ch)
-        '(#\space #\Tab #\newline #\Backspace #\Return #\Linefeed #\Page)))
-
-(defun is-keyword-? (word)
-  (some (curry #'equal word)
-        '("#EXE" "!USE" "$COMBO" "@DEF")))

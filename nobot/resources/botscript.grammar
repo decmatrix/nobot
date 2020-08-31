@@ -1,30 +1,24 @@
 <script> --> <macros-block> <predefined-block> <definition/combo-block> <graph-logic>
 
-<macros-block> --> <exe-macros> <macros-block> |
+<macros-block> --> <exe-macros> <macros-list> |
                    <empty>
 
-<predefined-block> --> <use-predefine> <predefined-block> |
+<predefined-block> --> <use-predefined> <predefined-block> |
                        <empty>
 
-<definition/combo-block> --> <call-definition/combo> <definition/combo-block> |
+<definition/combo-block> --> <call-definition> <definition/combo-block> |
+                             <call-combo> <definition/combo-block> |
                              <empty>
 
-<graph-logic> --> ??? 
+<graph-logic> --> ???
  
 <exe-macros> --> '#exe' <id> <args-list>
 
-<use-predefined> --> '!use' <predefines>
-
-<call-definition/combo> --> <call-definition> |
-                            <call-combo>
+<use-predefined> --> '!use' <id>
 
 <call-definition> --> '@def' <id> <args-list>
 
 <call-combo> --> '$combo' <id>
-
-<predefines> --> <id>
-
-<predefined-list> --> [go to botscript-predefine.grammar]
 
 <args-list> --> <arg> <args-list> |
                 <empty>
@@ -32,16 +26,16 @@
 <arg> --> <id> |
           <number-string>
 
-<id> --> <letter> <char-string>
+# <id> --> <letter> <char-string>
 
-<char-string> --> <letter> <char-string> |
+# <char-string> --> <letter> <char-string> |
                   <number> <char-string> |
                   '-' <char-string> |
                   <empty>
 
-<number-string> --> <num> <number-string> |
+# <number-string> --> <num> <number-string> |
                     <empty>
 
-<letter> --> [a-z | A-z]
+# <letter> --> [a-z | A-z]
 
-<number> --> [0-9]
+# <number> --> [0-9]

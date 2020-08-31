@@ -2,13 +2,14 @@
     (:use :cl
           :anaphora
           :alexandria)
+  (:import-from :nobot/utils
+                #:defcontextvar)
   (:export #:new-token
            #:make-tokens-source
            ;; from source node API
            #:get-source
            #:get-source-type
            ;; from tokens source node API
-           #:get-tokens-seq
            #:set-tokens-seq
            #:set-converted-tokens-seq
            #:get-converted-tokens-seq
@@ -33,16 +34,25 @@
            #:get-file-stream
            ;; from string source node API
            #:get-cur-index
+           ;; from parse tree source API
+           #:get-parse-tree
            ;; from file and string source node common API
            #:next-char
            #:undo-next-char
+           ;; from tokens source and token pointer common API
+           #:get-tokens-seq
+           ;; token pointer API
+           #:get-index
+           #:get-limit
            ;; nodes
            #:token-node
            #:from-source-node
            #:from-tokens-source-node
            #:from-source-code-node
            #:from-file-source-node
-           #:from-string-source-node))
+           #:from-string-source-node
+           #:from-parse-tree-source-node
+           #:token-pointer))
 
 
 (in-package :nobot/botscript/nodes)
@@ -56,7 +66,7 @@
     :accessor get-source-type)))
 
 (defclass from-tokens-source-node (from-source-node)
-  ((token-seq
+  ((tokens-seq
     :initarg :tokens-seq
     :reader get-tokens-seq
     :writer set-tokens-seq)
@@ -103,6 +113,21 @@
     :initform 0
     :accessor get-cur-index)))
 
+(defclass from-parse-tree-source-node (from-source-node)
+  ((parse-tree
+    :initarg :parse-tree
+    :accessor get-parse-tree)))
+
+(defclass token-pointer ()
+  ((pointer
+    :initform -1
+    :accessor get-index)
+   (tokens-seq
+    :initarg :tokens-seq
+    :accessor get-tokens-seq)
+   (toknes-seq-limit
+    :initarg :token-seq-limit
+    :accessor get-limit)))
 
 (defgeneric fix-cur-position (obj))
 (defgeneric clear-chars-buffer (obj))
@@ -163,3 +188,4 @@
 
 (defmethod undo-next-char (ch (obj from-string-source-node))
   (decf (get-cur-index obj)))
+

@@ -12,7 +12,7 @@
                    (disassemble-string ,input-string
                                        :convert-with-pos ,with-pos)
                    ,expected-tokens-seq
-                   :with-pos ,with-pos))))
+                   :without-pos ,(not with-pos)))))
 
 
 (define-lexer-test lexer.1

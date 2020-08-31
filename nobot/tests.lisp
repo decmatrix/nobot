@@ -1,7 +1,8 @@
 (uiop:define-package :nobot/tests
     (:use :cl
           :lisp-unit
-          :nobot/tests/lexer)
+          :nobot/tests/lexer
+          :nobot/tests/parser)
   (:nicknames :nobot-tests)
   (:export #:run-unit-tests))
 
