@@ -1,16 +1,16 @@
 * Botscript and predefine
 ** TODO write bash script for run it, or make file
 ** DONE write lexer
-** TODO write parser
-** TODO write parse string function
+** DONE write parser
+** DONE write parse string function
 ** DONE write lexer parse string function
 ** DONE write tests for lexer
 ** TODO write print objects for nodes.lisp
-** TODO write tests for parser
+** DONE write tests for parser
 ** TODO write tests for pos in lexer
 ** TODO write tests for error handling
-** TODO write tests for new lexemes representation
-** TODO coem up with inline parser for predefine in block !use
+** DONE write tests for new lexemes representation
+** TODO come up with inline parser for predefine in block !use
 ** DONE come up with cool representation tokens in lexer with pos and etc...
 ** TODO come up with cool error handler, while use lisp error with special representation
 ** DONE write function convert-tokens [[ TODO come up with cool representation tokens in lexer with pos and etc...][see]]
@@ -27,8 +27,8 @@
 ** TODO write tests
 * Common
 ** TODO write benchmark function/macros or lib with this function
-** TODO !!! write own test utils
-** TODO write bash script whose remove *.fasl , *~ etc
+** DONE !!! write own test utils
+** DONE write bash script whose remove *.fasl , *~ etc
 ** TODO find a way how calculate size of lisp object
 ** DONE split the package nobot-utils into sub packages 
 ** TODO write scripts who find debug functions like: print, format
