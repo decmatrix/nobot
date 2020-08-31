@@ -6,6 +6,8 @@
                 #:setf-context-var
                 #:equals)
   (:import-from :nobot/botscript/nodes
+                #:from-parse-tree-source-node
+                #:get-parse-tree
                 #:token-node
                 #:get-token-type
                 #:value-of-token)
@@ -22,6 +24,7 @@
 (defcontextvar *current-sort-type*)
 
 (defgeneric make-tree-from-token (obj))
+(defgeneric same-parse-tree-? (obj1 obj2))
 
 (defmacro with-tree ((&optional sort-type) &body body)
   `(multiple-value-bind (res-body new-tree)
@@ -38,7 +41,7 @@
 (defun @revert-tree ()
   (setf-context-var *tree* nil))
 
-;;TODO: poor impl, too bad !
+;;TODO: poor impl, i think
 (defun @insert-new-tree (new-tree)
   (labels ((%insert-new-tree (tree)
              (when tree
@@ -54,3 +57,11 @@
 
 (defmethod make-tree-from-token ((obj token-node))
   (list (get-token-type obj) (value-of-token obj)))
+
+(defmethod same-parse-tree-? ((obj1 from-parse-tree-source-node)
+                              (obj2 from-parse-tree-source-node))
+  (same-parse-tree-? (get-parse-tree obj1)
+                     (get-parse-tree obj2)))
+
+(defmethod same-parse-tree-? ((obj1 list) (obj2 list))
+  )

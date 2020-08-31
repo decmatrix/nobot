@@ -5,3 +5,7 @@
           :nobot/botscript/parser))
 
 (in-package :nobot/tests/parser)
+
+(defmacro define-parser-test (name input-string expected-tree)
+  `(define-test ,name
+     (assert-true (equalp))))
