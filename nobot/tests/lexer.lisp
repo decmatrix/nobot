@@ -11,27 +11,27 @@
      (assert-true (same-tokens-seq-?
                    (disassemble-string ,input-string
                                        :convert-with-pos ,with-pos)
-                   ,expected-tokens-seq
+                   ',expected-tokens-seq
                    :without-pos ,(not with-pos)))))
 
 
 (define-lexer-test lexer.1
     "@def port 8081"
-  '((<KEYWORD> @DEF) (<ID> "PORT") (<NUMBER-STRING> 8081)))
+  ((<KEYWORD> @DEF) (<ID> "PORT") (<NUMBER-STRING> 8081)))
 
 (define-lexer-test lexer.2
     "$combo bot-localhost"
-  '((<KEYWORD> $COMBO) (<ID> "BOT-LOCALHOST")))
+  ((<KEYWORD> $COMBO) (<ID> "BOT-LOCALHOST")))
 
 (define-lexer-test lexer.3
     "1234name"
-  '((<number-string> 1234) (<id> "name")))
+  ((<number-string> 1234) (<id> "name")))
 
 (define-lexer-test lexer.4
     "!use std-module"
-  '((<keyword> !use) (<id> "std-module")))
+  ((<keyword> !use) (<id> "std-module")))
 
 (define-lexer-test lexer.5
     "#exe lang python"
-  '((<keyword> |#exe|) (<id> "lang") (<id> "python")))
+  ((<keyword> |#exe|) (<id> "lang") (<id> "python")))
 

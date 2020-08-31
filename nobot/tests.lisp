@@ -9,4 +9,5 @@
 (in-package :nobot/tests)
 
 (defun run-unit-tests ()
-  (run-tests :all :nobot/tests/lexer))
+  (run-tests :all :nobot/tests/lexer)
+  (run-tests :all :nobot/tests/parser))
