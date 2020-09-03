@@ -28,7 +28,6 @@
             (format t "File done!~%")
             (format t "WRANG FILE FORMAT!~%"))))))
 
-
-(defun is-valid-fiel-format-? (arg)
+(defun is-valid-file-format-? (arg)
   (scan "^[\\d\\w\\-\\.\\(\\)\\:]+(\\.bs)|(\\.predef-bs)$"
         arg))
