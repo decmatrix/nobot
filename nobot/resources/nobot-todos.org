@@ -32,7 +32,7 @@
 ** TODO find a way how calculate size of lisp object
 ** DONE split the package nobot-utils into sub packages 
 ** TODO write scripts who find debug functions like: print, format
-
+** TODO hand error if option for applicatio does not exists
 
 * Somehow
 ** DONE improve lazy clalcs, lazy node - must have information

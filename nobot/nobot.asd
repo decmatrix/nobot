@@ -2,9 +2,9 @@
     :class :package-inferred-system
     :defsystem-depends-on (:asdf-package-system)
     :description "Engine for creating chat bots"
-    :version "0.0.1"
+    :version "0.1.0"
     :author "Sokolovskyi Bohdan"
-    :depends-on ("nobot/main"
+    :depends-on ("nobot/startup"
                  "nobot/core"
                  "nobot/botscript"
                  "nobot/utils"
@@ -12,9 +12,9 @@
                  ;; other libs
                  "alexandria"
                  "anaphora"
-                 "lisp-unit")
+                 "lisp-unit"
+                 "unix-opts"
+                 "cl-ppcre")
     :in-order-to ((test-op (load-op "nobot/tests")))
     ;;:perform (test-op (o c) (uiop:symbol-call :nobot/tests :run-unit-tests))
-    :build-operation "program-op" ;;???
-    :build-pathname "nobot-app"
-    :entry-point "nobot/main:run-nobot")
+    )
