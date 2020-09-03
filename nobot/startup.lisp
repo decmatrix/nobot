@@ -26,8 +26,8 @@
       (let ((file (car free-args)))
         (if (is-valid-file-format-? file)
             (format t "File done!~%")
-            (format t "WRANG FILE FORMAT!~%"))))))
+            (format t "WRONG FILE FORMAT!~%"))))))
 
 (defun is-valid-file-format-? (arg)
-  (scan "^[\\d\\w\\-\\.\\(\\)\\:]+(\\.bs)|(\\.predef-bs)$"
+  (scan "^[\\d\\w\\-\\.\\(\\):/]+(\\.bs)|(\\.predef-bs)$"
         arg))
