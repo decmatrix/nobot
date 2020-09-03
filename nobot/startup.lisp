@@ -24,7 +24,7 @@
       (format t "NOBOT PLATFORM v.1.0 alpha~%"))
     (when (and free-args (not (cdr free-args)))
       (let ((file (car free-args)))
-        (if (is-valid-fiel-format-? file)
+        (if (is-valid-file-format-? file)
             (format t "File done!~%")
             (format t "WRANG FILE FORMAT!~%"))))))
 
