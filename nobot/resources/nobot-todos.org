@@ -1,5 +1,5 @@
 * Botscript and predefine
-** TODO write bash script for run it, or make file
+** DONE write bash script for run it, or make file
 ** DONE write lexer
 ** DONE write parser
 ** DONE write parse string function
@@ -14,18 +14,12 @@
 ** DONE come up with cool representation tokens in lexer with pos and etc...
 ** TODO come up with cool error handler, while use lisp error with special representation
 ** DONE write function convert-tokens [[ TODO come up with cool representation tokens in lexer with pos and etc...][see]]
-* Python code gen
-** TODO write simple server generator
-** TODO write simple Telegram API bot generator
-** TODO write bot logic generator
-** TODO write tests
-
-* JS code gen
-** TODO write simple server generator
-** TODO write simple Telegram API bot generator
-** TODO write bot logic generator
-** TODO write tests
+** TODO rewrite grammar, for exmple '<macros>' -> '<pre-option>'
+* Code gen
+** TODO write code generator
+** TODO write tests for code generator
 * Common
+** TODO add cover of code
 ** TODO write benchmark function/macros or lib with this function
 ** DONE !!! write own test utils
 ** DONE write bash script whose remove *.fasl , *~ etc
@@ -34,5 +28,11 @@
 ** TODO write scripts who find debug functions like: print, format
 ** TODO hand error if option for applicatio does not exists
 
+** TODO write doc about NOBOT platform
+** TODO write doc about botscript lang
 * Somehow
 ** DONE improve lazy clalcs, lazy node - must have information
+* JS bot lib
+** TODO write minimal js lib for creation bots
+** TODO write doc about js lib
+** TODO what about extension for NOBOT platfrom ?
