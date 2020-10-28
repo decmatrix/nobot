@@ -1,0 +1,27 @@
+#set lang "js"
+#set arch "chat"
+
+@def bot-name "Tobi"
+@def port 8081
+@def host "localhost"
+
+data colors = vocabulary-to-arr('./colors.voc')
+data names = ['Mike', 'Bohdan', 'Ben', 'Tobi']
+data hi-words = ['Morning', 'Good morning', 'Hi', 'Hello']
+data hi-combos = combo "$names, $hi-words"
+
+expr hi = random from hi-words
+const any = 'Sorry, i can't understand you :('
+
+[first] <= hi
+[any] <= 'Sorry, i can't understand you :('
+
+[] => contain random from hi-words => go main
+
+main {
+   [first] <= ..
+   [any] <= ..
+   
+   [] => 'Good buy' => go ..
+}
+
