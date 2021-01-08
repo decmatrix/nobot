@@ -1,0 +1,7 @@
+*.fasl
+.*
+~*
+\'#*
+.DS_Store
+\#*
+nobot-pt

@@ -5,7 +5,7 @@
 
 (in-package :nobot/server)
 
-;;;;;;;;;;;;;;;;;; `WARNING': IT'S TESTING MODULE ;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;; WARNING: IT'S TESTING MODULE ;;;;;;;;;;;;;;;;;;
 
 (defconstant +default-port+ 8086)
 (defconstant +default-host+ "127.0.0.1")
@@ -24,4 +24,3 @@
         (socket-close connection)
         (socket-close socket)
         (format t  "nobot server stoped!")))))
-

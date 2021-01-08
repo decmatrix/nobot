@@ -20,11 +20,13 @@
 
 (in-package :nobot/botscript/parser)
 
-(defun parse-string (str)
-  (parse-source str :string))
+(defun parse-string (str &key return-instance)
+  (parse-source str :string
+                :return-instance return-instance))
 
-(defun parse-file (path)
-  (parse-source path :file))
+(defun parse-file (path &key return-instance)
+  (parse-source path :file
+                :return-instance return-instance))
 
 (defun parse-source (source type &key return-instance)
   (with-disassembled-source (source type)   

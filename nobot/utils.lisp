@@ -11,8 +11,10 @@
    #:log-debug
    #:log-warn
    #:log-error
+   #:with-log-level-context
    #:log-context
-   #:with-logl-level-context
+   #:with-logger
+   #:logger-configuration
    ;; program utils
    #:when-option
    #:it-opt

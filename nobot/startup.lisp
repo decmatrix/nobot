@@ -1,8 +1,6 @@
 (uiop:define-package :nobot/startup
     (:use :cl
           :nobot/toplevel)
-  (:import-from :anaphora
-                #:awhen)
   (:import-from :unix-opts
                 #:define-opts
                 #:get-opts
@@ -13,8 +11,6 @@
                 #:it-opt
                 #:is-valid-file-format-?
                 #:get-program-version)
-  (:import-from :cl-ppcre
-                #:scan)
   (:export #:*run*))
 
 (in-package :nobot/startup)
@@ -37,7 +33,7 @@
    :long "version")
   (:name :description
    :description "print description about program"
-   :short #\d
+   :short #\a
    :long "about")
   (:name :run
    :description "run program"
@@ -51,10 +47,13 @@
   (:name :run-server
    :description "run translator as server"
    :short #\s
-   :long "server"))
+   :long "server")
+  (:name :debug-mode
+   :description "run transaltor in debug mode"
+   :short #\d
+   :long "debug"))
 
-(defun *run* (args)
-  (declare (ignore args))
+(defun *run* ()
   (multiple-value-bind (options free-args)
       (handler-case
           (handler-bind ((unknown-option #'unknown-option-handler))
@@ -76,13 +75,14 @@
       (print-program-version))
     (when-option (options :description)
       (print-program-description))
+    (when-option (options :debug-mode)
+      ;; TODO: implement debug mode
+      )
     (when-option (options :run)
-      ;; WIP
-      (log-info "feature is WIP"))
+      (*run-and-burn-in-runtime*))
     (when-option (options :run-server)
-      ;; check port argument
-      ;; WIP
-      (log-info "feature is WIP"))
+      ;; TODO: check port argument
+      (*run-and-burn-as-server*))
     (when-option (options :compile-file)
       (*run-and-burn* it-opt))
     (when free-args
@@ -94,7 +94,7 @@
   (invoke-restart 'opts:skip-option))
 
 (defun print-program-description ()
-  (format nil "~A~%"
+  (format t "~A~%"
           (get-text-of-program-description)))
 
 (defun print-help-description ()

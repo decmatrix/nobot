@@ -16,4 +16,5 @@
                  "cl-ppcre"
                  "unix-opts")
     :in-order-to ((test-op (load-op "nobot/tests")))
-    :perform (test-op (o c) (uiop:symbol-call :nobot/tests :run-unit-tests)))
+    ;;:perform (test-op (o c) (uiop:symbol-call :nobot/tests :run-unit-tests))
+    )
