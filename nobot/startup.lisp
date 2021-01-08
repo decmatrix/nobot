@@ -1,33 +1,115 @@
 (uiop:define-package :nobot/startup
-    (:use :cl)
+    (:use :cl
+          :nobot/toplevel)
   (:import-from :anaphora
                 #:awhen)
   (:import-from :unix-opts
                 #:define-opts
-                #:get-opts)
+                #:get-opts
+                #:unknown-option)
+  (:import-from :nobot/utils
+                #:log-info
+                #:when-option
+                #:it-opt
+                #:is-valid-file-format-?
+                #:get-program-version)
   (:import-from :cl-ppcre
                 #:scan)
-  (:export #:run-nobot))
+  (:export #:*run*))
 
 (in-package :nobot/startup)
 
+(defun parse-file (str)
+  (if (is-valid-file-format-? str)
+      str
+      (progn
+        (format t "fatal: unknown extension of file, expected <name>.bs~%")
+        (opts:exit 1))))
+
 (define-opts
   (:name :help
-         :description "print avaliable nobot options"
-         :short #\h
-         :long "help"))
+   :description "print avaliable nobot options"
+   :short #\h
+   :long "help")
+  (:name :version
+   :description "print version of app"
+   :short #\v
+   :long "version")
+  (:name :description
+   :description "print description about program"
+   :short #\d
+   :long "about")
+  (:name :run
+   :description "run program"
+   :short #\r
+   :long "run")
+  (:name :compile-file
+   :description "transale code and generate bot"
+   :short #\c
+   :long "compile"
+   :arg-parser #'parse-file)
+  (:name :run-server
+   :description "run translator as server"
+   :short #\s
+   :long "server"))
 
-(defun run-nobot ()
+(defun *run* (args)
+  (declare (ignore args))
   (multiple-value-bind (options free-args)
-      (get-opts)
-    (awhen (getf options :help)
-      (format t "NOBOT PLATFORM v.1.0 alpha~%"))
-    (when (and free-args (not (cdr free-args)))
-      (let ((file (car free-args)))
-        (if (is-valid-file-format-? file)
-            (format t "File done!~%")
-            (format t "WRONG FILE FORMAT!~%"))))))
+      (handler-case
+          (handler-bind ((unknown-option #'unknown-option-handler))
+            (get-opts))
+        (opts:missing-arg (condition)
+          (format t "fatal: option ~s needs as argument!~%"
+                  (opts:option condition)))
+        (opts:arg-parser-failed (condition)
+          (format t "fatal: can't parse ~s as argument of ~s~%"
+                  (opts:raw-arg condition)
+                  (opts:option condition)))
+        (opts:missing-required-option (condition)
+          (format t "fatal: ~a~%"
+                  condition)
+          (opts:exit 1)))
+    (when-option (options :help)
+      (print-help-description))
+    (when-option (options :version)
+      (print-program-version))
+    (when-option (options :description)
+      (print-program-description))
+    (when-option (options :run)
+      ;; WIP
+      (log-info "feature is WIP"))
+    (when-option (options :run-server)
+      ;; check port argument
+      ;; WIP
+      (log-info "feature is WIP"))
+    (when-option (options :compile-file)
+      (*run-and-burn* it-opt))
+    (when free-args
+      (format t "fatal: extra arguments~%")
+      (opts:exit 1))))
 
-(defun is-valid-file-format-? (arg)
-  (scan "^[\\d\\w\\-\\.\\(\\):/]+(\\.bs)|(\\.predef-bs)$"
-        arg))
+(defun unknown-option-handler (condition)
+  (format t "warning: unknown option ~s~%" (opts:option condition))
+  (invoke-restart 'opts:skip-option))
+
+(defun print-program-description ()
+  (format nil "~A~%"
+          (get-text-of-program-description)))
+
+(defun print-help-description ()
+  (opts:describe
+   :prefix (get-text-of-program-version)
+   :suffix (format nil "more, ~A"
+                   (get-text-of-program-description))))
+
+(defun print-program-version ()
+  (format t "~A~%"
+          (get-text-of-program-version)))
+
+(defun get-text-of-program-description ()
+  (format nil "go to --> http://nobot.space"))
+
+(defun get-text-of-program-version ()
+  (format nil "NOBOT platform v.~A"
+          (get-program-version)))
