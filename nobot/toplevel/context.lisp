@@ -46,46 +46,46 @@
      ,@body))
 
 (defun add-info-log (str)
-  (when (boundp *context*)
+  (when (boundp '*context*)
     (push str (get-info-stack *context*))))
 
 (defun add-debug-log (str)
-  (when (boundp *context*)
+  (when (boundp '*context*)
     (push str (get-debug-stack *context*))))
 
 (defun add-warn-log (str)
-  (when (boundp *context*)
+  (when (boundp '*context*)
     (push str (get-warn-stack *context*))))
 
 (defun add-error-log (str)
-  (when (boundp *context*)
+  (when (boundp '*context*)
     (push str (get-error-stack *context*))))
 
 (defun is-empty-info-stack-? ()
   (or
-   (not (boundp *context*))
+   (not (boundp '*context*))
    (null (get-info-stack *context*))))
 
 (defun is-empty-debug-stack-? ()
   (or
-   (not (boundp *context*))
+   (not (boundp '*context*))
    (null (get-debug-stack *context*))))
 
 (defun is-empty-warn-stack-? ()
   (or
-   (not (boundp *context*))
+   (not (boundp '*context*))
    (null (get-warn-stack *context*))))
 
 (defun is-empty-error-stack-? ()
   (or
-   (not (boundp *context*))
+   (not (boundp '*context*))
    (null (get-error-stack *context*))))
 
 (defun get-source-from-context ()
-  (get-source *context*))
+  (get-source '*context*))
 
 (defun get-source-type-from-context ()
-  (get-source-type *context*))
+  (get-source-type '*context*))
 
 (defun is-source-type-? (source-type)
   (if (or (eq source-type :file)
