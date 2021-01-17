@@ -100,13 +100,13 @@
   (format t msg))
 
 (defun make-log-msg (msg level)
-  (format nil "[~a] - <~a>: ~a"
+  (format nil "[~a] - <~a>: ~a~%"
           (get-prefix *currnet-logger-configuration*)
           level
           msg))
 
 (defun get-logger-configuration ()
-  (if (boundp *logger-configuration*)
+  (if (boundp '*logger-configuration*)
       *logger-configuration*
       +default-logger-configuration+))
 
