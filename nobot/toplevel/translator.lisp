@@ -8,6 +8,8 @@
                 #:configure-logger)
   (:import-from :nobot/utils
                 #:with-logger)
+  (:import-from :nobot/toplevel/error-handling
+                #:toplevel-error-handler)
   (:export #:*run-and-burn*
            #:*run-and-burn-in-runtime*
            #:*run-and-burn-as-server*))
@@ -18,8 +20,9 @@
   (with-translator-context (:source-type :file
                             :source file)
     (with-logger ((configure-logger))
+      (toplevel-error-handler
       ;; Level 1: parse source file and get instance with tree of code
-      
+      (parse-file file)
       ;; Level 2: traverse tree and collect information
       
       ;; Level 3: generate project
@@ -28,7 +31,7 @@
       
       ;; Level 5: final processing
       
-      )))
+      ))))
 
 (defun *run-and-burn-in-runtime* ()
   ;; WIP
