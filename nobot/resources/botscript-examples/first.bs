@@ -1,27 +1,38 @@
-#set lang "js"
-#set arch "chat"
+// set compiler options
+opt lang "js"
+opt arch "chat"
+opt project-dir "~/dev-bots/mybot/"
+opt extension "tg"
 
-@def bot-name "Tobi"
-@def port 8081
-@def host "localhost"
+/* set bot options */
+def name "Tobi"
+def port 8081
+def host "localhost"
+def tg-token "123445dfeogjeg"
 
-data colors = vocabulary-to-arr('./colors.voc')
-data names = ['Mike', 'Bohdan', 'Ben', 'Tobi']
-data hi-words = ['Morning', 'Good morning', 'Hi', 'Hello']
-data hi-combos = combo "$names, $hi-words"
+letd greetings = ["Hi", "Hello", "Hey you"]
 
-expr hi = random from hi-words
-const any = 'Sorry, i can't understand you :('
+// keywords input
+letv a [act = act-a, type = in]
+letv b [act = act-b, type = out]
+letv c [act = act-c, type = out]
+letv default [act = act-default]
 
-[first] <= hi
-[any] <= 'Sorry, i can't understand you :('
-
-[] => contain random from hi-words => go main
-
-main {
-   [first] <= ..
-   [any] <= ..
-   
-   [] => 'Good buy' => go ..
+def-act act-a {
+   if input in greetings go to b
+   else go to default
 }
 
+def-act act-b {
+   say random from greetings go to c
+}
+
+def-act act-c () {
+   say "So, now what ?" go to a 
+}
+
+def-act act-defualt {
+   say "Sorry, i can't understand you" go to a
+}
+
+start from a

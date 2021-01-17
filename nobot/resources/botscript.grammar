@@ -1,41 +1,90 @@
-<script> --> <macros-block> <predefined-block> <definition/combo-block> <graph-logic>
+########################### FOR PARSER ###########################
 
-<macros-block> --> <exe-macros> <macros-list> |
-                   <empty>
+<script> ::= <option-list> <definition-list> <data-decl-list> <vertex-decl-list>
+             <action-decl-list> <start-expression>
 
-<predefined-block> --> <use-predefined> <predefined-block> |
-                       <empty>
-
-<definition/combo-block> --> <call-definition> <definition/combo-block> |
-                             <call-combo> <definition/combo-block> |
-                             <empty>
-
-<graph-logic> --> ???
- 
-<exe-macros> --> '#exe' <id> <args-list>
-
-<use-predefined> --> '!use' <id>
-
-<call-definition> --> '@def' <id> <args-list>
-
-<call-combo> --> '$combo' <id>
-
-<args-list> --> <arg> <args-list> |
-                <empty>
-
-<arg> --> <id> |
-          <number-string>
-
-# <id> --> <letter> <char-string>
-
-# <char-string> --> <letter> <char-string> |
-                  <number> <char-string> |
-                  '-' <char-string> |
+<option-list> ::= <option> <options-list> |
                   <empty>
 
-# <number-string> --> <num> <number-string> |
-                    <empty>
+<definition-list> ::= <definition> <definition-list> |
+                      <empty>
 
-# <letter> --> [a-z | A-z]
+<data-decl-list> ::= <data-decl> <data-decl-list> |
+                     <empty>
 
-# <number> --> [0-9]
+<vertex-decl-list> ::= <vertex-decl> <vertex-decl-list> |
+                       <empty>
+
+<action-decl-list> ::= <action-decl> <action-decl-list> |
+                       <empty>
+
+<start-expression> ::= 'start' 'from' <id>
+
+<option> ::= '#opt' <id> <string-or-num>
+
+<definition> ::= '@def' <id> <string-or-num>
+
+<data-decl> ::= 'letd' <id> <data-expression>
+
+<vertex-decl> ::= 'letv' <id> <vertex-options>
+
+<action-decl> ::= 'def-act' <id> '{' <expr-list> '}'
+
+<string-or-num> ::= <string> |
+                    <num-string>
+
+<data-expression> ::= <seq>
+
+<vertex-options> ::= '[' <vertex-option-list> ']'
+
+<expr-list> ::= <expr> <go-to-expr> <expr-list> |
+                <empty>
+
+<string> ::= '"' <char-list> '"'
+
+<seq> ::= '[' <string-list> ']'
+
+<vertex-option-list> ::= <vertex-option> ',' <vertex-option-list> |
+                         <empty>
+
+<expr> ::=
+
+<go-to-expr> ::= 'go' 'to' <id>
+
+// empty after ',' ?
+<string-list> ::= <string> ',' <string-list> |
+                  <empty>
+
+<vertex-option> ::= <vertex-option-id> '=' <vertex-option-val>
+
+<vertex-option-id> ::= 'act' |
+                       'type'
+                     
+<vertex-option-val> ::= <id> |
+                        'in' |
+                        'out'
+
+########################### FOR LEXER ###########################
+
+<char-list> ::= <char> <char-list> |
+                <empty>
+
+<id> ::= <letter> <char-string>
+
+<char-string> ::= <letter> <char-string> |
+                  <number> <char-string> |
+                  '-' <char-string> |
+                  <emtpy>
+
+<num-string> ::= <number> <num-string>
+                 <empty>
+
+<letter> ::= [a-z | A-Z]
+
+<number> ::= [0-9]
+
+<empty> ::= empty
+
+<single-comment> ::= '//' ...
+
+<multi-comment> ::= '/*' ... '*/'
