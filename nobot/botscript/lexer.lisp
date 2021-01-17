@@ -6,6 +6,8 @@
           :nobot/botscript/lexer-utils)
   (:import-from :nobot/botscript/types
                 #:use-token-type-class)
+  (:import-from :nobot/toplevel/error-handling
+                #:raise-bs-lexer-error)
   (:export #:disassemble-source
            #:disassemble-string
            #:disassemble-file))
@@ -20,7 +22,7 @@
                                     use-lazy-tokens
                                     return-instance)
   (unless source
-    (error "Expected source"))
+    (error "Can't reader source if source is nil"))
   (with-source-code (type source
                           :convert-tokens convert-tokens
                           :convert-with-pos convert-with-pos
@@ -107,7 +109,8 @@
     ((is-white-space-char-? ch)
      (update-pos ch *source*))
     (t
-     (error "Unknown symbol [~A] in pos ~A ~A~%"
-            ch
-            (1+ (get-position-x *source*))
-            (get-position-y *source*)))))
+     (raise-bs-lexer-error
+      "unknown symbol \"~a\" at position: line - ~a, column - ~a"
+      ch
+      (get-position-y *source*)
+      (1+ (get-position-x *source*))))))

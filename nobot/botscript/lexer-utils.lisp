@@ -17,11 +17,11 @@
 
 (defcontextvar *source*)
 
-(define-constant-? +keyword-table+
-    '("#EXE"
-      "!USE"
-      "$COMBO"
-      "@DEF"))
+(defparameter +kyword-table+
+  '("#EXE"
+    "!USE"
+    "$COMBO"
+    "@DEF"))
 
 (defmacro with-source-code ((type source &key
                                   convert-tokens
@@ -42,12 +42,14 @@
                 "<use-lazy-tokens>"))
        (let* ((*source* (case ,type
                           (:file
-                           (make-instance 'from-file-source-node
-                                          :fstream (open ,source
-                                                         :direction :input
-                                                         :if-does-not-exist :error)
-                                          :source ,source
-                                          :type ,type))
+                           (make-instance
+                            'from-file-source-node
+                            :fstream (open
+                                      ,source
+                                      :direction :input
+                                      :if-does-not-exist :error)
+                            :source ,source
+                            :type ,type))
                           (:string
                            (make-instance 'from-string-source-node
                                           :source ,source
