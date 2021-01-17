@@ -4,7 +4,7 @@
 
 ;; make image
 (sb-ext:save-lisp-and-die
- #p "nobot-pt"
+ #p "nobot-app"
  :toplevel #'nobot/startup:*run*
  :save-runtime-options t
  :executable t)
