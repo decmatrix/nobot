@@ -1,13 +1,11 @@
 ########################### FOR PARSER ###########################
 
-<script> ::= <option-list> <definition-list> <data-decl-list> <vertex-decl-list>
-             <action-decl-list> <start-expression>
+<script> ::= <compiler-options> <bot-options> <data-decl-list> <vertex-decl-list>
+             <action-decl-list> <start-stmt>
 
-<option-list> ::= <option> <options-list> |
-                  <empty>
+<compiler-options> ::= 'c-opts' <c-opts-block>
 
-<definition-list> ::= <definition> <definition-list> |
-                      <empty>
+<bot-options> ::= 'bot-opts' <bot-opts-block>
 
 <data-decl-list> ::= <data-decl> <data-decl-list> |
                      <empty>
@@ -18,47 +16,56 @@
 <action-decl-list> ::= <action-decl> <action-decl-list> |
                        <empty>
 
-<start-expression> ::= 'start' 'from' <id>
+<start-stmt> ::= 'start' 'from' <id>
 
-<option> ::= '#opt' <id> <string-or-num>
+<c-opts-block> ::= '{' <opts-list> '}'
 
-<definition> ::= '@def' <id> <string-or-num>
+<bot-opts-block> ::= '{' <opts-list> '}'
 
 <data-decl> ::= 'letd' <id> <data-expression>
 
 <vertex-decl> ::= 'letv' <id> <vertex-options>
 
-<action-decl> ::= 'def-act' <id> '{' <expr-list> '}'
+<action-decl> ::= 'def-act' <id> '{' <stmt-list> '}'
+
+<opts-list> ::= <opt> <opts-tail-list> |
+                  <empty>
+
+<opt> ::= <id> ':' <string-or-num>
+
+<opts-tail-list> ::= ',' <opt> <opts-tail-list> |
+                     <empty>
 
 <string-or-num> ::= <string> |
                     <num-string>
 
-<data-expression> ::= <seq>
+<data-expression> ::= <data-seq>
 
 <vertex-options> ::= '[' <vertex-option-list> ']'
 
-<expr-list> ::= <expr> <go-to-expr> <expr-list> |
+<stmt-list> ::= <stmt> <stmt-list> |
                 <empty>
+
+<stmt> ::= <expr> ^newline
 
 <string> ::= '"' <char-list> '"'
 
-<seq> ::= '[' <string-list> ']'
+<data-seq> ::= '[' <string-list> ']'
 
 <vertex-option-list> ::= <vertex-option> ',' <vertex-option-list> |
                          <empty>
 
-<expr> ::=
+<expr> ::= ?
 
-<go-to-expr> ::= 'go' 'to' <id>
+<string-list> ::= <string> <string-tail-list>
 
-// empty after ',' ?
-<string-list> ::= <string> ',' <string-list> |
-                  <empty>
+<string-tail-list> ::= ',' <string> <string-tail-list> |
+                       <empty>
 
-<vertex-option> ::= <vertex-option-id> '=' <vertex-option-val>
+<vertex-option> ::= <vertex-option-name> '=' <vertex-option-val>
 
-<vertex-option-id> ::= 'act' |
-                       'type'
+<vertex-option-name> ::= 'act' |
+                         'type'
                      
 <vertex-option-val> ::= <id> |
                         'in' |
@@ -88,3 +95,7 @@
 <single-comment> ::= '//' ...
 
 <multi-comment> ::= '/*' ... '*/'
+
+########################### NOTES ###########################
+
+^newline - non printed symbol of new line

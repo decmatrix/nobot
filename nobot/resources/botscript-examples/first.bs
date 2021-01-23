@@ -1,14 +1,18 @@
 // set compiler options
-opt lang "js"
-opt arch "chat"
-opt project-dir "~/dev-bots/mybot/"
-opt extension "tg"
+c-opts {
+  lang: "js",
+  arch: "chat",
+  project-dir: "~/dev-bots/mybot/",
+  extension "tg"
+}
 
 /* set bot options */
-def name "Tobi"
-def port 8081
-def host "localhost"
-def tg-token "123445dfeogjeg"
+bot-opts {
+  name: "Tobi",
+  port: 8081,
+  host: "localhost",
+  tg-token "123445dfeogjeg"
+}
 
 letd greetings = ["Hi", "Hello", "Hey you"]
 
