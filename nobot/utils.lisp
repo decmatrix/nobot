@@ -27,6 +27,7 @@
    #:define-constant-?
    #:reintern
    #:let-when
+   #:with-it
    ;; context variables package
    #:defcontextvar
    #:setf-context-var))

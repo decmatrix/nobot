@@ -7,7 +7,8 @@
            #:split-list
            #:define-constant-?
            #:reintern
-           #:let-when))
+           #:let-when
+           #:with-it))
 
 (in-package :nobot/utils/common-utils)
 
@@ -46,3 +47,7 @@
                 :collect `(,symbol (or ,value
                                        (return-from ,block nil))))
          ,@body))))
+
+(defmacro with-it ((val) &body body)
+  (let ((it ,val))
+    ,@body))
