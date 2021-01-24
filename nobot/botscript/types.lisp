@@ -30,7 +30,7 @@
       ((stringp type) (intern type package))
       ((keywordp type) type)
       ((symbolp type) (reintern type package))
-      (t (error "Representation of sort type maybe only is string, keyword or symbol")))))
+      (t (error "representation of sort type maybe only is string, keyword or symbol")))))
 
 (defun define-types (&rest types-list)
   (let ((table (make-hash-table :test #'eq)))
@@ -46,13 +46,13 @@
   (let ((converted-sort-type (convert-type type)))
     (aif (gethash converted-sort-type *sort-types*)
       it
-      (error "Unknown sort type ~A" (symbol-name converted-sort-type)))))
+      (error "unknown sort type ~A" (symbol-name converted-sort-type)))))
 
 (defun get-token-type-symbol (type)
   (let ((converted-token-type (convert-type type)))
     (aif (gethash converted-token-type *token-types*)
       it
-      (error "Unknown token type ~A" (symbol-name converted-token-type)))))
+      (error "unknown token type ~A" (symbol-name converted-token-type)))))
 
 (defun get-sort-type-list ()
   (hash-table-values *sort-types*))
@@ -60,40 +60,59 @@
 (defun get-token-type-list ()
   (hash-table-values *token-types*))
 
-(define-constant-? +botscript-token-types+
-    (define-types
+(defparameter +botscript-token-types+
+  (define-types
       "keyword"
-      "unknown"
       "number-string"
-      "id"))
+      "id"
+      "char-string"
+      "delimiter"))
 
-(define-constant-? +botscript-sort-types+
-    (define-types
+(defparameter +botscript-sort-types+
+  (define-types
       "script"
-      "macros-block"
-      "predefined-block"
-      "definition/combo-block"
-      "graph-logic"
-      "exe-macros-list"
-      "exe-macros"
-      "use-predefined"
-      "call-definition"
-      "call-combo"
-      "args-list"
-      "arg"
-      "id"))
+      "compiler-options"
+      "bot-options"
+      "data-decl-list"
+      "vertex-decl-list"
+      "action-decl-list"
+      "start-stmt"
+      "c-opts-block"
+      "bot-opts-block"
+      "data-decl"
+      "vertex-decl"
+      "action-decl"
+      "stmt-block"
+      "opts-list"
+      "opt"
+      "opts-tail-list"
+      "string-or-num"
+      "data-expr"
+      "vertex-options"
+      "stmt-list"
+      "stmt"
+      "data-seq"
+      "vertex-option-list"
+      "expr"
+      "item-list"
+      "item-tail-list"
+      "item"
+      "vertex-option"
+      "vertex-option-name"
+      "vertex-option-val"
+      "literal"))
 
 (defun get-sort-table-by-sort-type-class (name)
   (case name
     (:botscript-sort-types
      +botscript-sort-types+)
-    (t (error "Unknown sort type class: ~A" name))))
+    (t (error "unknown sort type class: ~A" name))))
 
 (defun get-token-table-by-token-type-class (name)
   (case name
     (:botscript-token-types
      +botscript-token-types+)
-    (t (error "Unknown token type class: ~A" name))))
+    (t (error "unknown token type class: ~A" name))))
 
 (defun use-sort-type-class (sort-type-class)
   (setf *sort-types* (get-sort-table-by-sort-type-class sort-type-class)))

@@ -22,11 +22,13 @@
 
 <bot-opts-block> ::= '{' <opts-list> '}'
 
-<data-decl> ::= 'letd' <id> <data-expression>
+<data-decl> ::= 'letd' <id> <data-expr>
 
 <vertex-decl> ::= 'letv' <id> <vertex-options>
 
-<action-decl> ::= 'def-act' <id> '{' <stmt-list> '}'
+<action-decl> ::= 'def-act' <id> <stmt-block>
+
+<stmt-block> ::= '{' <stmt-list> '}'
 
 <opts-list> ::= <opt> <opts-tail-list> |
                   <empty>
@@ -36,10 +38,10 @@
 <opts-tail-list> ::= ',' <opt> <opts-tail-list> |
                      <empty>
 
-<string-or-num> ::= <string> |
-                    <num-string>
+<string-or-num> ::= <char-string> |
+                    <number-string>
 
-<data-expression> ::= <data-seq>
+<data-expr> ::= <data-seq>
 
 <vertex-options> ::= '[' <vertex-option-list> ']'
 
@@ -48,19 +50,19 @@
 
 <stmt> ::= <expr> ^newline
 
-<string> ::= '"' <char-list> '"'
-
-<data-seq> ::= '[' <string-list> ']'
+<data-seq> ::= '[' <item-list> ']'
 
 <vertex-option-list> ::= <vertex-option> ',' <vertex-option-list> |
                          <empty>
 
 <expr> ::= ?
 
-<string-list> ::= <string> <string-tail-list>
+<item-list> ::= <item> <item-tail-list>
 
-<string-tail-list> ::= ',' <string> <string-tail-list> |
+<item-tail-list> ::= ',' <item> <item-tail-list> |
                        <empty>
+
+<item> ::= <literal>
 
 <vertex-option> ::= <vertex-option-name> '=' <vertex-option-val>
 
@@ -71,7 +73,12 @@
                         'in' |
                         'out'
 
+<literal> ::= <char-string> |
+              <number-string>
+
 ########################### FOR LEXER ###########################
+
+<string> ::= '"' <char-list> '"'
 
 <char-list> ::= <char> <char-list> |
                 <empty>
@@ -83,7 +90,7 @@
                   '-' <char-string> |
                   <emtpy>
 
-<num-string> ::= <number> <num-string>
+<number--string> ::= <number> <number-string>
                  <empty>
 
 <letter> ::= [a-z | A-Z]
