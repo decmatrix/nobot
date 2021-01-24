@@ -11,17 +11,38 @@
            #:is-keyword-char-?
            #:is-white-space-char-?
            #:is-keyword-?
-           #:get-symbol-for-keyword))
+           #:is-delimiter-?
+           #:is-dquote-?
+           #:is-locked-lexical-analysis-?
+           #:get-symbol-for-keyword
+           #:get-symbol-for-delimiter
+           #:wrap-word-in-dquotes
+           #:lock-lexical-analysis
+           #:unlock-lexical-analysis))
 
 (in-package :nobot/botscript/lexer-utils)
 
 (defcontextvar *source*)
 
-(defparameter +kyword-table+
-  '("#EXE"
-    "!USE"
-    "$COMBO"
-    "@DEF"))
+(defparameter *lock-lexical-analysis* nil)
+
+(defparameter +keyword-table+
+  '("c-opts"
+    "bot-opts"
+    "start"
+    "from"
+    "letd"
+    "letv"
+    "def-act"
+    "act"
+    "type"
+    "in"
+    "out"
+    ))
+
+;; also newline
+(defparameter +delimiter-table+
+  "{}[],=:")
 
 (defmacro with-source-code ((type source &key
                                   convert-tokens
@@ -31,12 +52,12 @@
   (with-gensyms (tokens-source-instance)
     `(progn
        (when (and ,return-instance ,convert-tokens)
-         (error "Use ~A with other keys or ~A"
+         (error "Expected ~A with other keys or ~A"
                 "<convert-tokens>"
                 "<return-instance>"))
        (when (and (or ,convert-with-pos ,use-lazy-tokens)
                   (not ,convert-tokens))
-         (error "Use ~A key before using the keys ~A and ~A"
+         (error "Expected ~A key before using the keys ~A and ~A"
                 "<convert-tokens>"
                 "<convert-with-pos>"
                 "<use-lazy-tokens>"))
@@ -67,18 +88,49 @@
                                    :lazy ,use-lazy-tokens)
                    (get-tokens-seq ,tokens-source-instance))))))))
 
-
-(defun is-keyword-char-? (ch)
-  (find ch "#!@$"))
+(defun is-delimiter-? (ch)
+  (or (find ch +delimiter-table+)
+      (eq ch #\Newline)))
 
 (defun is-white-space-char-? (ch)
-  (some (curry #'eq ch)
-        '(#\space #\Tab #\newline #\Backspace #\Return #\Linefeed #\Page)))
+  (find ch
+        '(#\space #\Tab #\newline #\Backspace #\Return #\Linefeed #\Page)
+        :key #'eq))
 
 (defun is-keyword-? (word)
-  (some (curry #'equal word)
-        +keyword-table+))
+  (find word +keyword-table+
+        :test #'equal
+        :key #'string-upcase))
+
+(defun is-dquote-? (ch)
+  (eq ch #\"))
 
 (defun get-symbol-for-keyword (str)
   (when (is-keyword-? str)
     (intern (string-upcase str) :cl-user)))
+
+(defun get-symbol-for-delimiter (del)
+  (intern
+   (string-upcase
+    (case del
+      (#\{ "o-bracket")
+      (#\} "c-bracket")
+      (#\[ "o-sq-bracket")
+      (#\] "c-sq-bracket")
+      (#\, "comma")
+      (#\= "assign")
+      (#\: "colon")
+      (#\Newline "newline")))
+   :cl-user))
+
+(defun wrap-word-in-dquotes (word)
+  (format nil "\"~a\"" word))
+
+(defun lock-lexical-analysis ()
+  (setf *lock-lexical-analysis* t))
+
+(defun unlock-lexical-analysis ()
+  (setf *lock-lexical-analysis* nil))
+
+(defun is-locked-lexical-analysis-? ()
+  *lock-lexical-analysis*)

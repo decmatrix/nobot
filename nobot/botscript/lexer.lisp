@@ -4,6 +4,8 @@
           :alexandria
           :nobot/botscript/nodes
           :nobot/botscript/lexer-utils)
+  (:import-from :nobot/utils
+                #:with-it)
   (:import-from :nobot/botscript/types
                 #:use-token-type-class)
   (:import-from :nobot/toplevel/error-handling
@@ -22,7 +24,7 @@
                                     use-lazy-tokens
                                     return-instance)
   (unless source
-    (error "Can't reader source if source is nil"))
+    (error "Can't read source if source is nil"))
   (with-source-code (type source
                           :convert-tokens convert-tokens
                           :convert-with-pos convert-with-pos
@@ -44,9 +46,11 @@
                       :convert-tokens t
                       :convert-with-pos convert-with-pos))
 
+;;TODO: implement multi comments
+;;TODO: implement handle error end of file in string case
 (defmacro read-chars (prev-char type)
-  ":id, :keyword, :num-string"
-  (with-gensyms (ch word)
+  ":id-or-keyword, :num-string, :char-string, :single-comment"
+  (with-gensyms (ch word is-keyword)
     `(progn
        (clear-chars-buffer *source*)
        (push-char-to-buffer ,prev-char *source*)
@@ -54,63 +58,107 @@
          (loop for ,ch = (next-char *source*)
             while ,ch
             do  (if ,(case type
-                       ((:id :keyword)
+                       ((:id-or-keyword)
                         `(or (alphanumericp ,ch)
                              (eq ,ch #\-)))
                        (:num-string
-                        `(digit-char-p ,ch)))
+                        `(digit-char-p ,ch))
+                       (:char-string
+                        `(not (eq ,ch #\")))
+                       (:single-comment
+                        `(eq ,ch #\\)))
+                    ,(if (eq type :single-comment)
+                         `(progn
+                            (update-pos ,ch *source*)
+                            (lock-lexical-analysis)
+                            (return-from in-read-chars-loop))
+                         `(progn
+                            (update-pos ,ch *source*)
+                            (push-char-to-buffer ,ch *source*)))
                     (progn
-                      (update-pos ,ch *source*)
-                      (push-char-to-buffer ,ch *source*))
-                    (progn
-                      (undo-next-char ,ch *source*)
+                      ,(if (eq type :id-or-keyword)
+                           `(update-pos ,ch *source*) 
+                           `(undo-next-char ,ch *source*))
                       (return-from in-read-chars-loop)))))
-       (let ((,word (string-upcase (concatenate 'string (get-chars-buffer *source*)))))
+       (let* ((,word (with-it ((concatenate 'string (get-chars-buffer *source*)))
+                       ,(if (eq type :id-or-keyword)
+                            `it
+                            `(string-upcase it))))
+              (,is-keyword (is-keyword-? ,word)))
          (push-token-to-buffer
           ,(case type
-             (:id
+             (:id-or-keyword
               `(new-token
-                :type :id
-                :value ,word
-                :position (get-fixed-cur-position *source*)))
-             (:keyword
-              `(new-token
-                :type (if (is-keyword-? ,word)
+                :type (if is-keyword
                           :keyword
-                          :unknown)
-                :value (intern ,word :cl-user)
+                          :id)
+                :value (if is-keyword
+                           (intern ,word :cl-user)
+                           ,word)
                 :position (get-fixed-cur-position *source*)))
              (:num-string
               `(new-token
                 :type :number-string
                 :value (parse-integer ,word)
-                :position (get-fixed-cur-position *source*))))
+                :position (get-fixed-cur-position *source*)))
+             (:char-string
+              `(new-token
+                :type :string
+                :value (wrap-word-in-dquotes ,word)
+                :position (get-fixed-cur-position *source*)))
+             (t (error "unknown token type for read chars (see func doc): ~a" type)))
           *source*)))))
 
+(defun make-delimiter-token (ch)
+  (push-token-to-buffer
+   (new-token
+    :type :delimiter
+    :value (get-symbol-for-delimiter ch)
+    :position (get-fixed-cur-position *source*))
+   *source*))
+
 (defun do-char (ch)
+  (def)
   (cond
-    ((is-keyword-char-? ch)
+    ((and (eq ch #\Newline) (is-locked-lexical-analysis-?))
+     (update-pos ch *source*)
+     (unlock-lexical-analysis))
+    ((eq ch #\\)
      (update-pos ch *source*)
      (fix-cur-position *source*)
      (read-chars ch
-                 :keyword))
+                 :single-comment)
+     (unless (is-locked-lexical-analysis-?)
+       (raise-lexer-error ch)))
+    ((is-delimiter-? ch)
+     ;; :delimiter
+     (update-pos ch *source*)
+     (fix-cur-position *source*)
+     (make-delimiter-token ch))
     ((alpha-char-p ch)
+     ;; :id-or-keyword
      (update-pos ch *source*)
      (fix-cur-position *source*)
      (read-chars ch
-                 :id))
+                 :id-or-keyword))
     ((digit-char-p ch)
      (update-pos ch *source*)
      (fix-cur-position *source*)
      (read-chars ch
                  :num-string))
-    ((eq ch #\newline)
-     (update-pos ch *source*)) 
+    ((is-dquote-? ch)
+     ;; char-string
+     (update-post ch *source*)
+     (fix-cur-position *source*)
+     (read-chars ch
+                 :char-string))
     ((is-white-space-char-? ch)
      (update-pos ch *source*))
-    (t
-     (raise-bs-lexer-error
-      "unknown symbol \"~a\" at position: line - ~a, column - ~a"
-      ch
-      (get-position-y *source*)
-      (1+ (get-position-x *source*))))))
+    (t (raise-lexer-error ch))))
+
+(defun raise-lexer-error (ch)
+  (raise-bs-lexer-error
+   "unknown symbol \"~a\" at position: line - ~a, column - ~a"
+   ch
+   (get-position-y *source*)
+   (1+ (get-position-x *source*))))
