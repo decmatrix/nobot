@@ -7,8 +7,6 @@
           :nobot/botscript/lexer
           :nobot/botscript/nodes
           :nobot/botscript/types)
-  (:import-from :nobot/utils
-                #:define-context-var)
   (:export #:with-disassembled-source
            #:defun-state
            #:with-state-context-run
@@ -25,9 +23,9 @@
 
 (in-package :nobot/botscript/parser-utils)
 
-(defcontextvar *tokens-source*)
-(defcontextvar *token-pointer*)
-(defcontextvar *state-table*)
+(defvar *tokens-source*)
+(defvar *token-pointer*)
+(defvar *rule-table*)
 
 (defgeneric make-parse-tree-source (tree obj))
 (defgeneric @is-token-of-value (obj token-value))
@@ -49,6 +47,56 @@
 
 (defun get-tokens-source ()
   *tokens-source*)
+
+(defmacro define-rule (sort-type () rule-lisp-form)
+  (let ((rule-fun-name (intern (concatenate 'string "rule@" (string sort-type)))))
+    `(prog1
+         (defun ,rule-fun-name ()
+           (with-tree (,(get-sort-type-symbol sort-type))
+             ,(build-rule-body lisp-form)))
+       (setf (gethash ',sort-type *rule-table*)
+             (function ,rule-fun-name)))))
+
+(defmacro build-rule-body-aux (lisp-form)
+  `(build-rule-body ',lisp-form))
+
+(defun build-rule-body (lisp-form)
+  (let ((root (car lisp-form)))
+    (case root
+      (:and
+       `(and
+         ,@ (mapcar #'build-rule-body (cdr lisp-form))))
+      (:or
+       `(or
+         ,@ (mapcar #'build-rule-body (cdr lisp-form))))
+      (:rule
+       `(@goto ,(second lisp-form)))
+      (:empty)
+      (:id)
+      (:delimiter)
+      (:string)
+      (:num-string)
+      (t (error "unknown rule  type: ~a" root)))))
+
+(defmacro @goto (state-fun-name)
+  `(apply (gethash ',state-fun-name *rule-table*)))
+
+
+
+(defmacro build-body-of-rule-fun-from-lisp-form (lisp-form)
+  (with-gensym (root)
+    `(let ((,root (car lisp-form)))
+       (case ,root
+         (:and
+          ())
+         (:or)
+         (:rule)
+         (:empty)
+         (:id)
+         (:delimiter)
+         (:string)
+         (:num-string)
+         (t (error "unknown rule type: ~a" ,root))))))
 
 (defmacro defun-state (sort-type (&rest args) &body body)
   (let ((state-fun-name (intern (concatenate 'string "@" (string sort-type)))))
@@ -75,9 +123,6 @@
        (if ,return-instance
            (make-parse-tree-source tree ,tokens-source)
            tree))))
-
-(defmacro @goto (state-fun-name &rest args)
-  `(apply (gethash ',state-fun-name *state-table*) ,args))
 
 (defun @next-token ()
   (get-next-token *token-pointer*))

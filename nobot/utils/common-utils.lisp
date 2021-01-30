@@ -3,9 +3,7 @@
   (:import-from :alexandria
                 #:with-gensyms)
   (:export #:equals
-           #:set-<>
            #:split-list
-           #:define-constant-?
            #:reintern
            #:let-when
            #:with-it))
@@ -29,16 +27,8 @@
 (defmethod equals ((obj1 symbol) (obj2 symbol))
   (eq obj1 obj2))
 
-(defun set-<> (str)
-  (concatenate 'string '(#\<) str '(#\>)))
-
 (defun reintern (sym &optional (package *package*))
   (intern (symbol-name sym) package))
-
-(defmacro define-constant-? (name value &optional documentation)
-  `(unless (boundp ',name)
-     (defconstant ,name ,value ,@(when documentation
-                                   `(,documentation)))))
 
 (defmacro let-when (bindings &body body)
   (with-gensyms (block)

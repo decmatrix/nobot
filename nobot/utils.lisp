@@ -5,7 +5,7 @@
           :nobot/utils/common-utils
           :nobot/utils/context-variables)
   (:export
-   ;; logger
+   ;; logger utils
    #:logg
    #:log-info
    #:log-debug
@@ -20,14 +20,9 @@
    #:it-opt
    #:is-valid-file-format-?
    #:get-progam-version
-   ;; common utils package
+   ;; common utils
    #:equals
-   #:set-<>
    #:split-list
-   #:define-constant-?
    #:reintern
    #:let-when
-   #:with-it
-   ;; context variables package
-   #:defcontextvar
-   #:setf-context-var))
+   #:with-it))

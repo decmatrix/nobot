@@ -1,11 +1,8 @@
-(uiop:define-package :nobot/botscript/lexer-utils
+(uiop:define-package :nobot/botscript/lexer/lexer-utils
     (:use :cl
           :alexandria
           :nobot/botscript/nodes
           :nobot/botscript/token-utils)
-  (:import-from :nobot/utils
-                #:defcontextvar
-                #:define-constant-?)
   (:export #:*source*
            #:with-source-code
            #:is-keyword-char-?
@@ -20,12 +17,14 @@
            #:lock-lexical-analysis
            #:unlock-lexical-analysis))
 
-(in-package :nobot/botscript/lexer-utils)
+(in-package :nobot/botscript/lexer/lexer-utils)
 
-(defcontextvar *source*)
+(defvar *source*)
 
 (defparameter *lock-lexical-analysis* nil)
-
+;; also newline
+(defparameter +delimiter-table+
+  "{}[],=:")
 (defparameter +keyword-table+
   '("c-opts"
     "bot-opts"
@@ -37,12 +36,8 @@
     "act"
     "type"
     "in"
-    "out"
-    ))
+    "out"))
 
-;; also newline
-(defparameter +delimiter-table+
-  "{}[],=:")
 
 (defmacro with-source-code ((type source &key
                                   convert-tokens
