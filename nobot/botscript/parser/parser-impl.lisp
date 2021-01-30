@@ -1,4 +1,4 @@
-(uiop:define-package :nobot/botscript/parser
+(uiop:define-package :nobot/botscript/parser-impl
     (:use :cl
           :nobot/botscript/parser-utils)
   (:import-from :nobot/botscript/tree-utils
@@ -18,7 +18,7 @@
            #:parse-string
            #:parse-file))
 
-(in-package :nobot/botscript/parser)
+(in-package :nobot/botscript/parser-impl)
 
 (defun parse-string (str &key return-instance)
   (parse-source str :string
