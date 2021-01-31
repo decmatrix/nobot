@@ -17,9 +17,9 @@
 ;;;; parser generator - acacia: https://github.com/bohdan-sokolovskyi/acacia
 
 
-(uiop:define-package :nobot/botscript/parser-generator
+(uiop:define-package :nobot/botscript/parser/acacia
     (:use :cl
           :nobot/botscript/parser/acacia/configuration
           :nobot/botscript/parser/acacia/parser-generator)
-  (:export #:with-init-acacia
+  (:export #:with-acacia-process
            #:define-rule))

@@ -1,14 +1,15 @@
-(uiop:define-package :nobot/botscript/token-utils
-    (:use :cl
-          :anaphora
-          :alexandria
-          :nobot/utils
-          :nobot/collections
-          :nobot/botscript/nodes)
-  (:import-from :nobot/botscript/types
-                #:get-token-type-symbol)
+;;;; Copyright (c) 2021 NOBOT
+;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
+
+(uiop:define-package :nobot/botscript/lexer/token
+    (:use :cl)
   (:export
-   ;; common token utils API
+   ;; GLOBAL EXPORTS
+   ;; token node API
+   #:get-token-type
+   #:value-of-token
+   #:get-position
    #:convert-tokens
    #:convert-token
    #:same-tokens-?
@@ -16,6 +17,8 @@
    #:make-tokens-source
    #:new-token
    ;; token pointer API
+   #:get-index
+   #:get-limit
    #:make-token-pointer
    #:mv-ptr-to-prev-token
    #:mv-ptr-to-next-token
@@ -24,9 +27,33 @@
    #:get-prev-token
    #:get-curr-token
    #:reset-pointer
-   #:ptr-is-out-of-bound-?))
+   #:ptr-is-out-of-bound-?
+   ))
 
-(in-package :nobot/botscript/token-utils)
+(in-package :nobot/botscript/lexer/token)
+
+(defclass token-node ()
+  ((type
+    :initarg :type
+    :reader get-token-type)
+   (value
+    :initarg :value
+    :reader value-of-token)
+   (position
+    :initarg :position
+    :reader get-position)))
+
+(defclass token-pointer ()
+  ((pointer
+    :initform -1
+    :accessor get-index)
+   (tokens-seq
+    :initarg :tokens-seq
+    :accessor get-tokens-seq)
+   (toknes-seq-limit
+    :initarg :token-seq-limit
+    :accessor get-limit)))
+
 
 ;; main utils API
 (defgeneric convert-tokens (obj &key with-pos re-cached lazy))
@@ -205,3 +232,4 @@
 
 (defmethod reset-pointer ((pointer token-pointer))
   (setf (get-index pointer) 0))
+

@@ -4,6 +4,8 @@
 
 (uiop:define-package :nobot/botscript/parser/acacia/configuration
     (:use :cl)
+  (:import-from :alexandria
+                #:with-gensyms)
   (:import-from :nobot/botscript/nodes
                 ;; types
                 #:from-tokens-source-node
@@ -11,10 +13,15 @@
   (:import-from :nobot/botscript/token-utils
                 #:make-token-pointer
                 #:get-next-token)
-  (:export #:with-init-acacia
+  (:import-from :nobot/botscript/parser/acacia/result-packaging
+                #:pack-parse-tree)
+  (:import-from :nobot/botscript/parser/acacia/parser-generator
+                #:rule->)
+  (:export #:with-acacia-process
            ;; configs
            #:$conf-get-start-rule
-           #:$conf-funcall/rule->term-sym
+           #:$conf-rule->term-sym
+           #:$conf-rule->description
            #:$conf-next-token))
 
 (in-package :nobot/botscript/parser/acacia/configuration)
@@ -30,38 +37,66 @@
     :type function
     :initarg :fun/rule->term-sym
     :reader get-fun/rule->term-sym)
-   (token-source
-    :type from-tokens-source-node
-    :initarg :tokens-source
-    :reader get-tokens-source)
+   (rule->description
+    :type function
+    :initarg :fun/rule->description
+    :reader get-fun/rule->description)
    (token-ptr
     :type token-pointer
-    :writer set-token-pointer
-    :reader get-token-pointer)))
+    :initarg :token-pointer
+    :reader get-token-pointer)
+   (source-type
+    :type keyword
+    :initarg :source-type
+    :reader get-source-type)
+   (source
+    :type string
+    :initarg :source
+    :reader get-source)))
 
-(defmacro with-init-acacia ((&rest configs-args) &body body)
-  `(let ((*acacia-configuration*
-          (make-instance 'acacia-configuration
-                         ,@config-args)))
-     ($$conf-make-token-pointer)
-     ,@body))
+(defmethod initialize-instance :around ((config acacia-configuration)
+                                        &key
+                                          start-from
+                                          fun/rule->term-sym
+                                          fun/rule->description
+                                          tokens-source
+                                          source-type
+                                          source)
+  (unless (or (eq source-type :string)
+              (eq source-type :file))
+    (error "unknown source type: ~a, expected :string or :file" source-type))
+  (call-next-method config
+                    :start-from start-from
+                    :fun/rule->term-sym fun/rule->term-sym
+                    :fun/rule->description fun/rule->description
+                    :token-pointer (make-token-pointer token-source)
+                    :source-type source-type
+                    :source source))
+
+(defmacro with-acacia-process ((&rest configs-args &key pack-result) &body body)
+  (with-gensyms (parse-tree)
+    `(let ((*acacia-configuration*
+            (make-instance 'acacia-configuration
+                           ,@config-args)))
+       ,@body
+       (let ((,parse-tree (rule-> ($conf-get-start-rule))))
+         ,(if pack-result
+              `(pack-parse-tree ,parse-tree)
+              `,parse-tree)))))
 
 
 ;; configuration getters
 (defun $conf-get-start-rule ()
   (get-start-rule *acacia-configuration*))
 
-(defun $conf-funcall/rule->term-sym (rule-name)
+(defun $conf-rule->term-sym (rule-name)
   (funcall (get-fun/rule->term-sym *acacia-configuration*)
+           rule-name))
+
+(defun $conf-rule->description (rule-name)
+  (funcall (get-fun/rule->description *acacia-configuration*)
            rule-name))
 
 (defun $conf-next-token ()
   (get-next-token
    (get-token-pointer *acacia-configuration*)))
-
-;; configurators
-(defun $$conf-make-token-pointer ()
-  (set-token-pointer (make-token-pointer
-                      (get-tokens-source *acacia-configuration*))
-                     *acacia-configuration*))
-

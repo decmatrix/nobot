@@ -15,7 +15,8 @@
            #:get-symbol-for-delimiter
            #:wrap-word-in-dquotes
            #:lock-lexical-analysis
-           #:unlock-lexical-analysis))
+           #:unlock-lexical-analysis
+           ))
 
 (in-package :nobot/botscript/lexer/lexer-utils)
 

@@ -1,19 +1,11 @@
+;;;; Copyright (c) 2021 NOBOT
+;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
+
 (uiop:define-package :nobot/botscript/parser-impl
     (:use :cl
-          :nobot/botscript/parser-utils)
-  (:import-from :nobot/botscript/tree-utils
-                #:@revert-tree)
-  (:import-from :nobot/botscript/parser-utils
-                #:@goto
-                #:@is-token-of-type
-                #:@is-token-of-value
-                #:@next-token
-                #:@revert-state-action
-                #:get-tokens-source)
-  (:import-from :nobot/botscript/types
-                #:get-sort-type-symbol)
-  (:import-from :nobot/botscript/lexer-utils
-                #:get-symbol-for-keyword)
+          :nobot/botscript/parser/acacia)
+  
   (:export #:parse-source
            #:parse-string
            #:parse-file))
@@ -32,7 +24,19 @@
   (with-disassembled-source (source type)   
     (with-state-context-run (:botscript-sort-types (get-tokens-source)
                                                    :entry-state script
-                                                   :return-instance return-instance)
+                                                   :return-instance return-instance))))
+
+
+(defun parse-source (source type &key return-instance)
+  (with-disassembled-source (source type)
+    (with-acacia-process (:start-from            :script
+                          :fun/rule->term-sym    #'
+                          :fun/rule->description #'
+                          :tokens-source
+                          :source-type
+                          :source
+                          :pack-result return-instance)
+      
       (define-rule script ()
         (:and
          (:rule compiler-options)
@@ -214,5 +218,4 @@
         (:or
          (:char-string)
          (:number-string)))
-
-)))
+      )))

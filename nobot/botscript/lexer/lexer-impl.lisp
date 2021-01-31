@@ -1,3 +1,7 @@
+;;;; Copyright (c) 2021 NOBOT
+;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
+
 (uiop:define-package :nobot/botscript/lexer/lexer-impl
     (:use :cl
           :anaphora
@@ -12,10 +16,20 @@
                 #:raise-bs-lexer-error)
   (:export #:disassemble-source
            #:disassemble-string
-           #:disassemble-file))
+           #:disassemble-file
+           #:with-disassembled-source
+           #:get-tokens-source))
 
 (in-package :nobot/botscript/lexer/lexer-impl)
-(use-token-type-class :botscript-token-types)
+
+(defvar *tokens-source*)
+
+(defmacro with-disassembled-source ((source type) &body body)
+  `(let ((*tokens-source*
+          (disassemble-source ,source
+                              :type ,type
+                              :return-instance t)))
+     ,@body))
 
 
 (defun disassemble-source (source &key (type :file)
@@ -162,3 +176,8 @@
    ch
    (get-position-y *source*)
    (1+ (get-position-x *source*))))
+
+
+;; util for with-disassembled-source macros
+(defun get-tokens-source ()
+  *tokens-source*)
