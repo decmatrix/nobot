@@ -2,8 +2,7 @@
     (:use :cl
           :nobot/utils/logger
           :nobot/utils/program-utils
-          :nobot/utils/common-utils
-          :nobot/utils/context-variables)
+          :nobot/utils/common-utils)
   (:export
    ;; logger utils
    #:logg

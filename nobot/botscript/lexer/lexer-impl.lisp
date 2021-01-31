@@ -6,7 +6,8 @@
     (:use :cl
           :anaphora
           :alexandria
-          :nobot/botscript/nodes
+          :nobot/botscript/lexer/token
+          :nobot/botscript/lexer/lexer-nodes
           :nobot/botscript/lexer/lexer-utils)
   (:import-from :nobot/utils
                 #:with-it)

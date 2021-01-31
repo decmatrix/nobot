@@ -1,8 +1,12 @@
+;;;; Copyright (c) 2021 NOBOT
+;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
+
 (uiop:define-package :nobot/botscript/lexer/lexer-utils
     (:use :cl
           :alexandria
-          :nobot/botscript/nodes
-          :nobot/botscript/token-utils)
+          :nobot/botscript/lexer/lexer-nodes
+          :nobot/botscript/lexer/token)
   (:export #:*source*
            #:with-source-code
            #:is-keyword-char-?

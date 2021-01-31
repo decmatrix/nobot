@@ -4,6 +4,8 @@
 
 (uiop:define-package :nobot/botscript/lexer/token
     (:use :cl)
+  (:import-from :alexandria
+                )
   (:export
    ;; GLOBAL EXPORTS
    ;; token node API

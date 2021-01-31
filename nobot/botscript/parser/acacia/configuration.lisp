@@ -6,17 +6,15 @@
     (:use :cl)
   (:import-from :alexandria
                 #:with-gensyms)
-  (:import-from :nobot/botscript/nodes
-                ;; types
-                #:from-tokens-source-node
-                #:token-pointer)
-  (:import-from :nobot/botscript/token-utils
+  (:import-from :nobot/botscript/lexer/token
+                #:get-next-token
                 #:make-token-pointer
-                #:get-next-token)
+                ;; type
+                #:token-pointer)
+  (:import-from :nobot/botscript/lexer/lexer-nodes
+                #:from-tokens-source-node)
   (:import-from :nobot/botscript/parser/acacia/result-packaging
                 #:pack-parse-tree)
-  (:import-from :nobot/botscript/parser/acacia/parser-generator
-                #:rule->)
   (:export #:with-acacia-process
            ;; configs
            #:$conf-get-start-rule
@@ -79,7 +77,9 @@
             (make-instance 'acacia-configuration
                            ,@config-args)))
        ,@body
-       (let ((,parse-tree (rule-> ($conf-get-start-rule))))
+       (let ((,parse-tree
+              (nobot/botscript/parser/acacia/parser-generator:rule->
+               ($conf-get-start-rule))))
          ,(if pack-result
               `(pack-parse-tree ,parse-tree)
               `,parse-tree)))))
