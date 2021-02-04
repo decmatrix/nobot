@@ -25,5 +25,5 @@
                  "unix-opts"
                  "yason")
     :in-order-to ((test-op (load-op "nobot/tests")))
-    ;;:perform (test-op (o c) (uiop:symbol-call :nobot/tests :run-unit-tests))
-    )
+    ;;TODO: change to rewd from string + eval
+    :perform (test-op (o c) (uiop:symbol-call :nobot/tests :run-unit-tests)))
