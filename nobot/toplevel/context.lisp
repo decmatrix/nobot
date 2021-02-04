@@ -22,6 +22,7 @@
            #:get-parser-result
            #:get-post-processing-result
            #:get-project-gen-result
+           #:get-code-gen-result
            #:regist))
 
 (in-package :nobot/toplevel/context)
@@ -61,6 +62,11 @@
     :initform nil
     ;; TODO: set type
     :accessor get-project-gen-result
+    )
+   (code-gen-result
+    :initform nil
+    ;; TODO: set type
+    :accessor get-code-gen-result
     )))
 
 ;; TODO: maybe no need macros, use func ?
@@ -71,7 +77,9 @@
             (:post-processing
              `(get-post-processing-result *context*))
             (:project-generation
-             `(get-project-gen-result *context*)))
+             `(get-project-gen-result *context*))
+            (:code-generation
+             `(get-code-gen-result *context*)))
          ,value))
 
 (defmacro with-translator-context ((&key source-type source) &body body)

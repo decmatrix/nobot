@@ -3,4 +3,6 @@
 
 
 (uiop:define-package :nobot/codegen
-    (:use :cl))
+    (:use :cl
+          :nobot/codegen/top)
+  (:reexport :nobot/codegen/top))

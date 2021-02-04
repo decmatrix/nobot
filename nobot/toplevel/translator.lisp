@@ -12,6 +12,8 @@
                 #:regist)
   (:import-from :nobot/projectgen
                 #:generate-project)
+  (:import-from :nobot/codegen
+                #:generate-code)
   (:import-from :nobot/toplevel/logger
                 #:configure-logger)
   (:import-from :nobot/logger
@@ -36,9 +38,9 @@
         ;; Level 3: generate project
         (regist :project-generation (generate-project))
         ;; Level 4: generate code
-      
+        (regist :code-generation (generate-code))
         ;; Level 5: final processing
-      
+        ;; ???
         ))))
 
 (defun *run-and-burn-in-runtime* ()
