@@ -1,4 +1,4 @@
-;;;; Copyright (c) 2021 NOBOT-S
+;;;; Copyright (c) 2021 Bohdan Sokolovskyi
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 
@@ -17,12 +17,13 @@
                  "nobot/collections"
                  "nobot/logger"
                  ;;"nobot/server"
-                 ;; other libs
+                 ;; 3th part libs
                  "alexandria"
                  "anaphora"
                  "lisp-unit"
                  "cl-ppcre"
-                 "unix-opts")
+                 "unix-opts"
+                 "yason")
     :in-order-to ((test-op (load-op "nobot/tests")))
     ;;:perform (test-op (o c) (uiop:symbol-call :nobot/tests :run-unit-tests))
     )

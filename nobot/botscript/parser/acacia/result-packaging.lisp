@@ -1,11 +1,14 @@
-;;;; Copyright (c) 2021 NOBOT-S
+;;;; Copyright (c) 2021 Bohdan Sokolovskyi
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 
 (uiop:define-package :nobot/botscript/parser/acacia/result-packaging
     (:use :cl)
-  (:export #:get-parse-tree
-           #:pack-parse-tree))
+  (:export #:pack-parse-tree
+           #:acacia-packed-result
+           #:get-parse-tree
+           #:get-source-type
+           #:get-source))
 
 (in-package :nobot/botscript/parser/acacia/result-packaging)
 

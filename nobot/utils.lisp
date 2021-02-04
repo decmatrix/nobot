@@ -1,4 +1,4 @@
-;;;; Copyright (c) 2021 NOBOT-S
+;;;; Copyright (c) 2021 Bohdan Sokolovskyi
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 

@@ -1,9 +1,13 @@
-;;;; Copyright (c) 2021 NOBOT-S
+;;;; Copyright (c) 2021 Bohdan Sokolovskyi
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 
 (uiop:define-package :nobot/toplevel/context
     (:use :cl)
+  (:import-from :nobot/botscript/parser/acacia
+                #:acacia-packed-result)
+  (:import-from :nobot/botscript
+                #:bot-project-info)
   (:export #:with-translator-context
            #:add-info-log
            #:add-debug-log
@@ -14,7 +18,11 @@
            #:is-empty-warn-stack-?
            #:is-empty-error-stack-?
            #:get-source-from-context
-           #:get-source-type-from-context))
+           #:get-source-type-from-context
+           #:get-parser-result
+           #:get-post-processing-result
+           #:get-project-gen-result
+           #:regist))
 
 (in-package :nobot/toplevel/context)
 
@@ -40,7 +48,31 @@
     :accessor get-warn-stack)
    (error-stack
     :initform nil
-    :accessor get-error-stack)))
+    :accessor get-error-stack)
+   (parser-result
+    :initform nil
+    :type (or null acacia-packed-result)
+    :accessor get-parser-result)
+   (post-processing-result
+    :initform nil
+    :type (or null bot-project-info)
+    :accessor get-post-processing-result)
+   (project-gen-result
+    :initform nil
+    ;; TODO: set type
+    :accessor get-project-gen-result
+    )))
+
+;; TODO: maybe no need macros, use func ?
+(defmacro regist (option value)
+  `(setf ,(case option
+            (:parser
+             `(get-parser-result *context*))
+            (:post-processing
+             `(get-post-processing-result *context*))
+            (:project-generation
+             `(get-project-gen-result *context*)))
+         ,value))
 
 (defmacro with-translator-context ((&key source-type source) &body body)
   `(let ((*context* (make-instance 'context
