@@ -6,9 +6,9 @@
     (:use :cl)
   (:export #:pack-parse-tree
            #:acacia-packed-result
-           #:get-parse-tree
-           #:get-source-type
-           #:get-source))
+           #:acacia-get-parse-tree
+           #:acacia-get-source-type
+           #:acacia-get-source))
 
 (in-package :nobot/botscript/parser/acacia/result-packaging)
 
@@ -16,15 +16,15 @@
   ((parse-tree
     :type list
     :initarg :parse-tree
-    :reader get-parse-tree)
+    :reader acacia-get-parse-tree)
    (source-type
     :type keyword
     :initarg :source-type
-    :reader get-source-type)
+    :reader acacia-get-source-type)
    (source
     :type string
     :initarg :source
-    :reader get-source)))
+    :reader acacia-get-source)))
 
 (defmethod initialize-instance :around ((res acacia-packed-result) &key parse-tree
                                                                      source-type

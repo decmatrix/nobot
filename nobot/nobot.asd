@@ -2,11 +2,11 @@
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 
-(asdf:defsystem "nobot"
+(asdf:defsystem :nobot
     :class :package-inferred-system
     :defsystem-depends-on (:asdf-package-system)
     :description "Engine for creating chat bots"
-    :version "1.0"
+    :version "0.1"
     :author "Sokolovskyi Bohdan"
     :depends-on ("nobot/startup"
                  "nobot/toplevel"
@@ -24,6 +24,5 @@
                  "cl-ppcre"
                  "unix-opts"
                  "yason")
-    :in-order-to ((test-op (load-op "nobot/tests")))
-    ;;TODO: change to rewd from string + eval, or another solution
-    :perform (test-op (o c) (uiop:symbol-call :nobot/tests :run-unit-tests)))
+    :in-order-to ((asdf:test-op (asdf:load-op :nobot/tests)))
+    :perform (asdf:test-op (o c) (uiop:symbol-call :nobot/tests :run-unit-tests)))

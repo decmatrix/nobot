@@ -26,6 +26,6 @@
            #:define-rule
            #:pack-parse-tree
            #:acacia-packed-result
-           #:get-parse-tree
-           #:get-source-type
-           #:get-source))
+           #:acacia-get-parse-tree
+           #:acacia-get-source-type
+           #:acacia-get-source))
