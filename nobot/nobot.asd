@@ -11,6 +11,8 @@
     :depends-on ("nobot/startup"
                  "nobot/toplevel"
                  "nobot/botscript"
+                 "nobot/codegen"
+                 "nobot/projectgen"
                  "nobot/utils"
                  "nobot/collections"
                  "nobot/logger"
