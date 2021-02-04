@@ -1,3 +1,7 @@
+;;;; Copyright (c) 2021 NOBOT-S
+;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
+
 (uiop:define-package :nobot/botscript/tree-utils
     (:use :cl
           :anaphora)

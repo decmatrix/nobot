@@ -1,4 +1,8 @@
-(uiop:define-package :nobot/utils/logger
+;;;; Copyright (c) 2021 NOBOT-S
+;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
+
+(uiop:define-package :nobot/logger/logger-impl
     (:use :cl)
   (:import-from :alexandria
                 #:define-constant
@@ -13,7 +17,7 @@
            #:with-logger
            #:logger-configuration))
 
-(in-package :nobot/utils/logger)
+(in-package :nobot/logger/logger-impl)
 
 (defclass logger-configuration ()
   ((prefix

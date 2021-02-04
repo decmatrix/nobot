@@ -1,3 +1,7 @@
+;;;; Copyright (c) 2021 NOBOT-S
+;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
+
 (asdf:defsystem "nobot"
     :class :package-inferred-system
     :defsystem-depends-on (:asdf-package-system)
@@ -9,6 +13,8 @@
                  "nobot/botscript"
                  "nobot/utils"
                  "nobot/collections"
+                 "nobot/logger"
+                 ;;"nobot/server"
                  ;; other libs
                  "alexandria"
                  "anaphora"

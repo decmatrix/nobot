@@ -1,4 +1,4 @@
-;;;; Copyright (c) 2021 NOBOT
+;;;; Copyright (c) 2021 NOBOT-S
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 
@@ -95,7 +95,7 @@
 (defun is-white-space-char-? (ch)
   (find ch
         '(#\space #\Tab #\newline #\Backspace #\Return #\Linefeed #\Page)
-        :key #'eq))
+        :test #'eq))
 
 (defun is-keyword-? (word)
   (find word +keyword-table+

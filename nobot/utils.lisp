@@ -1,19 +1,12 @@
+;;;; Copyright (c) 2021 NOBOT-S
+;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
+
 (uiop:define-package :nobot/utils
     (:use :cl
-          :nobot/utils/logger
           :nobot/utils/program-utils
           :nobot/utils/common-utils)
   (:export
-   ;; logger utils
-   #:logg
-   #:log-info
-   #:log-debug
-   #:log-warn
-   #:log-error
-   #:with-log-level-context
-   #:log-context
-   #:with-logger
-   #:logger-configuration
    ;; program utils
    #:when-option
    #:it-opt
@@ -23,5 +16,4 @@
    #:equals
    #:split-list
    #:reintern
-   #:let-when
-   #:with-it))
+   #:let-when))

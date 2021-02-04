@@ -1,4 +1,4 @@
-;;;; Copyright (c) 2021 NOBOT
+;;;; Copyright (c) 2021 NOBOT-S
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 
@@ -28,12 +28,12 @@
                                                                      source)
   (unless (or (eq source-type :string)
               (eq source-type :file))
-    (error "unknown source type: ~a, expected :string or :file" type))
+    (error "unknown source type: ~a, expected :string or :file" source-type))
   (call-next-method res
                     :parse-tree parse-tree
                     :source-type source-type
                     :source source))
 
-(defun pack-parse-tree ()
+(defun pack-parse-tree (parse-tree)
   (make-instance 'acacia-packed-result
                  :parse-tree parse-tree))

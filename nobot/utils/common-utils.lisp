@@ -1,3 +1,7 @@
+;;;; Copyright (c) 2021 NOBOT-S
+;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
+
 (uiop:define-package :nobot/utils/common-utils
     (:use :cl)
   (:import-from :alexandria
@@ -6,7 +10,7 @@
            #:split-list
            #:reintern
            #:let-when
-           #:with-it))
+           #:))
 
 (in-package :nobot/utils/common-utils)
 
@@ -37,7 +41,3 @@
                 :collect `(,symbol (or ,value
                                        (return-from ,block nil))))
          ,@body))))
-
-(defmacro with-it ((val) &body body)
-  (let ((it ,val))
-    ,@body))

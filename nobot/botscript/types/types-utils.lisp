@@ -1,4 +1,4 @@
-;;;; Copyright (c) 2021 NOBOT
+;;;; Copyright (c) 2021 NOBOT-S
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 
@@ -12,7 +12,7 @@
            #:convert-type
            #:$get-value
            #:$get-description
-           #:get-type
+           #:get-from-type
            #:get-type-value-list))
 
 (in-package :nobot/botscript/types/types-utils)
@@ -21,15 +21,15 @@
   ((value :initarg :value
           :type symbol
           :reader $get-value)
-   (description :description
+   (description :initarg :description
                 :type string
                 :reader $get-description)))
 
-(defgeneric get-type (type class-type what-need)
+(defgeneric get-from-type (type class-type what-need)
   (:documentation "
 Class type: [:token - for lexer, :sort - for parser]
-What need: [:value, :description]")
-  (:method (type class-type)
+What need: [:symbol, :symbol-description]")
+  (:method (type class-type what-need)
     (error "unexpected class type ~a. Expected: [:token or :sort]"
            class-type)))
 
@@ -41,7 +41,7 @@ What need: [:value, :description]")
 
 
 (defmacro define-types (&rest types-and-descriptions-list)
-  (with-gensym (table up-string value description)
+  (with-gensyms (table up-string value description)
     `(let ((,table (make-hash-table :test #'eq)))
        (mapcar
         (lambda (type-and-description)
@@ -54,7 +54,7 @@ What need: [:value, :description]")
                       (make-instance '$type
                                      :value (intern (set-<> ,up-string) :cl-user)
                                      :description ,description))))))
-        types-and-descriptions-list)
+        ,types-and-descriptions-list)
        ,table)))
 
 (defun convert-type (type &key only-to-symbol)

@@ -6,7 +6,7 @@
     (:use :cl)
   (:import-from :alexandria
                 #:with-gensyms)
-  (:import-from :nobot/utils
+  (:import-from :nobot/logger
                 #:log-error)
   (:export #:raise-bs-lexer-error
            #:raise-bs-parser-error
@@ -39,7 +39,9 @@
   `(handler-case
        (progn ,@body)
      (bs-lexer-error (c)
+       (declare (ignore c))
        nil)
      (bs-parser-error (c)
+       (declare (ignore c))
        nil)))
 

@@ -1,4 +1,4 @@
-;;;; Copyright (c) 2021 NOBOT
+;;;; Copyright (c) 2021 NOBOT-S
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 
@@ -9,8 +9,6 @@
           :nobot/botscript/lexer/token
           :nobot/botscript/lexer/lexer-nodes
           :nobot/botscript/lexer/lexer-utils)
-  (:import-from :nobot/utils
-                #:with-it)
   (:import-from :nobot/botscript/types
                 #:use-token-type-class)
   (:import-from :nobot/toplevel/error-handling
@@ -65,7 +63,7 @@
 ;;TODO: implement handle error end of file in string case
 (defmacro read-chars (prev-char type)
   ":id-or-keyword, :num-string, :char-string, :single-comment"
-  (with-gensyms (ch word is-keyword)
+  (with-gensyms (ch word is-keyword buff)
     `(progn
        (clear-chars-buffer *source*)
        (push-char-to-buffer ,prev-char *source*)
@@ -95,19 +93,21 @@
                            `(update-pos ,ch *source*) 
                            `(undo-next-char ,ch *source*))
                       (return-from in-read-chars-loop)))))
-       (let* ((,word (with-it ((concatenate 'string (get-chars-buffer *source*)))
-                       ,(if (eq type :id-or-keyword)
-                            `it
-                            `(string-upcase it))))
+       (let* ((,word
+               (let ((,buff (concatenate 'string (get-chars-buffer *source*))))
+                 ,(if (eq type :id-or-keyword)
+                      `,buff
+                      `(string-upcase ,buff))))
               (,is-keyword (is-keyword-? ,word)))
+         (declare (ignorable ,is-keyword))
          (push-token-to-buffer
           ,(case type
              (:id-or-keyword
               `(new-token
-                :type (if is-keyword
+                :type (if ,is-keyword
                           :keyword
                           :id)
-                :value (if is-keyword
+                :value (if ,is-keyword
                            (intern ,word :cl-user)
                            ,word)
                 :position (get-fixed-cur-position *source*)))
@@ -121,6 +121,7 @@
                 :type :string
                 :value (wrap-word-in-dquotes ,word)
                 :position (get-fixed-cur-position *source*)))
+             (:single-comment nil)
              (t (error "unknown token type for read chars (see func doc): ~a" type)))
           *source*)))))
 
@@ -133,7 +134,6 @@
    *source*))
 
 (defun do-char (ch)
-  (def)
   (cond
     ((and (eq ch #\Newline) (is-locked-lexical-analysis-?))
      (update-pos ch *source*)
@@ -163,7 +163,7 @@
                  :num-string))
     ((is-dquote-? ch)
      ;; char-string
-     (update-post ch *source*)
+     (update-pos ch *source*)
      (fix-cur-position *source*)
      (read-chars ch
                  :char-string))

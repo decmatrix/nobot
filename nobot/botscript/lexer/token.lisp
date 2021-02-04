@@ -1,13 +1,25 @@
-;;;; Copyright (c) 2021 NOBOT
+;;;; Copyright (c) 2021 NOBOT-S
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 
 (uiop:define-package :nobot/botscript/lexer/token
     (:use :cl)
   (:import-from :alexandria
-                )
+                #:curry)
+  (:import-from :nobot/collections
+                #:lazy!)
+  (:import-from :nobot/utils
+                #:equals)
+  (:import-from :nobot/botscript/lexer/lexer-nodes
+                #:from-tokens-source-node
+                #:get-tokens-seq
+                #:from-source-code-node
+                #:get-source
+                #:get-source-type
+                #:get-tokens-buffe)
+  (:import-from :nobot/botscript/types
+                #:get-type)
   (:export
-   ;; GLOBAL EXPORTS
    ;; token node API
    #:get-token-type
    #:value-of-token
@@ -82,7 +94,7 @@
                          (getf copy-args :type)
                        (remf copy-args :type))))
     (apply (curry #'make-instance 'token-node)
-           (nconc (list :type (get-token-type-symbol token-type))
+           (nconc (list :type (get-type token-type :token :symbol))
                   copy-args))))
 
 

@@ -1,3 +1,7 @@
+;;;; Copyright (c) 2021 NOBOT-S
+;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
+
 (uiop:define-package :nobot/toplevel/translator
     (:use :cl)
   (:import-from :nobot/botscript
@@ -6,7 +10,7 @@
                 #:with-translator-context)
   (:import-from :nobot/toplevel/logger
                 #:configure-logger)
-  (:import-from :nobot/utils
+  (:import-from :nobot/logger
                 #:with-logger)
   (:import-from :nobot/toplevel/error-handling
                 #:toplevel-error-handler)
@@ -38,5 +42,6 @@
   )
 
 (defun *run-and-burn-as-server* (&key (port 8086))
+  (declare (ignore port))
   ;; WIP
   )

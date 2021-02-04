@@ -1,4 +1,4 @@
-;;;; Copyright (c) 2021 NOBOT
+;;;; Copyright (c) 2021 NOBOT-S
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 
@@ -47,7 +47,7 @@
     (:value "vertex-option-val" :description "value of vertex option")
     (:value "literal" :description "literal")))
 
-(defmethod get-type-symbol (type (class-type (eql :sort)) what-need)
+(defmethod get-from-type (type (class-type (eql :sort)) what-need)
   (let ((converted-sort-type (convert-type type)))
     (aif (gethash converted-sort-type *botscript-sort-types*)
       (case what-need

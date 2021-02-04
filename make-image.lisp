@@ -1,3 +1,7 @@
+;;;; Copyright (c) 2021 NOBOT-S
+;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
+
 ;; load nobot system
 (load "nobot/nobot.asd")
 (asdf:load-system :nobot)

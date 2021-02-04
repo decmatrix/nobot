@@ -1,16 +1,24 @@
-;;;; Copyright (c) 2021 NOBOT
+;;;; Copyright (c) 2021 NOBOT-S
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 
-(uiop:define-package :nobot/botscript/parser-impl
+(uiop:define-package :nobot/botscript/parser/parser-impl
     (:use :cl
           :nobot/botscript/parser/acacia)
-  
+  (:import-from :alexandria
+                #:rcurry)
+  (:import-from :nobot/botscript/types
+                #:get-from-type)
+  (:import-from :nobot/botscript/lexer
+                #:with-disassembled-source
+                #:get-tokens-source
+                #:get-source
+                #:get-source-type)
   (:export #:parse-source
            #:parse-string
            #:parse-file))
 
-(in-package :nobot/botscript/parser-impl)
+(in-package :nobot/botscript/parser/parser-impl)
 
 (defun parse-string (str &key return-instance)
   (parse-source str :string
@@ -20,21 +28,15 @@
   (parse-source path :file
                 :return-instance return-instance))
 
-(defun parse-source (source type &key return-instance)
-  (with-disassembled-source (source type)   
-    (with-state-context-run (:botscript-sort-types (get-tokens-source)
-                                                   :entry-state script
-                                                   :return-instance return-instance))))
-
 
 (defun parse-source (source type &key return-instance)
   (with-disassembled-source (source type)
-    (with-acacia-process (:start-from            :script
-                          :fun/rule->term-sym    #'
-                          :fun/rule->description #'
-                          :tokens-source
-                          :source-type
-                          :source
+    (with-acacia-process ((:start-from            :script
+                           :fun/rule->term-sym    (rcurry #'get-from-type :value :token)
+                           :fun/rule->description (rcurry #'get-from-type :description :token)
+                           :tokens-source (get-tokens-source)
+                           :source-type (get-source-type (get-tokens-source))
+                           :source (get-source (get-tokens-source)))
                           :pack-result return-instance)
       
       (define-rule script ()

@@ -1,4 +1,4 @@
-;;;; Copyright (c) 2021 NOBOT
+;;;; Copyright (c) 2021 NOBOT-S
 ;;;; Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
 
@@ -21,7 +21,7 @@
     (:value "char-string" :description "string")
     (:value "delimiter" :description "delimiter")))
 
-(defmethod get-type-symbol (type (class-type (eql :token)) what-need)
+(defmethod get-from-type (type (class-type (eql :token)) what-need)
   (let ((converted-token-type (convert-type type)))
     (aif (gethash converted-token-type *botscript-token-types*)
       (case what-need
