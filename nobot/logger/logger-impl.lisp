@@ -60,7 +60,7 @@
   (make-instance 'logger-configuration))
 
 (defmacro logg (level msg &rest rest)
-  (with-gensyms (log-msg)
+  (with-gensyms (log-msg res-log-msg)
     `(let* ((*currnet-logger-configuration* (get-logger-configuration))
             (,log-msg (make-log-msg ,msg ,level)))
        (case ,level
@@ -69,9 +69,11 @@
          (:warn (funcall (get-on-warn *currnet-logger-configuration*) ,log-msg))
          (:error (funcall (get-on-error *currnet-logger-configuration*) ,log-msg))
          (t (error "Expected: [:info, :debug, :warn, :error], but got ~a"
-              ,level)))
-       (when (is-printable-? *currnet-logger-configuration*)
-         (format t ,log-msg ,@rest)))))
+                   ,level)))
+       (let ((,res-log-msg (format nil ,log-msg ,@rest)))
+         (when (is-printable-? *currnet-logger-configuration*)
+           (format t ,res-log-msg))
+         ,res-log-msg))))
 
 (defmacro log-info (msg &rest rest)
   `(logg :info ,msg ,@rest))

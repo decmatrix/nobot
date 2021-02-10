@@ -26,6 +26,8 @@
    #:get-position
    #:convert-tokens
    #:convert-token
+   #:token-typep
+   #:token-value-equal-to
    #:same-tokens-?
    #:same-tokens-seq-?
    #:make-tokens-source
@@ -75,6 +77,8 @@
 (defgeneric same-tokens-? (obj1 obj2 &key without-pos without-value without-type))
 (defgeneric same-tokens-seq-? (obj1 obj2 &key without-pos without-value without-type))
 (defgeneric make-tokens-source (obj))
+(defgeneric token-typep (obj type))
+(defgeneric token-value-equal-to (obj value))
 
 ;; token pointer utils API
 (defgeneric make-token-pointer (obj))
@@ -216,6 +220,16 @@
                  :type (get-source-type obj)
                  :tokens-seq (get-tokens-buffer obj)))
 
+(defmethod token-typep ((obj token-node) type)
+  (equals
+   (get-token-type obj)
+   type))
+
+(defmethod token-value-equal-to ((obj token-node) value)
+  (equals
+   (value-of-token-1 obj)
+   value))
+
 
 ;; token pointer API impl
 (defmethod mv-ptr-to-next-token ((pointer token-pointer))
@@ -239,6 +253,7 @@
   (let ((idx (mv-ptr-to-prev-token pointer)))
     (unless (ptr-is-out-of-bound-? pointer)
       (nth idx (get-tokens-seq pointer)))))
+
 
 (defmethod get-cur-index ((pointer token-pointer))
   (when (ptr-is-out-of-bound-? pointer)

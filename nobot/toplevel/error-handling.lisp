@@ -11,23 +11,29 @@
   (:export #:raise-bs-lexer-error
            #:raise-bs-parser-error
            #:lexer-error-handler
-           #:toplevel-error-handler))
+           #:toplevel-error-handler
+           #:get-error-msg))
 
 (in-package :nobot/toplevel/error-handling)
 
+;;TODO: see issue #3
+
 ;; Level 1 errors
-(define-condition bs-lexer-error (error) ())
+(define-condition bs-lexer-error (error)
+  ((error-msg
+    :initarg :error-msg
+    :initform nil
+    :accessor get-error-msg)))
+
 (define-condition bs-parser-error (error) ())
 
 (defmacro raise-bs-lexer-error (msg &rest rest)
-  `(progn
-     (log-error ,msg ,@rest)
-     (make-condition 'bs-lexer-error)))
+  `(make-condition 'bs-lexer-error
+                   :error-msg (log-error ,msg ,@rest)))
 
 (defmacro raise-bs-parser-error (msg &rest rest)
-  `(progn
-     (log-error ,msg ,@rest)
-     (make-condition 'bs-parser-error)))
+  `(make-condition 'bs-parser-error
+                   :error-msg (log-error ,msg ,@rest)))
 
 (defmacro lexer-error-handler ((action-on-catch) &body body)
   `(handler-case
