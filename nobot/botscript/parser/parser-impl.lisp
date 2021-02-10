@@ -32,8 +32,10 @@
 (defun parse-source (source type &key return-instance)
   (with-disassembled-source (source type)
     (with-acacia-process ((:start-from            :script
-                           :fun/rule->term-sym    (rcurry #'get-from-type :value :token)
-                           :fun/rule->description (rcurry #'get-from-type :description :token)
+                           :fun/rule->term-sym    (rcurry #'get-from-type :value :sort)
+                           :fun/rule->description (rcurry #'get-from-type :description :sort)
+                           :fun/token-rule->token-sym (rcurry #'get-from-type :value :token)
+                           :fun/token-rule->token->description (rcurry #'get-from-type :description :token)
                            :tokens-source (get-tokens-source)
                            :source-type (get-source-type (get-tokens-source))
                            :source (get-source (get-tokens-source)))
@@ -48,12 +50,12 @@
 
       (define-rule compiler-options ()
         (:and
-         (:keyword "c-opts")
+         (:no-term-sym keyword "c-opts")
          (:rule c-opts-block)))
 
       (define-rule bot-options ()
         (:and
-         (:keyword "bot-opts")
+         (:no-term-sym keyword "bot-opts")
          (:rule bot-opts-block)))
 
       (define-rule data-decl-list ()
@@ -79,45 +81,45 @@
 
       (define-rule start-stmt ()
         (:and
-         (:keyword "start")
-         (:keyword "from")
-         (:id)))
+         (:no-term-sym keyword "start")
+         (:no-term-sym keyword "from")
+         (:no-term-sym id)))
 
       (define-rule c-opts-block ()
         (:and
-         (:delimiter "{")
+         (:no-term-sym delimiter "{")
          (:rule opts-list)
-         (:delimiter "}")))
+         (:no-term-sym delimiter "}")))
 
       (define-rule bot-opts-block ()
         (:and
-         (:delimiter "{")
+         (:no-term-sym delimiter "{")
          (:rule opts-list)
-         (:delimiter "}")))
+         (:no-term-sym delimiter "}")))
 
       (define-rule data-decl ()
         (:and
-         (:keyword "letd")
-         (:id)
+         (:no-term-sym keyword "letd")
+         (:no-term-sym id)
          (:rule data-expr)))
 
       (define-rule vertex-decl ()
         (:and
-         (:keyword "letv")
-         (:id)
+         (:no-term-sym keyword "letv")
+         (:no-term-sym id)
          (:rule vertex-options)))
 
       (define-rule action-decl ()
         (:and
-         (:keyword "def-act")
-         (:id)
+         (:no-term-sym keyword "def-act")
+         (:no-term-sym id)
          (:rule stmt-block)))
 
       (define-rule stmt-block ()
         (:and
-         (:delimiter "{")
+         (:no-term-sym delimiter "{")
          (:rule stmt-list)
-         (:delimiter "}")))
+         (:no-term-sym delimiter "}")))
 
       (define-rule opts-list ()
         (:or
@@ -128,31 +130,31 @@
 
       (define-rule opt ()
         (:and
-         (:id)
-         (:delimiter ":")
+         (:no-term-sym id)
+         (:no-term-sym delimiter ":")
          (:rule string-or-num)))
 
       (define-rule opts-tail-list ()
         (:or
          (:and
-          (:delimiter ",")
+          (:no-term-sym delimiter ",")
           (:rule opt)
           (:rule opts-tail-list))
          (:empty)))
 
       (define-rule string-or-num ()
         (:or
-         (:string)
-         (:num-string)))
+         (:no-term-sym string)
+         (:no-term-sym num-string)))
 
       (define-rule data-expr ()
         (:rule data-seq))
 
       (define-rule vertex-options ()
         (:and
-         (:delimiter "[")
+         (:no-term-sym delimiter "[")
          (:rule vertex-option-list)
-         (:delimiter "]")))
+         (:no-term-sym delimiter "]")))
 
       (define-rule stmt-list ()
         (:or
@@ -161,22 +163,22 @@
           (:rule stmt-list))
          (:empty)))
 
-      (define-rule  stmt ()
+      (define-rule stmt ()
         (:and
          (:rule expr)
-         (:delimiter :! "newline")))
+         (:no-term-sym delimiter "newline")))
 
       (define-rule data-seq ()
         (:and
-         (:delimiter "[")
+         (:no-term-sym delimiter "[")
          (:rule item-list)
-         (:delimiter "]")))
+         (:no-term-sym delimiter "]")))
 
       (define-rule vertex-option-list ()
         (:or
          (:and
           (:rule vertex-option)
-          (:delimiter ",")
+          (:no-term-sym delimiter ",")
           (:rule vertex-option-list))
          (:empty)))
 
@@ -191,7 +193,7 @@
       (define-rule item-tail-list ()
         (:or
          (:and
-          (:delimiter ",")
+          (:no-term-sym delimiter ",")
           (:rule item)
           (:rule item-tail-list))
          (:empty)))
@@ -202,22 +204,22 @@
       (define-rule vertex-option ()
         (:and
          (:rule vertex-option-name)
-         (:delimiter "=")
+         (:no-term-sym delimiter "=")
          (:rule vertex-option-val)))
 
       (define-rule vertex-option-name ()
         (:or
-         (:keyword "act")
-         (:keyword "type")))
+         (:no-term-sym keyword "act")
+         (:no-term-sym keyword "type")))
 
       (define-rule vertex-option-val ()
         (:or
-         (:id)
-         (:keyword "in")
-         (:keyword "out")))
+         (:no-term-sym id)
+         (:no-term-sym keyword "in")
+         (:no-term-sym keyword "out")))
 
       (define-rule literal ()
         (:or
-         (:char-string)
-         (:number-string)))
+         (:no-term-sym char-string)
+         (:no-term-sym number-string)))
       )))
