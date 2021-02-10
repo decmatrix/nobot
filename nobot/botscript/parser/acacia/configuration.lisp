@@ -6,6 +6,8 @@
     (:use :cl)
   (:import-from :alexandria
                 #:with-gensyms)
+  (:import-from :nobot/botscript/parser/acacia/error-handling
+                #:acacia-unknown-source-type)
   (:import-from :nobot/botscript/parser/acacia/construction
                 #:rule->)
   (:import-from :nobot/botscript/lexer/token
@@ -18,10 +20,12 @@
   (:import-from :nobot/botscript/parser/acacia/result-packaging
                 #:pack-parse-tree)
   (:export #:with-acacia-process
-           ;; configsn
+           ;; configs
            #:$conf-get-start-rule
            #:$conf-rule->term-sym
            #:$conf-rule->description
+           #:$conf-token-rule->token-sym
+           #:$conf-token-rule->description
            #:$conf-next-token))
 
 (in-package :nobot/botscript/parser/acacia/configuration)
@@ -41,6 +45,14 @@
     :type function
     :initarg :fun/rule->description
     :reader get-fun/rule->description)
+   (token-rule->token-sym
+    :type function
+    :initarg :fun/token-rule->token-sym
+    :reader get-fun/token-rule->token-sym)
+   (token-rule->description
+    :type function
+    :initarg :fun/token-rule->token->description
+    :reader get-fun/token-rule->description)
    (token-ptr
     :type token-pointer
     :initarg :token-pointer
@@ -54,21 +66,27 @@
     :initarg :source
     :reader get-source)))
 
+;;TODO: add initargs
 (defmethod initialize-instance :around ((config acacia-configuration)
                                         &key
                                           start-from
                                           fun/rule->term-sym
                                           fun/rule->description
+                                          fun/token-rule->token-sym
+                                          fun/token-rule->description
                                           tokens-source
                                           source-type
                                           source)
   (unless (or (eq source-type :string)
               (eq source-type :file))
-    (error "unknown source type: ~a, expected :string or :file" source-type))
+    (make-condition 'acacia-unknown-source-type
+                    :unknown-source-type source-type))
   (call-next-method config
                     :start-from start-from
                     :fun/rule->term-sym fun/rule->term-sym
                     :fun/rule->description fun/rule->description
+                    :fun/token-rule->token-sym fun/token-rule->token-sym
+                    :fun/token-rule->token->description fun/token-rule->description
                     :token-pointer (make-token-pointer tokens-source)
                     :source-type source-type
                     :source source))
@@ -98,6 +116,14 @@
 (defun $conf-rule->description (rule-name)
   (funcall (get-fun/rule->description *acacia-configuration*)
            rule-name))
+
+(defun $conf-token-rule->token-sym (token-rule)
+  (funcall (get-fun/token-rule->token-sym *acacia-configuration*)
+           token-rule))
+
+(defun $conf-token-rule->description (token-rule)
+  (funcall (get-fun/token-rule->description *acacia-configuration*)
+           token-rule))
 
 (defun $conf-next-token ()
   (get-next-token

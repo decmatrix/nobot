@@ -8,6 +8,6 @@
 
 (in-package :nobot/botscript/parser/acacia/construction)
 
-(defgeneric rule-> (rule-name)
-  (:method (rule-name)
+(defgeneric rule-> (rule-name &key first-fail-no-error)
+  (:method (rule-name &key first-fail-no-error)
     (error "unknown rule: [~a]" rule-name)))
