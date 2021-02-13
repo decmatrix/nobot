@@ -10,6 +10,8 @@
   (:import-from :nobot/utils
                 #:to-symbol
                 #:reintern)
+  (:import-from :nobot/toplevel/error-handling
+                #:raise-bs-lexer-error)
   (:export #:*source*
            #:with-source-code
            #:is-keyword-char-?
@@ -18,17 +20,17 @@
            #:is-delimiter-?
            #:is-dquote-?
            #:is-locked-lexical-analysis-?
-           #:wrap-word-in-dquotes
-           #:lock-lexical-analysis
-           #:unlock-lexical-analysis
+           #:switch-ls-state
+           #:get-ls-state
+           #:with-lexical-switcher
            #:no-term-to
+           #:raise-lexer-error
            ))
 
 (in-package :nobot/botscript/lexer/lexer-utils)
 
+(defvar *lexical-switcher*)
 (defvar *source*)
-
-(defparameter *lock-lexical-analysis* nil)
 
 ;; also newline
 (defparameter +delimiter-table+
@@ -46,6 +48,24 @@
     "type"
     "in"
     "out"))
+
+(defclass lexical-switcher ()
+  ((comment-state
+    :type boolean
+    :initform nil
+    :accessor get-comment-state)
+   (multi-comment-state
+    :type boolean
+    :initform nil
+    :accessor get-multi-comment-state)
+   (string-state
+    :type boolean
+    :initform nil
+    :accessor get-string-state)))
+
+(defmacro with-lexical-switcher (() &body body)
+  `(let ((*lexical-switcher* (make-instance 'lexical-switcher)))
+     ,@body))
 
 
 (defmacro with-source-code ((type source &key
@@ -102,7 +122,7 @@
         :test #'eq))
 
 (defun is-keyword-? (word)
-  (find word +keyword-table+
+  (find (string-upcase word) +keyword-table+
         :test #'equal
         :key #'string-upcase))
 
@@ -121,35 +141,35 @@
            (case val
              (#\{
               (if (eq to :sym)
-                  "o-bracket"
+                  (to-symbol "o-bracket")
                   "open bracket"))
              (#\}
               (if (eq to :sym)
-                  "c-bracket"
+                  (to-symbol "c-bracket")
                   "close bracket"))
              (#\[
               (if (eq to :sym)
-                  "o-sq-bracket"
+                  (to-symbol "o-sq-bracket")
                   "open square bracket"))
              (#\]
               (if (eq to :sym)
-                  "c-sq-bracket"
+                  (to-symbol "c-sq-bracket")
                   "close square bracket"))
              (#\,
               (if (eq to :sym)
-                  "comma"
-                  "symbol comma"))
+                  (to-symbol "comma")
+                  "comma"))
              (#\=
               (if (eq to :sym)
-                  "assign"
-                  "symbol assign"))
+                  (to-symbol "assign")
+                  "assign"))
              (#\:
               (if (eq to :sym)
-                  "colon"
-                  "symbol colon"))
+                  (to-symbol "colon")
+                  "colon"))
              (#\Newline
               (if (eq to :sym)
-                  "newline"
+                  (to-symbol "newline")
                   "new line"))))
           (:keyword
            (when (is-keyword-? val)
@@ -160,14 +180,55 @@
           (t (error "unknown no term sym: ~a" key)))
         (error "unknown `to` value arg: ~a, expected: :sym ot :description" to))))
 
-(defun wrap-word-in-dquotes (word)
-  (format nil "\"~a\"" word))
+(defun raise-lexer-error (on-error &optional val)
+  ":on-char, :on-open-comment, :on-close-comment, :on-string"
+  (raise-bs-lexer-error
+   (concatenate
+    'string
+    (case on-error
+      (:on-char
+       (assert val)
+       (format nil "unknown symbol \"~a\"" val))
+      (:on-open-comment
+       "comment opening expected")
+      (:on-close-comment
+       "comment closing expected")
+      (:on-string
+       "double quotes expected at position")
+      (t
+       (error "unknown type of arg `on-error`: ~a, see fun doc"
+              on-error)))
+    " at position: line - ~a, column - ~a~a")
+   (get-position-y *source*)
+   (1+ (get-position-x *source*))
+   (if (eq (get-source-type *source*) :file)
+       (format nil ", file: ~a"
+               (get-source *source*))
+       "")))
 
-(defun lock-lexical-analysis ()
-  (setf *lock-lexical-analysis* t))
+(defun switch-ls-state (state)
+  ":comment, :multi-comment, :string"
+  (case state
+    (:comment
+     (setf (get-comment-state *lexical-switcher*)
+           (not (get-comment-state *lexical-switcher*))))
+    (:multi-comment
+     (setf (get-multi-comment-state *lexical-switcher*)
+           (not (get-multi-comment-state *lexical-switcher*))))
+    (:string
+     (setf (get-string-state *lexical-switcher*)
+           (not (get-string-state *lexical-switcher*))))
+    (t (error "unknown state of lexical switcher: ~a, see fun doc"
+              state))))
 
-(defun unlock-lexical-analysis ()
-  (setf *lock-lexical-analysis* nil))
-
-(defun is-locked-lexical-analysis-? ()
-  *lock-lexical-analysis*)
+(defun get-ls-state (state)
+  ":comment, :multi-comment, :string"
+  (case state
+    (:comment
+     (get-comment-state *lexical-switcher*))
+    (:multi-comment
+     (get-multi-comment-state *lexical-switcher*))
+    (:string
+     (get-string-state *lexical-switcher*))
+    (t (error "unknown state of lexical switcher: ~a, see fun doc"
+              state))))

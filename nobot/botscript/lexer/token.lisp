@@ -104,7 +104,7 @@
                          (getf copy-args :type)
                        (remf copy-args :type))))
     (apply (curry #'make-instance 'token-node)
-           (nconc (list :type (get-from-type token-type :token :symbol))
+           (nconc (list :type (get-from-type token-type :token :value))
                   copy-args))))
 
 

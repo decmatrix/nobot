@@ -31,7 +31,6 @@
                               :return-instance t)))
      ,@body))
 
-
 (defun disassemble-source (source &key (type :file)
                                     convert-tokens
                                     convert-with-pos
@@ -44,9 +43,10 @@
                           :convert-with-pos convert-with-pos
                           :use-lazy-tokens use-lazy-tokens
                           :return-instance return-instance)
-    (loop for ch = (next-char *source*)
-       while ch
-       do (do-char ch))))
+    (with-lexical-switcher ()
+      (loop for ch = (next-char *source*)
+         while ch
+         do (do-char ch)))))
 
 (defun disassemble-string (str &key convert-with-pos)
   (disassemble-source str
@@ -60,10 +60,8 @@
                       :convert-tokens t
                       :convert-with-pos convert-with-pos))
 
-;;TODO: implement multi comments
-;;TODO: implement handle error end of file in string case
 (defmacro read-chars (prev-char type)
-  ":id-or-keyword, :num-string, :char-string, :single-comment"
+  ":id-or-keyword, :num-string, :char-string, :comment, :multi-comment-end"
   (with-gensyms (ch word is-keyword buff)
     `(progn
        (clear-chars-buffer *source*)
@@ -71,60 +69,78 @@
        (block in-read-chars-loop
          (loop for ,ch = (next-char *source*)
             while ,ch
-            do  (if ,(case type
-                       ((:id-or-keyword)
-                        `(or (alphanumericp ,ch)
-                             (eq ,ch #\-)))
-                       (:num-string
-                        `(digit-char-p ,ch))
-                       (:char-string
-                        `(not (eq ,ch #\")))
-                       (:single-comment
-                        `(eq ,ch #\\)))
-                    ,(if (eq type :single-comment)
-                         `(progn
-                            (update-pos ,ch *source*)
-                            (lock-lexical-analysis)
-                            (return-from in-read-chars-loop))
-                         `(progn
-                            (update-pos ,ch *source*)
-                            (push-char-to-buffer ,ch *source*)))
-                    (progn
-                      ,(if (eq type :id-or-keyword)
-                           `(update-pos ,ch *source*) 
-                           `(undo-next-char ,ch *source*))
-                      (return-from in-read-chars-loop)))))
-       (let* ((,word
-               (let ((,buff (concatenate 'string (get-chars-buffer *source*))))
-                 ,(if (eq type :id-or-keyword)
-                      `,buff
-                      `(string-upcase ,buff))))
-              (,is-keyword (is-keyword-? ,word)))
-         (declare (ignorable ,is-keyword))
-         (push-token-to-buffer
-          ,(case type
-             (:id-or-keyword
-              `(new-token
-                :type (if ,is-keyword
-                          :keyword
-                          :id)
-                :value (if ,is-keyword
-                           (no-term-to :sym :keyword ,word)
-                           ,word)
-                :position (get-fixed-cur-position *source*)))
-             (:num-string
-              `(new-token
-                :type :number-string
-                :value (parse-integer ,word)
-                :position (get-fixed-cur-position *source*)))
-             (:char-string
-              `(new-token
-                :type :string
-                :value (wrap-word-in-dquotes ,word)
-                :position (get-fixed-cur-position *source*)))
-             (:single-comment nil)
-             (t (error "unknown token type for read chars (see func doc): ~a" type)))
-          *source*)))))
+            do  (progn
+                  (update-pos ,ch *source*)
+                  (if ,(case type
+                         (:id-or-keyword
+                          `(or (alphanumericp ,ch)
+                               (eq ,ch #\-)))
+                         (:num-string
+                          `(digit-char-p ,ch))
+                         (:char-string
+                          `(not (eq ,ch #\")))
+                         (:multi-comment-end
+                          `(eq ,ch #\/))
+                         (:comment
+                          `(or (eq ,ch #\/)
+                               (eq ,ch #\*))))
+                      ,(case type
+                         (:comment
+                          `(progn
+                             (when (eq ,ch #\*)
+                               (switch-ls-state :multi-comment))
+                             (switch-ls-state :comment)
+                             (return-from in-read-chars-loop)))
+                         (:multi-comment-end
+                          `(progn
+                             (if (get-ls-state :multi-comment)
+                                 (progn
+                                   (switch-ls-state :comment)
+                                   (switch-ls-state :multi-comment)
+                                   (return-from in-read-chars-loop))
+                                 (raise-lexer-error :on-open-comment))))
+                         (t
+                          `(push-char-to-buffer ,ch *source*)))
+                      (progn
+                        ,(if (find type '(:char-string :comment))
+                             `(progn
+                                ,(when (eq type :char-string)
+                                   `(switch-ls-state :string))
+                                (update-pos ,ch *source*)) 
+                             `(undo-next-char ,ch *source*))
+                        (return-from in-read-chars-loop))))))
+       ,(unless (or (eq type :comment)
+                    (eq type :multi-comment-end))
+          `(let* ((,word
+                   (let ((,buff (concatenate 'string (get-chars-buffer *source*))))
+                     ,(if (eq type :id-or-keyword)
+                          `,buff
+                          `(string-upcase ,buff))))
+                  (,is-keyword (is-keyword-? ,word)))
+             (declare (ignorable ,is-keyword))
+             (push-token-to-buffer
+              ,(case type
+                 (:id-or-keyword
+                  `(new-token
+                    :type (if ,is-keyword
+                              :keyword
+                              :id)
+                    :value (if ,is-keyword
+                               (no-term-to :sym :keyword ,word)
+                               ,word)
+                    :position (get-fixed-cur-position *source*)))
+                 (:num-string
+                  `(new-token
+                    :type :number-string
+                    :value (parse-integer ,word)
+                    :position (get-fixed-cur-position *source*)))
+                 (:char-string
+                  `(new-token
+                    :type :char-string
+                    :value (format nil "~a\"" ,word)
+                    :position (get-fixed-cur-position *source*)))
+                 (t (error "unknown token type for read chars (see func doc): ~a" type)))
+              *source*))))))
 
 (defun make-delimiter-token (ch)
   (push-token-to-buffer
@@ -136,18 +152,27 @@
 
 (defun do-char (ch)
   (cond
-    ((and (eq ch #\Newline) (is-locked-lexical-analysis-?))
+    ((eq ch #\*)
+     (unless (get-ls-state :multi-comment)
+       (raise-lexer-error :on-char ch))
      (update-pos ch *source*)
-     (unlock-lexical-analysis))
-    ((eq ch #\\)
-     (update-pos ch *source*)
-     (fix-cur-position *source*)
      (read-chars ch
-                 :single-comment)
-     (unless (is-locked-lexical-analysis-?)
-       (raise-lexer-error ch)))
+                 :multi-comment-end))
+    ((get-ls-state :comment)
+     (update-pos ch *source*)
+     (when (and (eq ch #\Newline)
+                (not (get-ls-state :multi-comment)))
+       (switch-ls-state :comment)))
+    ((eq ch #\/)
+     (update-pos ch *source*)
+     (read-chars ch
+                 :comment)
+     (unless (get-ls-state :comment)
+       (raise-lexer-error :on-char ch))
+     (when (get-ls-state :multi-comment)
+        (raise-lexer-error :on-close-comment)))
     ((is-delimiter-? ch)
-     ;; :delimiter
+     ;; :delimite
      (update-pos ch *source*)
      (fix-cur-position *source*)
      (make-delimiter-token ch))
@@ -163,22 +188,17 @@
      (read-chars ch
                  :num-string))
     ((is-dquote-? ch)
-     ;; char-string
+     ;; :char-string
      (update-pos ch *source*)
      (fix-cur-position *source*)
+     (switch-ls-state :string)
      (read-chars ch
-                 :char-string))
+                 :char-string)
+     (when (get-ls-state :string)
+        (raise-lexer-error :on-string)))
     ((is-white-space-char-? ch)
      (update-pos ch *source*))
-    (t (raise-lexer-error ch))))
-
-(defun raise-lexer-error (ch)
-  (raise-bs-lexer-error
-   "unknown symbol \"~a\" at position: line - ~a, column - ~a"
-   ch
-   (get-position-y *source*)
-   (1+ (get-position-x *source*))))
-
+    (t (raise-lexer-error :on-char ch))))
 
 ;; util for with-disassembled-source macros
 (defun get-tokens-source ()
