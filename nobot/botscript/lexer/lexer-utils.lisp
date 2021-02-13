@@ -7,6 +7,9 @@
           :alexandria
           :nobot/botscript/lexer/lexer-nodes
           :nobot/botscript/lexer/token)
+  (:import-from :nobot/utils
+                #:to-symbol
+                #:reintern)
   (:export #:*source*
            #:with-source-code
            #:is-keyword-char-?
@@ -15,11 +18,10 @@
            #:is-delimiter-?
            #:is-dquote-?
            #:is-locked-lexical-analysis-?
-           #:get-symbol-for-keyword
-           #:get-symbol-for-delimiter
            #:wrap-word-in-dquotes
            #:lock-lexical-analysis
            #:unlock-lexical-analysis
+           #:no-term-to
            ))
 
 (in-package :nobot/botscript/lexer/lexer-utils)
@@ -107,23 +109,56 @@
 (defun is-dquote-? (ch)
   (eq ch #\"))
 
-(defun get-symbol-for-keyword (str)
-  (when (is-keyword-? str)
-    (intern (string-upcase str) :cl-user)))
-
-(defun get-symbol-for-delimiter (del)
-  (intern
-   (string-upcase
-    (case del
-      (#\{ "o-bracket")
-      (#\} "c-bracket")
-      (#\[ "o-sq-bracket")
-      (#\] "c-sq-bracket")
-      (#\, "comma")
-      (#\= "assign")
-      (#\: "colon")
-      (#\Newline "newline")))
-   :cl-user))
+(defun no-term-to (to key val)
+  "to: :sym || :description or sym || description"
+  (let ((to (if (keywordp to)
+                to
+                (reintern to :keyword))))
+    (if (or (eq to :sym)
+            (eq to :description))
+        (case key
+          (:delimiter
+           (case val
+             (#\{
+              (if (eq to :sym)
+                  "o-bracket"
+                  "open bracket"))
+             (#\}
+              (if (eq to :sym)
+                  "c-bracket"
+                  "close bracket"))
+             (#\[
+              (if (eq to :sym)
+                  "o-sq-bracket"
+                  "open square bracket"))
+             (#\]
+              (if (eq to :sym)
+                  "c-sq-bracket"
+                  "close square bracket"))
+             (#\,
+              (if (eq to :sym)
+                  "comma"
+                  "symbol comma"))
+             (#\=
+              (if (eq to :sym)
+                  "assign"
+                  "symbol assign"))
+             (#\:
+              (if (eq to :sym)
+                  "colon"
+                  "symbol colon"))
+             (#\Newline
+              (if (eq to :sym)
+                  "newline"
+                  "new line"))))
+          (:keyword
+           (when (is-keyword-? val)
+             (let ((sym (to-symbol val)))
+               (if (eq to :sym)
+                   sym
+                   (format nil "~a keyword" val)))))
+          (t (error "unknown no term sym: ~a" key)))
+        (error "unknown `to` value arg: ~a, expected: :sym ot :description" to))))
 
 (defun wrap-word-in-dquotes (word)
   (format nil "\"~a\"" word))

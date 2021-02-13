@@ -26,6 +26,8 @@
            #:$conf-rule->description
            #:$conf-token-rule->token-sym
            #:$conf-token-rule->description
+           #:$conf-no-term->sym
+           #:$conf-no-term->description
            #:$conf-next-token))
 
 (in-package :nobot/botscript/parser/acacia/configuration)
@@ -53,6 +55,14 @@
     :type function
     :initarg :fun/token-rule->token->description
     :reader get-fun/token-rule->description)
+   (no-term->sym
+    :type function
+    :initarg :fun/no-term->sym
+    :reader get-fun/no-term->sym)
+   (no-term->description
+    :type function
+    :initarg :fun/no-term->description
+    :reader get-fun/no-term->description)
    (token-ptr
     :type token-pointer
     :initarg :token-pointer
@@ -124,6 +134,16 @@
 (defun $conf-token-rule->description (token-rule)
   (funcall (get-fun/token-rule->description *acacia-configuration*)
            token-rule))
+
+(defun $conf-no-term->sym (token-type val)
+  (funcall (get-fun/no-term->sym *acacia-configuration*)
+           token-type
+           val))
+
+(defun $conf-no-term->description (token-type val)
+  (funcall (get-fun/no-term->description *acacia-configuration*)
+           token-type
+           val))
 
 (defun $conf-next-token ()
   (get-next-token

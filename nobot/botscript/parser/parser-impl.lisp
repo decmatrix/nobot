@@ -6,14 +6,18 @@
     (:use :cl
           :nobot/botscript/parser/acacia)
   (:import-from :alexandria
-                #:rcurry)
+                #:rcurry
+                #:curry)
+  (:import-from :nobot/utils
+                #:to-symbol)
   (:import-from :nobot/botscript/types
                 #:get-from-type)
   (:import-from :nobot/botscript/lexer
                 #:with-disassembled-source
                 #:get-tokens-source
                 #:get-source
-                #:get-source-type)
+                #:get-source-type
+                #:no-term-to)
   (:export #:parse-source
            #:parse-string
            #:parse-file))
@@ -36,6 +40,8 @@
                            :fun/rule->description (rcurry #'get-from-type :description :sort)
                            :fun/token-rule->token-sym (rcurry #'get-from-type :value :token)
                            :fun/token-rule->token->description (rcurry #'get-from-type :description :token)
+                           :fun/no-term->sym (curry #'no-term-to :sym)
+                           :fun/no-term->description (curry #'no-term-to :description)
                            :tokens-source (get-tokens-source)
                            :source-type (get-source-type (get-tokens-source))
                            :source (get-source (get-tokens-source)))

@@ -9,7 +9,8 @@
   (:export #:equals
            #:split-list
            #:reintern
-           #:let-when))
+           #:let-when
+           #:to-symbol))
 
 (in-package :nobot/utils/common-utils)
 
@@ -40,3 +41,9 @@
                 :collect `(,symbol (or ,value
                                        (return-from ,block nil))))
          ,@body))))
+
+(defun to-symbol (str &key case-sensitive (to-package :cl-user))
+  (let ((normal-str (if case-sensitive
+                        str
+                        (string-upcase str))))
+    (intern normal-str to-package)))

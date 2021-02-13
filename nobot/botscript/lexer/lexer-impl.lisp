@@ -17,7 +17,8 @@
            #:disassemble-string
            #:disassemble-file
            #:with-disassembled-source
-           #:get-tokens-source))
+           #:get-tokens-source
+           #:no-term-to))
 
 (in-package :nobot/botscript/lexer/lexer-impl)
 
@@ -108,7 +109,7 @@
                           :keyword
                           :id)
                 :value (if ,is-keyword
-                           (intern ,word :cl-user)
+                           (no-term-to :sym :keyword ,word)
                            ,word)
                 :position (get-fixed-cur-position *source*)))
              (:num-string
@@ -129,7 +130,7 @@
   (push-token-to-buffer
    (new-token
     :type :delimiter
-    :value (get-symbol-for-delimiter ch)
+    :value (no-term-to :sym :delimiter ch)
     :position (get-fixed-cur-position *source*))
    *source*))
 

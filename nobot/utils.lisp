@@ -16,4 +16,5 @@
    #:equals
    #:split-list
    #:reintern
-   #:let-when))
+   #:let-when
+   #:to-symbol))

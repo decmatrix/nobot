@@ -4,6 +4,9 @@
 
 (uiop:define-package :nobot/botscript/lexer/token
     (:use :cl)
+  (:import-from :anaphora
+                #:aif
+                #:it)
   (:import-from :alexandria
                 #:curry)
   (:import-from :nobot/collections
@@ -16,9 +19,12 @@
                 #:from-source-code-node
                 #:get-source
                 #:get-source-type
-                #:get-tokens-buffe)
+                #:get-tokens-buffe
+                #:get-converted-tokens-seq
+                #:set-tokens-seq
+                #:get-tokens-buffer)
   (:import-from :nobot/botscript/types
-                #:get-type)
+                #:get-from-type)
   (:export
    ;; token node API
    #:get-token-type
@@ -98,7 +104,7 @@
                          (getf copy-args :type)
                        (remf copy-args :type))))
     (apply (curry #'make-instance 'token-node)
-           (nconc (list :type (get-type token-type :token :symbol))
+           (nconc (list :type (get-from-type token-type :token :symbol))
                   copy-args))))
 
 
@@ -227,7 +233,7 @@
 
 (defmethod token-value-equal-to ((obj token-node) value)
   (equals
-   (value-of-token-1 obj)
+   (value-of-token obj)
    value))
 
 

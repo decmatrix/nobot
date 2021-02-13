@@ -18,7 +18,8 @@
                 #:awhen
                 #:it)
   (:import-from :nobot/utils
-                #:reintern)
+                #:reintern
+                #:to-symbol)
   (:import-from :nobot/botscript/lexer/token
                 #:token-typep
                 #:token-value-equal-to
@@ -101,7 +102,7 @@
                                      (raise-bs-parser-error
                                       "expected get: ~a, but got: ~a. File: ~a, line - ~a, column - ~a."
                                       ,(if val
-                                           converted-val
+                                           `($conf-no-term->description ',sym ,val)
                                            converted-sym)
                                       ,(if val
                                            `(value-of-token next)
@@ -122,9 +123,3 @@
 
 (defun to-kword (sym)
   (reintern sym :keyword))
-
-(defun to-symbol (str)
-  (when str
-    (intern
-     (string-upcase str)
-     :cl-user)))
