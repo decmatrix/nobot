@@ -10,7 +10,8 @@
            #:split-list
            #:reintern
            #:let-when
-           #:to-symbol))
+           #:to-symbol
+           #:pos-of-str))
 
 (in-package :nobot/utils/common-utils)
 
@@ -37,7 +38,8 @@
 (defmacro let-when (bindings &body body)
   (with-gensyms (block)
     `(block ,block
-       (let ,(loop :for (symbol value) :in bindings
+       (let ,(loop
+                :for (symbol value) :in bindings
                 :collect `(,symbol (or ,value
                                        (return-from ,block nil))))
          ,@body))))
@@ -47,3 +49,20 @@
                         str
                         (string-upcase str))))
     (intern normal-str to-package)))
+
+(defun pos-of-str (string)
+  "pos: (x . y)"
+  (let ((cur-pos-x 1)
+        (cur-pos-y 1))
+    (mapcar
+     (lambda (ch)
+       (prog2 nil
+           (list
+            ch
+            (cons
+             cur-pos-x
+             (if (eq ch #\Newline)
+                 (incf cur-pos-y)
+                 cur-pos-y)))
+         (incf cur-pos-x)))
+     (coerce string 'list))))

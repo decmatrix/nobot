@@ -3,6 +3,7 @@
 
 
 (uiop:define-package :nobot/utils
+    (:nicknames :nobot-utils)
     (:use :cl
           :nobot/utils/program-utils
           :nobot/utils/common-utils)
@@ -17,4 +18,5 @@
    #:split-list
    #:reintern
    #:let-when
-   #:to-symbol))
+   #:to-symbol
+   #:pos-of-str))

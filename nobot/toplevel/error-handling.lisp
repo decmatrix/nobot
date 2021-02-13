@@ -28,13 +28,13 @@
 (define-condition bs-parser-error (error) ())
 
 (defmacro raise-bs-lexer-error (msg &rest rest)
-  `(make-condition 'bs-lexer-error
-                   :error-msg (log-error ,msg ,@rest)))
+  `(error 'bs-lexer-error
+          :error-msg (log-error ,msg ,@rest)))
 
 (defmacro raise-bs-parser-error (msg &rest rest)
   `(progn
-     (make-condition 'bs-parser-error
-                     :error-msg (log-error ,msg ,@rest))
+     (error 'bs-parser-error
+            :error-msg (log-error ,msg ,@rest))
      nil))
 
 (defmacro lexer-error-handler ((action-on-catch) &body body)
