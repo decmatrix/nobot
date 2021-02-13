@@ -54,8 +54,8 @@
                   (let* ((sub-rules (cdr body-tree))
                          (first-rule (car sub-rules)))
                     (unless sub-rules
-                      (make-condition 'acacia-empty-body-of-rule
-                                      :rule :and))
+                      (error 'acacia-empty-body-of-rule
+                             :rule :and))
                     `(awhen ,(%build first-rule :first-fail-no-error first-fail-no-error)
                        (append
                         ($conf-rule->term-sym ,rule-name)
@@ -65,8 +65,8 @@
                   (let* ((sub-rules (cdr body-tree))
                          (last-rule (lastcar sub-rules)))
                     (unless sub-rules
-                      (make-condition 'acacia-empty-body-of-rule
-                                      :rule :or))
+                      (error 'acacia-empty-body-of-rule
+                             :rule :or))
                     ;;TODO: see issue #4
                     `(append
                       ($conf-rule->term-sym ,rule-name)
@@ -111,8 +111,8 @@
                                       (1+ (car ,pos-list)))))))))))
                  ;;FIXME: temporary solution for `expr' rule
                  (:empty t)
-                 (t (make-condition 'acacia-unknown-parser-rule
-                                    :unknown-rule root))))))
+                 (t (error 'acacia-unknown-parser-rule
+                           :unknown-rule root))))))
     (%build (car quote-body-tree))))
 
 (defun is-empty-rule (rule)

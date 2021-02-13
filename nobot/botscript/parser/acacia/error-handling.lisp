@@ -24,8 +24,8 @@
          (,@body)
        (bs-parser-error (,c)
          (unless ,condition-parameter
-           (make-condition 'bs-parser-error
-                           :error-msg (get-error-msg ,c)))))))
+           (error 'bs-parser-error
+                  :error-msg (get-error-msg ,c)))))))
 
 (define-condition acacia-unknown-parser-rule (error)
   ((unknown-rule

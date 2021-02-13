@@ -24,8 +24,9 @@
 
 (in-package :nobot/botscript/parser/parser-impl)
 
-(defun parse-string (str &key return-instance)
-  (parse-source str :string
+(defun parse-string (str  &key return-instance)
+  (parse-source str
+                :string
                 :return-instance return-instance))
 
 (defun parse-file (path &key return-instance)
@@ -151,7 +152,7 @@
       (define-rule string-or-num ()
         (:or
          (:no-term-sym string)
-         (:no-term-sym num-string)))
+         (:no-term-sym number-string)))
 
       (define-rule data-expr ()
         (:rule data-seq))
