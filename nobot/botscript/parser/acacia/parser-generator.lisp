@@ -86,7 +86,7 @@
                     (with-gensyms (converted-sym converted-val pos-list)
                       `(with-next-token ()
                          (let ((,converted-sym ($conf-token-rule->token-sym ',sym))
-                               (,converted-val ,(to-symbol val)))
+                               (,converted-val ',(to-symbol val)))
                            (declare (ignorable ,converted-val))
                            (if (and (token-typep next ,converted-sym)
                                     ,(if val

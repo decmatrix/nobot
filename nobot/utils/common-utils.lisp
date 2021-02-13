@@ -9,8 +9,7 @@
   (:export #:equals
            #:split-list
            #:reintern
-           #:let-when
-           #:))
+           #:let-when))
 
 (in-package :nobot/utils/common-utils)
 

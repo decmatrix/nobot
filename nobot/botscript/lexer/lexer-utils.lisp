@@ -27,9 +27,11 @@
 (defvar *source*)
 
 (defparameter *lock-lexical-analysis* nil)
+
 ;; also newline
 (defparameter +delimiter-table+
   "{}[],=:")
+
 (defparameter +keyword-table+
   '("c-opts"
     "bot-opts"
