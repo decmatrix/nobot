@@ -3,6 +3,7 @@
 
 
 (uiop:define-package :nobot/botscript/parser/parser-impl
+    (:nicknames :nobot-bs-parser)
     (:use :cl
           :nobot/botscript/parser/acacia)
   (:import-from :alexandria
@@ -24,23 +25,26 @@
 
 (in-package :nobot/botscript/parser/parser-impl)
 
-(defun parse-string (str  &key return-instance)
+(defun parse-string (str  &key return-instance (start-from :script))
   (parse-source str
                 :string
-                :return-instance return-instance))
+                :return-instance return-instance
+                :start-from start-from))
 
-(defun parse-file (path &key return-instance)
+(defun parse-file (path &key return-instance (start-from :script))
   (parse-source path :file
-                :return-instance return-instance))
+                :return-instance return-instance
+                :start-from start-from))
 
 
-(defun parse-source (source type &key return-instance)
+(defun parse-source (source type &key return-instance (start-from :script))
   (with-disassembled-source (source type)
-    (with-acacia-process ((:start-from            :script
+    (with-acacia-process ((:start-from            start-from
                            :fun/rule->term-sym    (rcurry #'get-from-type :value :sort)
                            :fun/rule->description (rcurry #'get-from-type :description :sort)
                            :fun/token-rule->token-sym (rcurry #'get-from-type :value :token)
-                           :fun/token-rule->token->description (rcurry #'get-from-type :description :token)
+                           :fun/token-rule->token->description (rcurry #'get-from-type
+                                                                       :description :token)
                            :fun/no-term->sym (curry #'no-term-to :sym)
                            :fun/no-term->description (curry #'no-term-to :description)
                            :tokens-source (get-tokens-source)
