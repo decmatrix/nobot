@@ -3,10 +3,11 @@
 
 
 (uiop:define-package :nobot/botscript/lexer
-    (:use :cl
-          :nobot/botscript/lexer/lexer-impl
-          :nobot/botscript/lexer/token
-          :nobot/botscript/lexer/lexer-nodes)
+    (:nicknames :nobot-bs-lexer)
+  (:use :cl
+        :nobot/botscript/lexer/lexer-impl
+        :nobot/botscript/lexer/token
+        :nobot/botscript/lexer/lexer-nodes)
   (:reexport :nobot/botscript/lexer/lexer-impl
              :nobot/botscript/lexer/token
              :nobot/botscript/lexer/lexer-nodes))

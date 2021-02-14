@@ -46,7 +46,9 @@
     (with-lexical-switcher ()
       (loop for ch = (next-char *source*)
          while ch
-         do (do-char ch)))))
+         do (do-char ch))
+      (when (get-ls-state :multi-comment)
+        (raise-lexer-error :on-close-comment)))))
 
 (defun disassemble-string (str &key convert-with-pos)
   (disassemble-source str
@@ -93,12 +95,9 @@
                              (return-from in-read-chars-loop)))
                          (:multi-comment-end
                           `(progn
-                             (if (get-ls-state :multi-comment)
-                                 (progn
-                                   (switch-ls-state :comment)
-                                   (switch-ls-state :multi-comment)
-                                   (return-from in-read-chars-loop))
-                                 (raise-lexer-error :on-open-comment))))
+                             (switch-ls-state :comment)
+                             (switch-ls-state :multi-comment)
+                             (return-from in-read-chars-loop)))
                          (t
                           `(push-char-to-buffer ,ch *source*)))
                       (progn
@@ -152,25 +151,21 @@
 
 (defun do-char (ch)
   (cond
-    ((eq ch #\*)
-     (unless (get-ls-state :multi-comment)
-       (raise-lexer-error :on-char ch))
-     (update-pos ch *source*)
-     (read-chars ch
-                 :multi-comment-end))
     ((get-ls-state :comment)
      (update-pos ch *source*)
      (when (and (eq ch #\Newline)
                 (not (get-ls-state :multi-comment)))
-       (switch-ls-state :comment)))
+       (switch-ls-state :comment))
+     (when (and (eq ch #\*)
+                (get-ls-state :multi-comment))
+       (read-chars ch
+                   :multi-comment-end)))
     ((eq ch #\/)
      (update-pos ch *source*)
      (read-chars ch
                  :comment)
      (unless (get-ls-state :comment)
-       (raise-lexer-error :on-char ch))
-     (when (get-ls-state :multi-comment)
-        (raise-lexer-error :on-close-comment)))
+       (raise-lexer-error :on-char ch)))
     ((is-delimiter-? ch)
      ;; :delimite
      (update-pos ch *source*)
@@ -195,7 +190,7 @@
      (read-chars ch
                  :char-string)
      (when (get-ls-state :string)
-        (raise-lexer-error :on-string)))
+       (raise-lexer-error :on-string)))
     ((is-white-space-char-? ch)
      (update-pos ch *source*))
     (t (raise-lexer-error :on-char ch))))

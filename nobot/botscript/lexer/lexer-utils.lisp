@@ -181,7 +181,7 @@
         (error "unknown `to` value arg: ~a, expected: :sym ot :description" to))))
 
 (defun raise-lexer-error (on-error &optional val)
-  ":on-char, :on-open-comment, :on-close-comment, :on-string"
+  ":on-char, :on-close-comment, :on-string"
   (raise-bs-lexer-error
    (concatenate
     'string
@@ -189,8 +189,6 @@
       (:on-char
        (assert val)
        (format nil "unknown symbol \"~a\"" val))
-      (:on-open-comment
-       "comment opening expected")
       (:on-close-comment
        "comment closing expected")
       (:on-string

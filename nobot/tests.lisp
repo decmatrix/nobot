@@ -5,6 +5,7 @@
 (uiop:define-package :nobot/tests
     (:use :cl
           :lisp-unit
+          :nobot/tests/utils
           :nobot/tests/botscript-lexer
           :nobot/tests/botscript-parser)
   (:nicknames :nobot-tests)
@@ -13,8 +14,9 @@
 (in-package :nobot/tests)
 
 (defun run-unit-tests ()
-  (mapc
-   (lambda (package)
-     (run-tests :all package))
-   '(:nobot/tests/botscript-lexer
-     :nobot/tests/botscript-parser)))
+  (let ((*print-summary* t))
+    (mapc
+     (lambda (package)
+       (run-tests :all package))
+     '(:nobot/tests/botscript-lexer
+       :nobot/tests/botscript-parser))))
