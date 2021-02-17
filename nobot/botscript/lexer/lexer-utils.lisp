@@ -139,8 +139,8 @@
              (let ((sym (to-symbol terminal)))
                (if (eq to :sym)
                    sym
-                   (format nil "~a keyword" val)))))
-          (t (error "unknown char or sym: ~a" val)))
+                   (format nil "~a keyword" terminal)))))
+          (t (error "unknown char or sym: ~a" terminal)))
         (error "unknown `to` value arg: ~a, expected: :sym ot :description" to))))
 
 (defun raise-lexer-error (on-error &optional val)

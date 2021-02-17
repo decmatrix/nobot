@@ -59,8 +59,8 @@
 
 (define-delimiter *char-delimiter-table* *sym-delimiter-table*
   :ch #\]
-  :sym-idea "c-fig-bracket"
-  :description "close figurate bracket")
+  :sym-idea "c-sq-bracket"
+  :description "close sqaure bracket")
 
 (define-delimiter *char-delimiter-table* *sym-delimiter-table*
   :ch #\,
@@ -90,13 +90,13 @@
   (get-delimiter sym-or-char-or-key))
 
 (defun delimiter-to (sym-or-char-or-key to)
-  "to arg it :char or :value or :description"
+  "to arg it :sym or :value or :description, or sym representations"
   (let ((del (get-delimiter sym-or-char-or-key)))
     (assert del)
     (case to
       (:char
        ($del-get-char del))
-      (:value
+      (:sym
        ($del-get-sym del))
       (:description
        ($del-get-description del))

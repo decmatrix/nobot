@@ -39,14 +39,14 @@
 (define-lexer-test bs-lexer.simple.3
     "def-act act-default {}"
   ((<KEYWORD> DEF-ACT (1 . 1)) (<ID> "act-default" (9 . 1))
-   (<DELIMITER> O-BRACKET (21 . 1)) (<DELIMITER> C-BRACKET (22 . 1)))
+   (<DELIMITER> O-FIG-BRACKET (21 . 1)) (<DELIMITER> C-FIG-BRACKET (22 . 1)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.simple.4
     "c-opts { lang: \"js\" }"
-  ((<KEYWORD> C-OPTS (1 . 1)) (<DELIMITER> O-BRACKET (8 . 1))
+  ((<KEYWORD> C-OPTS (1 . 1)) (<DELIMITER> O-FIG-BRACKET (8 . 1))
    (<ID> "lang" (10 . 1)) (<DELIMITER> COLON (14 . 1))
-   (<CHAR-STRING> "\"JS\"" (16 . 1)) (<DELIMITER> C-BRACKET (22 . 1)))
+   (<CHAR-STRING> "\"JS\"" (16 . 1)) (<DELIMITER> C-FIG-BRACKET (22 . 1)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.simple.5
@@ -56,7 +56,7 @@ arch: \"chat\",
 project-dir: \"~/dev-bots/mybot/\",
 extension: \"tg\"
 }"
-  ((<KEYWORD> C-OPTS (1 . 1)) (<DELIMITER> O-BRACKET (8 . 1))
+  ((<KEYWORD> C-OPTS (1 . 1)) (<DELIMITER> O-FIG-BRACKET (8 . 1))
    (<DELIMITER> NEWLINE (8 . 2)) (<ID> "lang" (9 . 2))
    (<DELIMITER> COLON (13 . 2)) (<CHAR-STRING> "\"JS\"" (15 . 2))
    (<DELIMITER> COMMA (20 . 2)) (<DELIMITER> NEWLINE (20 . 3))
@@ -67,7 +67,7 @@ extension: \"tg\"
    (<DELIMITER> COMMA (68 . 4)) (<DELIMITER> NEWLINE (68 . 5))
    (<ID> "extension" (69 . 5)) (<DELIMITER> COLON (78 . 5))
    (<CHAR-STRING> "\"TG\"" (80 . 5)) (<DELIMITER> NEWLINE (84 . 6))
-   (<DELIMITER> C-BRACKET (85 . 6)))
+   (<DELIMITER> C-FIG-BRACKET (85 . 6)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.keywords.1
@@ -81,7 +81,7 @@ extension: \"tg\"
 
 (define-lexer-test bs-lexer.delimiters.1
     "{}[],   =:"
-  ((<DELIMITER> O-BRACKET (1 . 1)) (<DELIMITER> C-BRACKET (2 . 1))
+  ((<DELIMITER> O-FIG-BRACKET (1 . 1)) (<DELIMITER> C-FIG-BRACKET (2 . 1))
    (<DELIMITER> O-SQ-BRACKET (3 . 1)) (<DELIMITER> C-SQ-BRACKET (4 . 1))
    (<DELIMITER> COMMA (5 . 1)) (<DELIMITER> ASSIGN (9 . 1))
    (<DELIMITER> COLON (10 . 1)))
