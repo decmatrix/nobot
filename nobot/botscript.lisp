@@ -6,6 +6,7 @@
     (:use :cl
           :nobot/botscript/lexer
           :nobot/botscript/parser
+          :nobot/botscript/tree-tools
           :nobot/botscript/post)
   (:export
    ;; lexer

@@ -8,7 +8,8 @@
           :alexandria
           :nobot/botscript/lexer/token
           :nobot/botscript/lexer/lexer-nodes
-          :nobot/botscript/lexer/lexer-utils)
+          :nobot/botscript/lexer/lexer-utils
+          :nobot/botscript/lexer/delimiter)
   (:import-from :nobot/botscript/types
                 #:use-token-type-class)
   (:import-from :nobot/toplevel/error-handling
@@ -18,7 +19,7 @@
            #:disassemble-file
            #:with-disassembled-source
            #:get-tokens-source
-           #:no-term-to))
+           #:terminal-to))
 
 (in-package :nobot/botscript/lexer/lexer-impl)
 
@@ -125,7 +126,7 @@
                               :keyword
                               :id)
                     :value (if ,is-keyword
-                               (no-term-to :sym :keyword ,word)
+                               (terminal-to :sym :keyword ,word)
                                ,word)
                     :position (get-fixed-cur-position *source*)))
                  (:num-string
@@ -145,7 +146,7 @@
   (push-token-to-buffer
    (new-token
     :type :delimiter
-    :value (no-term-to :sym :delimiter ch)
+    :value (terminal-to :sym :delimiter ch)
     :position (get-fixed-cur-position *source*))
    *source*))
 

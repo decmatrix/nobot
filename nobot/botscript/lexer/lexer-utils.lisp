@@ -6,7 +6,8 @@
     (:use :cl
           :alexandria
           :nobot/botscript/lexer/lexer-nodes
-          :nobot/botscript/lexer/token)
+          :nobot/botscript/lexer/token
+          :nobot/botscript/lexer/delimiter)
   (:import-from :nobot/utils
                 #:to-symbol
                 #:reintern)
@@ -17,13 +18,12 @@
            #:is-keyword-char-?
            #:is-white-space-char-?
            #:is-keyword-?
-           #:is-delimiter-?
            #:is-dquote-?
            #:is-locked-lexical-analysis-?
            #:switch-ls-state
            #:get-ls-state
            #:with-lexical-switcher
-           #:no-term-to
+           #:terminal-to
            #:raise-lexer-error
            ))
 
@@ -31,23 +31,6 @@
 
 (defvar *lexical-switcher*)
 (defvar *source*)
-
-;; also newline
-(defparameter +delimiter-table+
-  "{}[],=:")
-
-(defparameter +keyword-table+
-  '("c-opts"
-    "bot-opts"
-    "start"
-    "from"
-    "letd"
-    "letv"
-    "def-act"
-    "act"
-    "type"
-    "in"
-    "out"))
 
 (defclass lexical-switcher ()
   ((comment-state
@@ -62,6 +45,20 @@
     :type boolean
     :initform nil
     :accessor get-string-state)))
+
+(defparameter +keyword-table+
+  '("c-opts"
+    "bot-opts"
+    "start"
+    "from"
+    "letd"
+    "letv"
+    "def-act"
+    "act"
+    "type"
+    "in"
+    "out"))
+
 
 (defmacro with-lexical-switcher (() &body body)
   `(let ((*lexical-switcher* (make-instance 'lexical-switcher)))
@@ -112,10 +109,6 @@
                                    :lazy ,use-lazy-tokens)
                    (get-tokens-seq ,tokens-source-instance))))))))
 
-(defun is-delimiter-? (ch)
-  (or (find ch +delimiter-table+)
-      (eq ch #\Newline)))
-
 (defun is-white-space-char-? (ch)
   (find ch
         '(#\space #\Tab #\newline #\Backspace #\Return #\Linefeed #\Page)
@@ -129,55 +122,25 @@
 (defun is-dquote-? (ch)
   (eq ch #\"))
 
-(defun no-term-to (to key val)
+(defun terminal-to (to key terminal)
   "to: :sym || :description or sym || description"
   (let ((to (if (keywordp to)
                 to
-                (reintern to :keyword))))
-    (if (or (eq to :sym)
-            (eq to :description))
+                (reintern to :keyword)))
+        (key (if (keywordp key)
+                 key
+                 (reintern key :keyword))))
+    (if (find to '(:sym :description) :test #'eq)
         (case key
           (:delimiter
-           (case val
-             (#\{
-              (if (eq to :sym)
-                  (to-symbol "o-bracket")
-                  "open bracket"))
-             (#\}
-              (if (eq to :sym)
-                  (to-symbol "c-bracket")
-                  "close bracket"))
-             (#\[
-              (if (eq to :sym)
-                  (to-symbol "o-sq-bracket")
-                  "open square bracket"))
-             (#\]
-              (if (eq to :sym)
-                  (to-symbol "c-sq-bracket")
-                  "close square bracket"))
-             (#\,
-              (if (eq to :sym)
-                  (to-symbol "comma")
-                  "comma"))
-             (#\=
-              (if (eq to :sym)
-                  (to-symbol "assign")
-                  "assign"))
-             (#\:
-              (if (eq to :sym)
-                  (to-symbol "colon")
-                  "colon"))
-             (#\Newline
-              (if (eq to :sym)
-                  (to-symbol "newline")
-                  "new line"))))
+           (delimiter-to terminal to))
           (:keyword
-           (when (is-keyword-? val)
-             (let ((sym (to-symbol val)))
+           (when (is-keyword-? terminal)
+             (let ((sym (to-symbol terminal)))
                (if (eq to :sym)
                    sym
                    (format nil "~a keyword" val)))))
-          (t (error "unknown no term sym: ~a" key)))
+          (t (error "unknown char or sym: ~a" val)))
         (error "unknown `to` value arg: ~a, expected: :sym ot :description" to))))
 
 (defun raise-lexer-error (on-error &optional val)
