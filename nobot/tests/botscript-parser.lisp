@@ -3,6 +3,13 @@
 
 
 (uiop:define-package :nobot/tests/botscript-parser
-    (:use :cl))
+    (:use :cl
+          :lisp-unit
+          :nobot/botscript/parser))
 
 (in-package :nobot/tests/botscript-parser)
+
+(defmacro define-parser-test (name input-string expected-tree)
+  `(define-test ,name
+     (assert-true
+      (same-parse-tree))))

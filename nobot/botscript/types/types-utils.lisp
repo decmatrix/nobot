@@ -4,6 +4,11 @@
 
 (uiop:define-package :nobot/botscript/types/types-utils
     (:use :cl)
+  (:import-from :cl-ppcre
+                #:register-groups-bind)
+  (:import-from :anaphora
+                #:aif
+                #:it)
   (:import-from :alexandria
                 #:with-gensyms)
   (:import-from :nobot/utils
@@ -51,14 +56,20 @@ What need: [:value, :description]"))
        ,table)))
 
 (defun convert-type (type &key only-to-symbol)
-  (let ((package (if only-to-symbol
+  (let ((str-type (string type))
+        (package (if only-to-symbol
                      :cl-user
                      :keyword)))
-    (cond
-      ((stringp type) (intern type package))
-      ((keywordp type) type)
-      ((symbolp type) (reintern type package))
-      (t (error "representation of sort type maybe only is string, keyword or symbol")))))
+    (let ((type (aif (register-groups-bind (word)
+                         ("<((\\w|\\s|-)+)>" str-type)
+                       word)
+                  it
+                  type)))
+      (cond
+        ((stringp type) (intern type package))
+        ((keywordp type) type)
+        ((symbolp type) (reintern type package))
+        (t (error "representation of sort type maybe only is string, keyword or symbol"))))))
 
 (defun set-<> (str)
   (format nil "<~a>" str))

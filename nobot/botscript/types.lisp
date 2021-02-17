@@ -4,6 +4,8 @@
 
 (uiop:define-package :nobot/botscript/types
     (:use :cl
+          :nobot/botscript/types/lexer-types
+          :nobot/botscript/types/parser-types
           :nobot/botscript/types/types-utils)
   (:export #:get-from-type
            #:get-type-value-list))
