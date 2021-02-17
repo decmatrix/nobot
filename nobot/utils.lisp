@@ -18,5 +18,6 @@
    #:split-list
    #:reintern
    #:let-when
+   #:to-keyword
    #:to-symbol
    #:pos-of-str))

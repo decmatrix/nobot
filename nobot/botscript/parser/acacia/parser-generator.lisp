@@ -58,7 +58,7 @@
                              :rule :and))
                     `(awhen ,(%build first-rule :first-fail-no-error first-fail-no-error)
                        (append
-                        ($conf-rule->term-sym ,rule-name)
+                        (list ($conf-rule->term-sym ,rule-name))
                         it
                         ,@ (mapcar #'%build (cdr sub-rules))))))
                  (:or
@@ -69,7 +69,7 @@
                              :rule :or))
                     ;;TODO: see issue #4
                     `(append
-                      ($conf-rule->term-sym ,rule-name)
+                      (list ($conf-rule->term-sym ,rule-name))
                       (aif (or
                             ,@ (mapcar (rcurry #'%build :first-fail-no-error t)
                                        (butlast sub-rules))
@@ -81,7 +81,7 @@
                             it)
                         (raise-bs-parser-error
                          "error on rule ~a" ,rule-name)))))
-                 (:no-term-sym
+                 (:terminal
                   (destructuring-bind (sym &optional val)
                       (cdr body-tree)
                     (with-gensyms (converted-sym converted-val pos-list)
@@ -93,22 +93,26 @@
                                     ,(if val
                                          `(token-value-equal-to next ,converted-val)
                                          t))
-                               (convert-token next :with-pos nil)
+                               (list (convert-token next :with-pos nil))
                                (if ,(if first-fail-no-error
                                         t
                                         `first-fail-no-error)
                                    nil
                                    (let ((,pos-list (get-position next)))
                                      (raise-bs-parser-error
-                                      "expected get: ~a, but got: ~a. File: ~a, line - ~a, column - ~a."
+                                      "expected get: ~a, but got: ~a, at position line - ~a, column - ~a~a"
                                       ,(if val
-                                           `($conf-no-term->description ',sym ,val)
-                                           converted-sym)
+                                           `($conf-terminal->description ',sym ,val)
+                                           `($conf-token-rule->description ',sym))
                                       ,(if val
-                                           `(value-of-token next)
-                                           `(get-token-type next))
+                                           `($conf-terminal->description ',sym (value-of-token next))
+                                           `($conf-token-rule->description (get-token-type next)))
                                       (cdr ,pos-list)
-                                      (1+ (car ,pos-list)))))))))))
+                                      (1+ (car ,pos-list))
+                                      (if (eq ($conf-get-source-type) :file)
+                                          (format nil ", file: ~a."
+                                                  ($conf-get-source))
+                                          "."))))))))))
                  ;;FIXME: temporary solution for `expr' rule
                  (:empty t)
                  (t (error 'acacia-unknown-parser-rule

@@ -11,6 +11,7 @@
            #:reintern
            #:let-when
            #:to-symbol
+           #:to-keyword
            #:pos-of-str))
 
 (in-package :nobot/utils/common-utils)
@@ -49,6 +50,11 @@
                         str
                         (string-upcase str))))
     (intern normal-str to-package)))
+
+(defun to-keyword (str &key case-sensitive)
+  (to-symbol str
+             :case-sensitive case-sensitive
+             :to-package :keyword))
 
 (defun pos-of-str (string)
   "pos: (x . y)"

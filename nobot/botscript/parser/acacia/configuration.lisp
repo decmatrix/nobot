@@ -26,9 +26,11 @@
            #:$conf-rule->description
            #:$conf-token-rule->token-sym
            #:$conf-token-rule->description
-           #:$conf-no-term->sym
-           #:$conf-no-term->description
-           #:$conf-next-token))
+           #:$conf-terminal->sym
+           #:$conf-terminal->description
+           #:$conf-next-token
+           #:$conf-get-source-type
+           #:$conf-get-source))
 
 (in-package :nobot/botscript/parser/acacia/configuration)
 
@@ -55,14 +57,14 @@
     :type function
     :initarg :fun/token-rule->token->description
     :reader get-fun/token-rule->description)
-   (no-term->sym
+   (terminal->sym
     :type function
-    :initarg :fun/no-term->sym
-    :reader get-fun/no-term->sym)
-   (no-term->description
+    :initarg :fun/terminal->sym
+    :reader get-fun/terminal->sym)
+   (terminal->description
     :type function
-    :initarg :fun/no-term->description
-    :reader get-fun/no-term->description)
+    :initarg :fun/terminal->description
+    :reader get-fun/terminal->description)
    (token-ptr
     :type token-pointer
     :initarg :token-pointer
@@ -84,6 +86,8 @@
                                           fun/rule->description
                                           fun/token-rule->token-sym
                                           fun/token-rule->description
+                                          fun/terminal->sym
+                                          fun/terminal->description
                                           tokens-source
                                           source-type
                                           source)
@@ -97,6 +101,8 @@
                     :fun/rule->description fun/rule->description
                     :fun/token-rule->token-sym fun/token-rule->token-sym
                     :fun/token-rule->token->description fun/token-rule->description
+                    :fun/terminal->sym fun/terminal->sym
+                    :fun/terminal->description fun/terminal->description
                     :token-pointer (make-token-pointer tokens-source)
                     :source-type source-type
                     :source source))
@@ -135,16 +141,22 @@
   (funcall (get-fun/token-rule->description *acacia-configuration*)
            token-rule))
 
-(defun $conf-no-term->sym (token-type val)
-  (funcall (get-fun/no-term->sym *acacia-configuration*)
+(defun $conf-terminal->sym (token-type val)
+  (funcall (get-fun/terminal->sym *acacia-configuration*)
            token-type
            val))
 
-(defun $conf-no-term->description (token-type val)
-  (funcall (get-fun/no-term->description *acacia-configuration*)
+(defun $conf-terminal->description (token-type val)
+  (funcall (get-fun/terminal->description *acacia-configuration*)
            token-type
            val))
 
 (defun $conf-next-token ()
   (get-next-token
    (get-token-pointer *acacia-configuration*)))
+
+(defun $conf-get-source-type ()
+  (get-source-type *acacia-configuration*))
+
+(defun $conf-get-source ()
+  (get-source *acacia-configuration*))
