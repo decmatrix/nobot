@@ -27,4 +27,46 @@
   (<START-STMT> (<KEYWORD> START) (<KEYWORD> FROM) (<ID> "a"))
   :start-stmt)
 
+(define-parser-test bs-parser.literal.1
+    "\"test\""
+  (<LITERAL> (<CHAR-STRING> "\"TEST\""))
+  :literal)
+
+(define-parser-test bs-parser.literal.2
+    "8080"
+  (<LITERAL> (<NUMBER-STRING> 8080))
+  :literal)
+
+(define-parser-test bs-parser.vertex-option-val.1
+    "in"
+  (<VERTEX-OPTION-VAL> (<KEYWORD> IN))
+  :vertex-option-val)
+
+(define-parser-test bs-parser.vertex-option-val.2
+    "out"
+  (<VERTEX-OPTION-VAL> (<KEYWORD> OUT))
+  :vertex-option-val)
+
+(define-parser-test bs-parser.vertex-option-val.3
+    "label"
+  (<VERTEX-OPTION-VAL> (<ID> "label"))
+  :vertex-option-val)
+
+(define-parser-test bs-parser.vertex-option-name.1
+    "act"
+  (<VERTEX-OPTION-NAME> (<KEYWORD> ACT))
+  :vertex-option-name)
+
+(define-parser-test bs-parser.vertex-option-name.1
+    "act"
+  (<VERTEX-OPTION-NAME> (<KEYWORD> ACT))
+  :vertex-option-name)
+
+(define-parser-test bs-parser.vertex-option-name.2
+    "type"
+  (<VERTEX-OPTION-NAME> (<KEYWORD> TYPE))
+  :vertex-option-name)
+
+
+
 

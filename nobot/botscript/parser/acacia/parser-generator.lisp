@@ -32,6 +32,7 @@
 
 (in-package :nobot/botscript/parser/acacia/parser-generator)
 
+;;TODO: define acacia error: unknown rule
 (defgeneric rule-> (rule-name &key first-fail-no-error)
   (:method (rule-name &key first-fail-no-error)
     (declare (ignore first-fail-no-error))
@@ -46,7 +47,6 @@
     `(defmethod rule-> ((rule-name (eql ,rule-name)) &key first-fail-no-error)
        (declare (ignorable first-fail-no-error))
        ,(build-rule-body `(,body) `,rule-name))))
-
 
 (defun build-rule-body (quote-body-tree rule-name)
   (labels ((%build (body-tree &key first-fail-no-error)
@@ -103,7 +103,9 @@
                                (if ,(if first-fail-no-error
                                         t
                                         `first-fail-no-error)
-                                   nil
+                                   (progn
+                                     ($conf-mv-ptr-to-prev-token)
+                                     nil)
                                    (let ((,pos-list (get-position next)))
                                      (raise-bs-parser-error
                                       "expected get: ~a, but got: ~a, at position line - ~a, column - ~a~a"

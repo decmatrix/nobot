@@ -12,6 +12,7 @@
                 #:get-next-token
                 #:make-token-pointer
                 #:pointer-at-end-?
+                #:mv-ptr-to-prev-token
                 ;; type
                 #:token-pointer)
   (:import-from :nobot/botscript/lexer/lexer-nodes
@@ -29,7 +30,8 @@
            #:$conf-next-token
            #:$conf-get-source-type
            #:$conf-get-source
-           #:$conf-pointer-at-end-?))
+           #:$conf-pointer-at-end-?
+           #:$conf-mv-ptr-to-prev-token))
 
 (in-package :nobot/botscript/parser/acacia/configuration)
 
@@ -143,6 +145,10 @@
 
 (defun $conf-next-token ()
   (get-next-token
+   (get-token-pointer *acacia-configuration*)))
+
+(defun $conf-mv-ptr-to-prev-token ()
+  (mv-ptr-to-prev-token 
    (get-token-pointer *acacia-configuration*)))
 
 (defun $conf-get-source-type ()
