@@ -270,6 +270,6 @@
   (setf (get-index pointer) 0))
 
 (defmethod pointer-at-end-? ((pointer token-pointer))
-  (> (get-index pointer)
-     (get-limit pointer)))
+  (= (get-index pointer)
+     (1- (get-limit pointer))))
 

@@ -8,8 +8,7 @@
   (:import-from :nobot/botscript/parser
                 #:parse-string)
   (:import-from :nobot/botscript/parser/acacia
-                #:same-parse-tree-?
-                #:acacia-get-parse-tree))
+                #:same-parse-tree-?))
 
 (in-package :nobot/tests/botscript-parser)
 
@@ -20,8 +19,12 @@
   `(define-test ,name
      (assert-true
       (same-parse-tree-?
-       (acacia-get-parse-tree
-        (parse-string ,input-string :sort-type ,sort-type))
+       (parse-string ,input-string :sort-type ,sort-type)
        ',expected-tree))))
+
+(define-parser-test bs-parser.start-stmt
+    "start from a"
+  (<START-STMT> (<KEYWORD> START) (<KEYWORD> FROM) (<ID> "a"))
+  :start-stmt)
 
 
