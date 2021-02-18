@@ -8,18 +8,16 @@
                 #:with-gensyms)
   (:import-from :nobot/botscript/parser/acacia/error-handling
                 #:acacia-unknown-source-type)
-  (:import-from :nobot/botscript/parser/acacia/construction
-                #:rule->)
   (:import-from :nobot/botscript/lexer/token
                 #:get-next-token
                 #:make-token-pointer
+                #:pointer-at-end-?
                 ;; type
                 #:token-pointer)
   (:import-from :nobot/botscript/lexer/lexer-nodes
                 #:from-tokens-source-node)
-  (:import-from :nobot/botscript/parser/acacia/result-packaging
-                #:pack-parse-tree)
-  (:export #:with-acacia-process
+  (:export #:make-configuration
+           #:*acacia-configuration*
            ;; configs
            #:$conf-get-start-rule
            #:$conf-rule->term-sym
@@ -30,7 +28,8 @@
            #:$conf-terminal->description
            #:$conf-next-token
            #:$conf-get-source-type
-           #:$conf-get-source))
+           #:$conf-get-source
+           #:$conf-pointer-at-end-?))
 
 (in-package :nobot/botscript/parser/acacia/configuration)
 
@@ -107,18 +106,9 @@
                     :source-type source-type
                     :source source))
 
-(defmacro with-acacia-process (((&rest config-args) &key pack-result) &body body)
-  (with-gensyms (parse-tree)
-    `(let ((*acacia-configuration*
-            (make-instance 'acacia-configuration
-                           ,@config-args)))
-       ,@body
-       (let ((,parse-tree
-              (rule->
-               ($conf-get-start-rule))))
-         (if ,pack-result
-             (pack-parse-tree ,parse-tree)
-             ,parse-tree)))))
+(defmacro make-acacia-configuration (&rest config-args)
+  `(make-instance 'acacia-configuration
+                  ,@config-args))
 
 
 ;; configuration getters
@@ -160,3 +150,6 @@
 
 (defun $conf-get-source ()
   (get-source *acacia-configuration*))
+
+(defun $conf-pointer-at-end-? ()
+  (pointer-at-end-? (get-token-pointer *acacia-configuration*)))

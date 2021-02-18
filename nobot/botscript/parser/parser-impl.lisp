@@ -3,7 +3,6 @@
 
 
 (uiop:define-package :nobot/botscript/parser/parser-impl
-    (:nicknames :nobot-bs-parser)
     (:use :cl
           :nobot/botscript/parser/acacia)
   (:import-from :alexandria
@@ -39,18 +38,17 @@
 
 (defun parse-source (source type &key return-instance (sort-type :script))
   (with-disassembled-source (source type)
-    (with-acacia-process ((:start-from            sort-type
-                           :fun/rule->term-sym    (rcurry #'get-from-type :sort :value)
-                           :fun/rule->description (rcurry #'get-from-type :sort :description)
-                           :fun/token-rule->token-sym (rcurry #'get-from-type :token :value)
-                           :fun/token-rule->description (rcurry #'get-from-type
-                                                                       :token :description)
-                           :fun/terminal->sym (curry #'terminal-to :sym)
-                           :fun/terminal->description (curry #'terminal-to :description)
-                           :tokens-source (get-tokens-source)
-                           :source-type (get-source-type (get-tokens-source))
-                           :source (get-source (get-tokens-source)))
-                          :pack-result return-instance)
+    (with-acacia-runner ((:start-from            sort-type
+                          :fun/rule->term-sym    (rcurry #'get-from-type :sort :value)
+                          :fun/rule->description (rcurry #'get-from-type :sort :description)
+                          :fun/token-rule->token-sym (rcurry #'get-from-type :token :value)
+                          :fun/token-rule->description (rcurry #'get-from-type :token :description)
+                          :fun/terminal->sym (curry #'terminal-to :sym)
+                          :fun/terminal->description (curry #'terminal-to :description)
+                          :tokens-source (get-tokens-source)
+                          :source-type (get-source-type (get-tokens-source))
+                          :source (get-source (get-tokens-source)))
+                         :pack-result return-instance)
       
       (define-rule script ()
         (:and

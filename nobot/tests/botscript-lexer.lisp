@@ -22,7 +22,7 @@
 
 (define-lexer-test bs-lexer.simple.1
     "lang:1, op2: \"test\" // 12 3 4 * & ^"
-  ((<ID> "lang" (1 . 1)) (<DELIMITER> COLON (5 . 1)) (<NUMBER-STRING> 1 (6 . 1))
+  ((<ID> "lang" (1 . 1)) (<DELIMITER> CыOLON (5 . 1)) (<NUMBER-STRING> 1 (6 . 1))
    (<DELIMITER> COMMA (7 . 1)) (<ID> "op2" (9 . 1)) (<DELIMITER> COLON (12 . 1))
    (<CHAR-STRING> "\"TEST\"" (14 . 1)))
   :with-pos t)

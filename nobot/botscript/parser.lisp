@@ -3,8 +3,9 @@
 
 
 (uiop:define-package :nobot/botscript/parser
-    (:use :cl
-          :nobot/botscript/parser/parser-impl)
+    (:nicknames :nobot-bs-parser)
+  (:use :cl
+        :nobot/botscript/parser/parser-impl)
   (:export #:parse-source
            #:parse-string
            #:parse-file))

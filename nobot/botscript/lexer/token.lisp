@@ -50,6 +50,7 @@
    #:get-curr-token
    #:reset-pointer
    #:ptr-is-out-of-bound-?
+   #:pointer-at-end-?
    ))
 
 (in-package :nobot/botscript/lexer/token)
@@ -95,6 +96,7 @@
 (defgeneric get-prev-token (obj))
 (defgeneric get-curr-token (obj))
 (defgeneric reset-pointer (obj))
+(defgeneric pointer-at-end-? (obj))
 
 
 ;; maker API
@@ -260,11 +262,14 @@
     (unless (ptr-is-out-of-bound-? pointer)
       (nth idx (get-tokens-seq pointer)))))
 
-
 (defmethod get-cur-index ((pointer token-pointer))
   (when (ptr-is-out-of-bound-? pointer)
     (nth (get-index pointer) (get-tokens-seq pointer))))
 
 (defmethod reset-pointer ((pointer token-pointer))
   (setf (get-index pointer) 0))
+
+(defmethod pointer-at-end-? ((pointer token-pointer))
+  (> (get-index pointer)
+     (get-limit pointer)))
 

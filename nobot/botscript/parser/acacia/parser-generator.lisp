@@ -5,7 +5,6 @@
 (uiop:define-package :nobot/botscript/parser/acacia/parser-generator
     (:use :cl
           :nobot/botscript/parser/acacia/configuration
-          :nobot/botscript/parser/acacia/construction
           :nobot/botscript/parser/acacia/error-handling)
   (:import-from :nobot/toplevel/error-handling
                 #:raise-bs-parser-error)
@@ -26,10 +25,17 @@
                 #:value-of-token
                 #:convert-token
                 #:get-token-type
-                #:get-position)
-  (:export #:define-rule))
+                #:get-position
+                )
+  (:export #:define-rule
+           #:rule->))
 
 (in-package :nobot/botscript/parser/acacia/parser-generator)
+
+(defgeneric rule-> (rule-name &key first-fail-no-error)
+  (:method (rule-name &key first-fail-no-error)
+    (declare (ignore first-fail-no-error))
+    (error "unknown rule: [~a]" rule-name)))
 
 (defmacro with-next-token (() &body body)
   `(let ((next ($conf-next-token)))
