@@ -22,7 +22,7 @@
 
 (define-lexer-test bs-lexer.simple.1
     "lang:1, op2: \"test\" // 12 3 4 * & ^"
-  ((<ID> "lang" (1 . 1)) (<DELIMITER> CыOLON (5 . 1)) (<NUMBER-STRING> 1 (6 . 1))
+  ((<ID> "lang" (1 . 1)) (<DELIMITER> COLON (5 . 1)) (<NUMBER-STRING> 1 (6 . 1))
    (<DELIMITER> COMMA (7 . 1)) (<ID> "op2" (9 . 1)) (<DELIMITER> COLON (12 . 1))
    (<CHAR-STRING> "\"TEST\"" (14 . 1)))
   :with-pos t)
@@ -68,6 +68,11 @@ extension: \"tg\"
    (<ID> "extension" (69 . 5)) (<DELIMITER> COLON (78 . 5))
    (<CHAR-STRING> "\"TG\"" (80 . 5)) (<DELIMITER> NEWLINE (84 . 6))
    (<DELIMITER> C-FIG-BRACKET (85 . 6)))
+  :with-pos t)
+
+(define-lexer-test bs-lexer.simple.6
+    "act = in"
+  ((<KEYWORD> ACT (1 . 1)) (<DELIMITER> ASSIGN (5 . 1)) (<KEYWORD> IN (7 . 1)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.keywords.1

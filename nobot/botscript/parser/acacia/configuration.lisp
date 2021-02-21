@@ -10,6 +10,7 @@
                 #:acacia-unknown-source-type)
   (:import-from :nobot/botscript/lexer/token
                 #:get-next-token
+                #:get-prev-token
                 #:make-token-pointer
                 #:pointer-at-end-?
                 #:mv-ptr-to-prev-token
@@ -28,6 +29,7 @@
            #:$conf-terminal->sym
            #:$conf-terminal->description
            #:$conf-next-token
+           #:$conf-prev-token
            #:$conf-get-source-type
            #:$conf-get-source
            #:$conf-pointer-at-end-?
@@ -145,6 +147,10 @@
 
 (defun $conf-next-token ()
   (get-next-token
+   (get-token-pointer *acacia-configuration*)))
+
+(defun $conf-prev-token ()
+  (get-prev-token
    (get-token-pointer *acacia-configuration*)))
 
 (defun $conf-mv-ptr-to-prev-token ()

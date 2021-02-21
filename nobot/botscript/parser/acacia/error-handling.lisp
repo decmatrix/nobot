@@ -14,7 +14,9 @@
            #:acacia-unknown-source-type
            #:acacia-empty-body-of-rule
            #:acacia-expected-empty-rule
-           #:cond-parser-error-handle))
+           #:cond-parser-error-handle
+           #:acacia-expected-empty-rule
+           #:acacia-undefined-rule))
 
 (in-package :nobot/botscript/parser/acacia/error-handling)
 
@@ -63,4 +65,24 @@
    (lambda (condition stream)
      (declare (ignore condition))
      (format stream "[ACACIA]: expected :empty rule as last rule in :or rule.~&"))))
+
+(define-condition acacia-expected-empty-rule (error)
+  ((rule
+    :initarg :rule
+    :initform nil
+    :accessor get-rule))
+  (:report
+   (lambda (condition stream)
+     (format stream "[ACACIA]: ~a can't be as first rule"
+             (get-rule condition)))))
+
+(define-condition acacia-undefined-rule (error)
+  ((rule
+    :initarg :rule
+    :initform nil
+    :accessor get-rule))
+  (:report
+   (lambda (condition stream)
+     (format stream "[ACACIA]: undefined rule ~a"
+             (get-rule condition)))))
 

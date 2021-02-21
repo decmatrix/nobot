@@ -4,6 +4,9 @@
 
 (uiop:define-package :nobot/botscript/lexer/delimiter
     (:use :cl)
+  (:import-from :anaphora
+                #:awhen
+                #:it)
   (:import-from :nobot/utils
                 #:to-symbol
                 #:reintern)
@@ -34,12 +37,13 @@
 
 (defun define-delimiter (char-table sym-table &key ch sym-idea description)
   (assert (and char-table sym-table ch sym-idea description))
-  (let ((del
-         (make-instance 'delimiter
-                        :char ch
-                        :sym (to-symbol sym-idea)
-                        :description description)))
-    (setf (gethash sym-idea sym-table) del)
+  (let* ((sym (to-symbol sym-idea))
+         (del
+          (make-instance 'delimiter
+                         :char ch
+                         :sym sym
+                         :description description)))
+    (setf (gethash sym sym-table) del)
     (setf (gethash ch char-table) del)))
 
 (define-delimiter *char-delimiter-table* *sym-delimiter-table*
@@ -82,22 +86,21 @@
   :sym-idea "newline"
   :description "newline")
 
-(defun get-delimiter (sym-or-char-or-key)
-  (or (gethash sym-or-char-or-key *char-delimiter-table*)
-      (gethash sym-or-char-or-key *sym-delimiter-table*)))
+(defun get-delimiter (sym-or-char)
+  (or (gethash sym-or-char *char-delimiter-table*)
+      (gethash sym-or-char *sym-delimiter-table*)))
 
-(defun is-delimiter-? (sym-or-char-or-key)
-  (get-delimiter sym-or-char-or-key))
+(defun is-delimiter-? (sym-or-char)
+  (get-delimiter sym-or-char))
 
-(defun delimiter-to (sym-or-char-or-key to)
+(defun delimiter-to (sym-or-char to)
   "to arg it :sym or :value or :description, or sym representations"
-  (let ((del (get-delimiter sym-or-char-or-key)))
-    (assert del)
+  (awhen (get-delimiter sym-or-char)
     (case to
       (:char
-       ($del-get-char del))
+       ($del-get-char it))
       (:sym
-       ($del-get-sym del))
+       ($del-get-sym it))
       (:description
-       ($del-get-description del))
+       ($del-get-description it))
       (t (error "unknown value of `to` arg: ~a, func doc" to)))))

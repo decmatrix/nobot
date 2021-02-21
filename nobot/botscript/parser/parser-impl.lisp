@@ -158,7 +158,8 @@
          (:terminal number-string)))
 
       (define-rule data-expr ()
-        (:rule data-seq))
+        (:and
+         (:rule data-seq)))
 
       (define-rule vertex-options ()
         (:and
@@ -193,13 +194,15 @@
          (:empty)))
 
       (define-rule expr ()
-        (:empty))
+        (:and
+         (:empty)))
 
       (define-rule item-list ()
         (:and
          (:rule item)
          (:rule item-tail-list)))
 
+      ;;TODO: bug with 
       (define-rule item-tail-list ()
         (:or
          (:and
@@ -209,7 +212,8 @@
          (:empty)))
 
       (define-rule item ()
-        (:rule literal))
+        (:and
+         (:rule literal)))
 
       (define-rule vertex-option ()
         (:and

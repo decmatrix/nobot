@@ -32,11 +32,11 @@
 
 (in-package :nobot/botscript/parser/acacia/parser-generator)
 
-;;TODO: define acacia error: unknown rule
 (defgeneric rule-> (rule-name &key first-fail-no-error)
   (:method (rule-name &key first-fail-no-error)
     (declare (ignore first-fail-no-error))
-    (error "unknown rule: [~a]" rule-name)))
+    (error 'acacia-undefined-rule
+           :rule rule-name)))
 
 (defmacro with-next-token (() &body body)
   `(let ((next ($conf-next-token)))
@@ -49,24 +49,30 @@
        ,(build-rule-body `(,body) `,rule-name))))
 
 (defun build-rule-body (quote-body-tree rule-name)
-  (labels ((%build (body-tree &key first-fail-no-error)
+  (labels ((%build (body-tree &key
+                              first-fail-no-error
+                              merge-sub-trees)
              (let ((root (car body-tree)))
                (case root
                  (:rule
                   (destructuring-bind (rule-name)
                       (cdr body-tree)
-                    `(rule-> ,(to-kword rule-name) :first-fail-no-error ,first-fail-no-error)))
+                    `(awhen (rule-> ,(to-kword rule-name) :first-fail-no-error ,first-fail-no-error)
+                       (list it))))
                  (:and
                   (let* ((sub-rules (cdr body-tree))
                          (first-rule (car sub-rules)))
                     (unless sub-rules
                       (error 'acacia-empty-body-of-rule
                              :rule :and))
-                    `(awhen ,(%build first-rule :first-fail-no-error first-fail-no-error)
+                    `(awhen ,(%build first-rule
+                                     :first-fail-no-error first-fail-no-error
+                                     :merge-sub-trees t)
                        (append
-                        (list ($conf-rule->term-sym ,rule-name))
+                        (unless ,merge-sub-trees
+                          (list ($conf-rule->term-sym ,rule-name)))
                         it
-                        ,@ (mapcar #'%build (cdr sub-rules))))))
+                        ,@ (mapcar (rcurry #'%build :merge-sub-trees t) (cdr sub-rules))))))
                  (:or
                   (let* ((sub-rules (cdr body-tree))
                          (last-rule (lastcar sub-rules)))
@@ -74,31 +80,43 @@
                       (error 'acacia-empty-body-of-rule
                              :rule :or))
                     ;;TODO: see issue #4
-                    `(append
-                      (list ($conf-rule->term-sym ,rule-name))
-                      (aif (or
-                            ,@ (mapcar (rcurry #'%build :first-fail-no-error t)
-                                       (butlast sub-rules))
-                            ,(if (is-empty-rule last-rule)
-                                 t
-                                 (%build last-rule :first-fail-no-error t)))
-                        (if (eq it t)
-                            nil
-                            it)
-                        (raise-bs-parser-error
-                         "error on rule ~a" ,rule-name)))))
+                    `(awhen
+                         (append
+                          (unless ,merge-sub-trees
+                            (list ($conf-rule->term-sym ,rule-name)))
+                          (aif (or
+                                ,@ (mapcar (rcurry #'%build
+                                                   :first-fail-no-error t
+                                                   :merge-sub-trees t)
+                                           (butlast sub-rules))
+                                ,(if (is-empty-rule last-rule)
+                                     t
+                                     (%build last-rule
+                                             :first-fail-no-error t
+                                             :merge-sub-trees t)))
+                            (if (eq it t)
+                                nil
+                                it)
+                            (raise-bs-parser-error
+                             "error on rule ~a" ,rule-name)))
+                       (when (cdr it)
+                         it))))
                  (:terminal
                   (destructuring-bind (sym &optional val)
                       (cdr body-tree)
                     (with-gensyms (converted-sym converted-val pos-list)
                       `(with-next-token ()
                          (let ((,converted-sym ($conf-token-rule->token-sym ',sym))
-                               (,converted-val ',(to-symbol val)))
+                               (,converted-val (if (characterp ,val)
+                                                   ($conf-terminal->sym ',sym ,val)
+                                                   ',(to-symbol val))))
                            (declare (ignorable ,converted-val))
-                           (if (and (token-typep next ,converted-sym)
-                                    ,(if val
-                                         `(token-value-equal-to next ,converted-val)
-                                         t))
+                           (if (and
+                                next
+                                (token-typep next ,converted-sym)
+                                ,(if val
+                                     `(token-value-equal-to next ,converted-val)
+                                     t))
                                (list (convert-token next :with-pos nil))
                                (if ,(if first-fail-no-error
                                         t
@@ -106,17 +124,24 @@
                                    (progn
                                      ($conf-mv-ptr-to-prev-token)
                                      nil)
-                                   (let ((,pos-list (get-position next)))
+                                   (let ((,pos-list
+                                          (if next
+                                              (get-position next)
+                                              (awhen (get-position ($conf-prev-token))
+                                                (cons (car it)
+                                                      (1+ (cdr it)))))))
                                      (raise-bs-parser-error
                                       "expected get: ~a, but got: ~a, at position line - ~a, column - ~a~a"
                                       ,(if val
                                            `($conf-terminal->description ',sym ,val)
                                            `($conf-token-rule->description ',sym))
-                                      ,(if val
-                                           `($conf-terminal->description ',sym (value-of-token next))
-                                           `($conf-token-rule->description (get-token-type next)))
+                                      (if next
+                                          ,(if val
+                                               `($conf-terminal->description ',sym (value-of-token next))
+                                               `($conf-token-rule->description (get-token-type next)))
+                                          "end of source")
                                       (cdr ,pos-list)
-                                      (1+ (car ,pos-list))
+                                      (car ,pos-list)
                                       (if (eq ($conf-get-source-type) :file)
                                           (format nil ", file: ~a."
                                                   ($conf-get-source))
@@ -125,7 +150,12 @@
                  (:empty t)
                  (t (error 'acacia-unknown-parser-rule
                            :unknown-rule root))))))
-    (%build (car quote-body-tree))))
+    (let* ((body-tree (car quote-body-tree))
+           (first-rule (car body-tree)))
+      (when (find first-rule '(:rule :empty))
+        (error 'acacia-expected-empty-rule
+               :rule first-rule))
+      (%build body-tree))))
 
 (defun is-empty-rule (rule)
   (and

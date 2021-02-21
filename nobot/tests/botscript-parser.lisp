@@ -57,15 +57,75 @@
   (<VERTEX-OPTION-NAME> (<KEYWORD> ACT))
   :vertex-option-name)
 
-(define-parser-test bs-parser.vertex-option-name.1
-    "act"
-  (<VERTEX-OPTION-NAME> (<KEYWORD> ACT))
-  :vertex-option-name)
-
 (define-parser-test bs-parser.vertex-option-name.2
     "type"
   (<VERTEX-OPTION-NAME> (<KEYWORD> TYPE))
   :vertex-option-name)
+
+(define-parser-test bs-parser.vertex-option.1
+    "act = in"
+  (<VERTEX-OPTION> (<VERTEX-OPTION-NAME> (<KEYWORD> ACT)) (<DELIMITER> ASSIGN)
+                   (<VERTEX-OPTION-VAL> (<KEYWORD> IN)))
+  :vertex-option)
+
+(define-parser-test bs-parser.item.1
+    "8080"
+  (<ITEM> (<LITERAL> (<NUMBER-STRING> 8080)))
+  :item)
+
+(define-parser-test bs-parser.item-tail-list.1
+    ", 1,3, \"js\""
+  (<ITEM-TAIL-LIST>
+   (<DELIMITER> COMMA) (<ITEM> (<LITERAL> (<NUMBER-STRING> 1)))
+   (<ITEM-TAIL-LIST>
+    (<DELIMITER> COMMA) (<ITEM> (<LITERAL> (<NUMBER-STRING> 3)))
+    (<ITEM-TAIL-LIST>
+     (<DELIMITER> COMMA)
+     (<ITEM> (<LITERAL> (<CHAR-STRING> "\"JS\""))))))
+  :item-tail-list)
+
+(define-parser-test bs-parser.item-list.1
+    "1, 2, \"js\", 5"
+  (<ITEM-LIST>
+   (<ITEM> (<LITERAL> (<NUMBER-STRING> 1)))
+   (<ITEM-TAIL-LIST>
+    (<DELIMITER> COMMA) (<ITEM> (<LITERAL> (<NUMBER-STRING> 2)))
+    (<ITEM-TAIL-LIST>
+     (<DELIMITER> COMMA)
+     (<ITEM> (<LITERAL> (<CHAR-STRING> "\"JS\"")))
+     (<ITEM-TAIL-LIST>
+      (<DELIMITER> COMMA)
+      (<ITEM> (<LITERAL> (<NUMBER-STRING> 5)))))))
+  :item-list)
+
+;;TODO: issue #14
+;; (define-parser-test bs-parser.)
+
+(define-parser-test bs-parser.data-seq.1
+    "[1, 2, \"hi\", 3]"
+  (<DATA-SEQ>
+   (<DELIMITER> O-SQ-BRACKET)
+   (<ITEM-LIST> (<ITEM> (<LITERAL> (<NUMBER-STRING> 1)))
+                (<ITEM-TAIL-LIST>
+                 (<DELIMITER> COMMA)
+                 (<ITEM> (<LITERAL> (<NUMBER-STRING> 2)))
+                 (<ITEM-TAIL-LIST>
+                  (<DELIMITER> COMMA)
+                  (<ITEM> (<LITERAL> (<CHAR-STRING> "\"HI\"")))
+                  (<ITEM-TAIL-LIST>
+                   (<DELIMITER> COMMA)
+                   (<ITEM> (<LITERAL> (<NUMBER-STRING> 3)))))))
+   (<DELIMITER> C-SQ-BRACKET))
+  :data-seq)
+
+;;TODO: stmt, stmt-list -> need grammar for expr
+;;TODO: vertex-options, see issue #14
+;;TODO: data-expr, see issue #15
+;;TODO: string ot nume, see issue #16
+
+
+
+
 
 
 

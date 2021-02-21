@@ -38,10 +38,7 @@
         ;; Level 3: generate project
         (regist :project-generation (generate-project))
         ;; Level 4: generate code
-        (regist :code-generation (generate-code))
-        ;; Level 5: final processing
-        ;; ???
-        ))))
+        (regist :code-generation (generate-code))))))
 
 (defun *run-and-burn-in-runtime* ()
   ;; WIP

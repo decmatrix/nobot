@@ -5,11 +5,12 @@
 (uiop:define-package :nobot/botscript/post
     (:use :cl)
   (:export #:bot-project-info
-           #:botscript-post-processing))
+           #:botscript-post-processing
+           #:botscript-post-process-info))
 
 (in-package :nobot/botscript/post)
 
-(defclass bot-project-info () ())
+(defclass botscript-post-process-info () ())
 
 (defun botscript-post-processing ()
   )

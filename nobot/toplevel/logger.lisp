@@ -9,7 +9,7 @@
                 #:add-warn-log
                 #:add-debug-log
                 #:add-error-log)
-  (:import-from :nobot/utils
+  (:import-from :nobot/logger
                 #:logger-configuration)
   (:export #:configure-logger))
 

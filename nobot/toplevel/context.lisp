@@ -8,6 +8,8 @@
                 #:acacia-packed-result)
   (:import-from :nobot/botscript
                 #:bot-project-info)
+  (:import-from :nobot/projectgen/common
+                #:projectgen-info)
   (:export #:with-translator-context
            #:add-info-log
            #:add-debug-log
@@ -21,7 +23,7 @@
            #:get-source-type-from-context
            #:get-parser-result
            #:get-post-processing-result
-           #:get-project-gen-result
+           #:get-projectgen-result
            #:get-code-gen-result
            #:regist))
 
@@ -58,11 +60,10 @@
     :initform nil
     :type (or null bot-project-info)
     :accessor get-post-processing-result)
-   (project-gen-result
+   (projectgen-result
     :initform nil
-    ;; TODO: set type
-    :accessor get-project-gen-result
-    )
+    :type (or null projectgen-info)
+    :accessor get-projectgen-result)
    (code-gen-result
     :initform nil
     ;; TODO: set type
