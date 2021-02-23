@@ -12,6 +12,7 @@
    #:*run-and-burn-in-runtime*
    #:*run-and-burn-as-server*
    ;; from context
+   #:*context*
    #:add-info-log
    #:add-warn-log
    #:add-error-log

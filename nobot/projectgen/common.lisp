@@ -61,11 +61,11 @@
   (let ((*project*
          (make-bot-project
           (get-projectgen-result *context*))))
-    (generate-project (get-project-type *project*))
+    (create-project (get-project-type *project*))
     (make-projectgen-info)))
 
 (defun make-bot-project (post-process-instance)
-  )
+  (declare (ignore post-process-instance)))
 
 (defun make-projectgen-info ()
   (make-instance

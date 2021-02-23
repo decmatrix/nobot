@@ -11,21 +11,24 @@
   (:import-from :nobot/projectgen/utils
                 #:make-path)
   (:import-from :nobot/projectgen/common
-                #:generate-project
+                #:create-project
                 #:*project*
-                #:get-project-path))
+                #:get-project-path
+                #:get-project-author
+                #:get-project-version
+                #:get-project-name))
 
 (in-package :nobot/projectgen/npm)
 
-(defmethod generate-project ((project-type (eql :npm)))
-  (let ((file-path (get-file-path
+(defmethod create-project ((project-type (eql :npm)))
+  (let ((file-path (make-pathname
                     :name "package"
                     :type "json")))
     (with-open-file
         (stream
          file-path
          :direction :output)
-      (enocode
+      (encode
        (hash-table-plist
         `(
           "name"        ,(get-project-name *project*)
@@ -34,7 +37,7 @@
           "main"        "index.js"
           "author"      ,(get-project-author *project*)
           "scripts"     ,(hash-table-plist
-                          "test" "echo \"Error: no test specified\" && exit 1")
+                          '("test" "echo \"Error: no test specified\" && exit 1"))
           "license"     "<none>"))
        stream))))
 

@@ -4,9 +4,13 @@
 
 (uiop:define-package :nobot/codegen/top
     (:use :cl)
-  (:export #:generate-code))
+  (:export #:generate-code
+           #:codegen-info))
 
 (in-package :nobot/codegen/top)
+
+(defclass codegen-info ()
+  ())
 
 (defun generate-code ()
   )

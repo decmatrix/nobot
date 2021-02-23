@@ -8,7 +8,7 @@
                 #:plist-hash-table)
   (:import-from :yason
                 #:encode)
-  (:exports #:make-path))
+  (:export #:make-path))
 
 (defun make-path (path)
   (merge-pathnames

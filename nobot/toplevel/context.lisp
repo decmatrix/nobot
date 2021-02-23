@@ -6,13 +6,8 @@
     (:use :cl)
   (:import-from :nobot/logger
                 #:log-info)
-  (:import-from :nobot/botscript/parser/acacia
-                #:acacia-packed-result)
-  (:import-from :nobot/botscript
-                #:bot-project-info)
-  (:import-from :nobot/projectgen/common
-                #:projectgen-info)
-  (:export #:with-translator-context
+  (:export #:*context*
+           #:with-translator-context
            #:add-info-log
            #:add-debug-log
            #:add-warn-log
@@ -56,42 +51,35 @@
     :accessor get-error-stack)
    (parser-result
     :initform nil
-    :type (or null acacia-packed-result)
     :accessor get-parser-result)
    (post-processing-result
     :initform nil
-    :type (or null bot-project-info)
     :accessor get-post-processing-result)
    (projectgen-result
     :initform nil
-    :type (or null projectgen-info)
     :accessor get-projectgen-result)
    (code-gen-result
     :initform nil
-    ;; TODO: set type
     :accessor get-code-gen-result
     )))
-
-;; TODO: maybe no need macros, use func ?
-(defmacro regist (option value)
-  `(setf ,(case option
-            (:parser
-             `(progn
-                (log-info "parse botscript...")
-                (get-parser-result *context*)))
-            (:post-processing
-             `(progn
-                (log-info "botscrit post processing...")
-                (get-post-processing-result *context*)))
-            (:project-generation
-             `(progn
-                (log-info "project generation...")
-                (get-project-gen-result *context*)))
-            (:code-generation
-             `(progn
-                (log-info "code generation...")
-                (get-code-gen-result *context*))))
-         ,value))
+(defun regist (option value)
+  (case option
+    (:parser
+     (progn
+       (log-info "parse botscript...")
+       (setf (get-parser-result *context*) value)))
+    (:post-processing
+     (progn
+       (log-info "botscrit post processing...")
+       (setf (get-post-processing-result *context*) value)))
+    (:project-generation
+     (progn
+       (log-info "project generation...")
+       (setf (get-projectgen-result *context*) value)))
+    (:code-generation
+     (progn
+       (log-info "code generation...")
+       (setf (get-code-gen-result *context*) value)))))
 
 (defmacro with-translator-context ((&key source-type source) &body body)
   `(let ((*context*
