@@ -8,11 +8,15 @@
                 #:with-gensyms)
   (:import-from :nobot/logger
                 #:log-error)
-  (:export #:raise-bs-lexer-error
-           #:raise-bs-parser-error
-           #:lexer-error-handler
-           #:toplevel-error-handler
-           #:get-error-msg))
+  (:export
+   ;; Level 1 errors
+   #:raise-bs-lexer-error
+   #:raise-bs-parser-error
+   ;; Level 2 errors
+   #:raise-bs-post-process-error
+   #:lexer-error-handler
+   #:toplevel-error-handler
+   #:get-error-msg))
 
 (in-package :nobot/toplevel/error-handling)
 

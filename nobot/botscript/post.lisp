@@ -6,6 +6,8 @@
     (:use :cl)
   (:import-from :nobot/utils/common-utils
                 #:to-keyword)
+  (:import-from :nobot/toplevel/error-handling
+                #:raise-bs-post-process-error)
   (:import-from :nobot/botscript/parser/acacia/tree-tools
                 #:get-sub-tree)
   (:export #:bot-project-info
@@ -13,12 +15,6 @@
            #:botscript-post-process-info))
 
 (in-package :nobot/botscript/post)
-
-(defparameter *avaliable-compiler-options*
-  '(:lang))
-
-(defparameter *avaliable-bot-options*
-  '(:name :port :host))
 
 (defclass botscript-post-process-info ()
   ((bot-options
@@ -49,7 +45,10 @@
      (lambda (option)
        (let ((id (to-keyword (second (second option))))
              (value (second (fourth option))))
-         (if (find))))
+         (if (is-avaliable-bot-option-? id)
+             (setf (gethash id table)
+                   (check-option-value value))
+             ())))
      (get-sub-tree bot-options-tree :opt :all))
     table))
 
@@ -59,6 +58,20 @@
      (lambda (option)
        (let ((id (to-keyword (second (second option))))
              (value (second (fourth option))))
-         ))
+         (if (is-avaliable-compiler-option-? id)
+             (setf (gethash id table)
+                   (check-option-value value))
+             ())))
      (get-sub-tree bot-options-tree :opt :all))
     table))
+
+(defun is-avaliable-compiler-option-? (option)
+  (find option '(:lang) :test #'eq))
+
+(defun is-avaliable-bot-option-? (option)
+  (find option '(:name :port :host) :test #'eq))
+
+(defun check-option-value (value type)
+  (case type
+    (t (raise-bs-post-process-error
+        "expected ~a type, but got ~a for option in file: "))))
