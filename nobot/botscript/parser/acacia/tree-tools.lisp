@@ -38,7 +38,7 @@
   (equals (normolize-tree obj1)
           (normolize-tree obj2)))
 
-(defun get-sub-tree (tree sort-type)
+(defun get-sub-tree (tree sort-type &key )
   )
 
 (defmethod get-sub-tree-aux ((tree list))
