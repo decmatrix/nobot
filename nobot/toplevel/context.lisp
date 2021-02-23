@@ -4,6 +4,8 @@
 
 (uiop:define-package :nobot/toplevel/context
     (:use :cl)
+  (:import-from :nobot/logger
+                #:log-info)
   (:import-from :nobot/botscript/parser/acacia
                 #:acacia-packed-result)
   (:import-from :nobot/botscript
@@ -74,20 +76,30 @@
 (defmacro regist (option value)
   `(setf ,(case option
             (:parser
-             `(get-parser-result *context*))
+             `(progn
+                (log-info "parse botscript...")
+                (get-parser-result *context*)))
             (:post-processing
-             `(get-post-processing-result *context*))
+             `(progn
+                (log-info "botscrit post processing...")
+                (get-post-processing-result *context*)))
             (:project-generation
-             `(get-project-gen-result *context*))
+             `(progn
+                (log-info "project generation...")
+                (get-project-gen-result *context*)))
             (:code-generation
-             `(get-code-gen-result *context*)))
+             `(progn
+                (log-info "code generation...")
+                (get-code-gen-result *context*))))
          ,value))
 
 (defmacro with-translator-context ((&key source-type source) &body body)
-  `(let ((*context* (make-instance 'context
-                                   :source-type (when (is-source-type-? ,source-type)
-                                                  ,source-type)
-                                   :source ,source)))
+  `(let ((*context*
+          (make-instance
+           'context
+           :source-type (when (is-source-type-? ,source-type)
+                          ,source-type)
+           :source ,source)))
      ,@body))
 
 (defun add-info-log (str)
