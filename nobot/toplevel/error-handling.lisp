@@ -43,6 +43,13 @@
      (bs-lexer-error (c)
        (funcall ,action-on-catch))))
 
+;; Level 2 errors
+(define-condition bs-post-process-error (error) ())
+
+(defmacro raise-bs-post-process-error (msg &rest rest)
+  `(error 'bs-post-process-error
+          :error-msg (log-error ,msg ,@rest)))
+
 (defmacro toplevel-error-handler (&body body)
   `(handler-case
        (progn ,@body)

@@ -10,12 +10,14 @@
   (:import-from :nobot/botscript/parser/acacia/result-packaging
                 #:acacia-packed-result
                 #:acacia-get-parse-tree)
-  (:export #:same-parse-tree-?))
+  (:export #:same-parse-tree-?
+           #:get-sub-tree))
 
 (in-package :nobot/botscript/parser/acacia/tree-tools)
 
 (defgeneric same-parse-tree-? (obj1 obj2))
 (defgeneric normolize-tree (tree))
+(defgeneric get-sub-tree-aux (tree))
 
 (defmethod normolize-tree ((tree list))
   (mapcar (lambda (elm)
@@ -35,6 +37,12 @@
 (defmethod same-parse-tree-? ((obj1 list) (obj2 list))
   (equals (normolize-tree obj1)
           (normolize-tree obj2)))
+
+(defun get-sub-tree (tree sort-type)
+  )
+
+(defmethod get-sub-tree-aux ((tree list))
+  )
 
 
 
