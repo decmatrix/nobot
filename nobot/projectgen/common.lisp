@@ -6,7 +6,7 @@
     (:use :cl)
   (:import-from :nobot/toplevel/context
                 #:*context*
-                #:get-projectgen-result)
+                #:get-post-processing-result)
   (:import-from :nobot/projectgen/utils
                 #:make-path)
   (:import-from :nobot/botscript
@@ -60,7 +60,7 @@
 (defun generate-project ()
   (let ((*project*
          (make-bot-project
-          (get-projectgen-result *context*))))
+          (get-post-processing-result *context*))))
     (create-project (get-project-type *project*))
     (make-projectgen-info)))
 

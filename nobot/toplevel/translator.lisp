@@ -4,12 +4,12 @@
 
 (uiop:define-package :nobot/toplevel/translator
     (:use :cl)
-  (:import-from :nobot/botscript
-                #:parse-file
-                #:botscript-post-processing)
   (:import-from :nobot/toplevel/context
                 #:with-translator-context
                 #:regist)
+  (:import-from :nobot/botscript
+                #:parse-file
+                #:botscript-post-process)
   (:import-from :nobot/projectgen
                 #:generate-project)
   (:import-from :nobot/codegen
@@ -34,7 +34,7 @@
         ;; Level 1: parse source file and get instance with tree of code
         (regist :parser (parse-file file :return-instance t)) ;; remove passing args, use context
         ;; Level 2: post parsing processing
-        (regist :post-processing (botscript-post-processing))
+        (regist :post-processing (botscript-post-process))
         ;; Level 3: generate project
         (regist :project-generation (generate-project))
         ;; Level 4: generate code
