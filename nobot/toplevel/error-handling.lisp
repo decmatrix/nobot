@@ -12,11 +12,14 @@
    ;; Level 1 errors
    #:raise-bs-lexer-error
    #:raise-bs-parser-error
+   #:lexer-error-handler
+   #:get-error-msg
    ;; Level 2 errors
    #:raise-bs-post-process-error
-   #:lexer-error-handler
-   #:toplevel-error-handler
-   #:get-error-msg))
+   ;; Level 3 errors
+   #:raise-projectgen-error
+   ;; Toplevel errors
+   #:toplevel-error-handler))
 
 (in-package :nobot/toplevel/error-handling)
 
@@ -54,6 +57,15 @@
   `(error 'bs-post-process-error
           :error-msg (log-error ,msg ,@rest)))
 
+;; Level 3 errors
+(define-condition projectgen-error (error) ())
+
+(defmacro raise-projectgen-error (msg &rest rest)
+  `(error 'projectgen-error
+          :error-msg (log-error ,msg ,@rest)))
+
+
+;; Toplevel errors
 (defmacro toplevel-error-handler (&body body)
   `(handler-case
        (progn ,@body)

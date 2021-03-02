@@ -8,4 +8,5 @@
           :nobot/botscript/types/parser-types
           :nobot/botscript/types/types-utils)
   (:export #:get-from-type
-           #:get-type-value-list))
+           #:get-type-value-list
+           #:convert-type))

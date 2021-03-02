@@ -4,11 +4,15 @@
 
 (uiop:define-package :nobot/botscript/post
     (:use :cl)
-  (:import-from :nobot/utils/common-utils
+  (:import-from :nobot/utils
                 #:to-keyword)
+  (:import-from :nobot/botscript/types/types-utils
+                #:get-from-type)
   (:import-from :nobot/toplevel/context
                 #:*context*
                 #:get-parser-result)
+  (:import-from :nobot/botscript/types
+                #:convert-type)
   (:import-from :nobot/toplevel/error-handling
                 #:raise-bs-post-process-error)
   (:import-from :nobot/botscript/parser/acacia/result-packaging
@@ -38,7 +42,7 @@
     :reader get-parse-tree)))
 
 (defparameter *avaliable-compiler-options*
-  '(:lang))
+  '(:lang :author :version))
 
 (defparameter *avaliable-bot-options*
   '(:name :port :host))
@@ -64,7 +68,8 @@
              (value (second (fourth option))))
          (if (is-avaliable-bot-option-? id)
              (setf (gethash id table)
-                   (check-option-value value))
+                   (and (check-option-value-type (first value) id)
+                        (second value)))
              (raise-bs-post-process-error
               "not avaliable compiler option: ~a~a"
               id
@@ -77,10 +82,11 @@
     (mapc
      (lambda (option)
        (let ((id (to-keyword (second (second option))))
-             (value (second (fourth option))))
+             (value (fourth option)))
          (if (is-avaliable-compiler-option-? id)
              (setf (gethash id table)
-                   (check-option-value value))
+                   (and (check-option-value-type (first value) id)
+                        (second value)))
              (raise-bs-post-process-error
               "not avaliable bot option: ~a~a"
               id
@@ -94,14 +100,33 @@
 (defun is-avaliable-bot-option-? (option)
   (find option *avaliable-bot-options* :test #'eq))
 
-(defun check-option-value (value type)
-  (case type
-    (t (raise-bs-post-process-error
-        "expected ~a type, but got ~a for option~a"
-        type
-        (make-source-msg)))))
+(defun check-option-value-type (type id)
+  (let ((converted-type (convert-type type)))
+    (case id 
+      ((:lang :name :host :version :author)
+       (or (eq converted-type :char-string)
+           (raise-type-error
+            converted-type
+            :char-string
+            id)))
+      (:port
+       (or (eq converted-type :number-string)
+           (raise-type-error
+            converted-type
+            :number-string
+            id)))
+      (t (raise-bs-post-process-error
+          "expected ~a type, but got ~a for option~a"
+          type
+          (make-source-msg))))))
 
-(defun type-check (value))
+(defun raise-type-error (input-type expected-type option)
+  (raise-bs-post-process-error
+   "expected ~a type, but got ~a for option ~a~a"
+   (get-from-type input-type :token :description)
+   (get-from-type expected-type :token :description)
+   option
+   (make-source-msg)))
 
 (defun make-source-msg ()
   (if (eq (acacia-get-source-type *parser-result*) :file)
