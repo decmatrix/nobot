@@ -10,7 +10,8 @@
   (:export #:is-valid-file-format-?
            #:get-program-version
            #:when-option
-           #:it-opt))
+           #:it-opt
+           #:get-pwd))
 
 (in-package :nobot/utils/program-utils)
 
@@ -28,3 +29,6 @@
   (let ((system (asdf:find-system :nobot nil)))
     (when (and system (slot-boundp system 'asdf:version))
       (asdf:component-version system))))
+
+(defun get-pwd ()
+  (truename "."))

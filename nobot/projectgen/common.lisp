@@ -5,7 +5,8 @@
 (uiop:define-package :nobot/projectgen/common
     (:use :cl)
   (:import-from :nobot/utils
-                #:to-keyword)
+                #:to-keyword
+                #:get-pwd)
   (:import-from :nobot/toplevel/error-handling
                 #:raise-projectgen-error)
   (:import-from :nobot/toplevel/context
@@ -102,7 +103,7 @@
      :project-path (if (eq (acacia-get-source-type *parser-result*)
                            :string)
                        (error "string as source type in projectgen")
-                       (make-project-path (acacia-get-source *parser-result*))))))
+                       (make-project-path project-name)))))
 
 (defun determine-project-type (project-lang)
   (case project-lang
@@ -119,10 +120,13 @@
      (make-source-msg)))
   (format nil "~a-project" bot-name))
 
-(defun make-project-path (path)
-  (declare (ignore path))
-  ;;TODO: implement me
-  )
+(defun make-project-path (project-name)
+  (let ((project-path
+         (merge-pathnames
+          (get-pwd)
+          (make-pathname :name project-name))))
+    (ensure-directories-exist project-path)
+    project-path))
 
 (defun make-projectgen-info ()
   (make-instance

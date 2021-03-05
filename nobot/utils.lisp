@@ -13,6 +13,7 @@
    #:it-opt
    #:is-valid-file-format-?
    #:get-progam-version
+   #:get-pwd
    ;; common utils
    #:equals
    #:split-list
