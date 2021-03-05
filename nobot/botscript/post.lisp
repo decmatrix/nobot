@@ -91,7 +91,7 @@
               "not avaliable bot option: ~a~a"
               id
               (make-source-msg)))))
-     (get-sub-tree bot-options-tree :opt :all))
+     (get-sub-tree compiler-options-tree :opt :all))
     table))
 
 (defun is-avaliable-compiler-option-? (option)

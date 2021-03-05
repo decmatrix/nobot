@@ -4,7 +4,7 @@
 
 (uiop:define-package :nobot/projectgen/common
     (:use :cl)
-  (:import-from :nboto/utils
+  (:import-from :nobot/utils
                 #:to-keyword)
   (:import-from :nobot/toplevel/error-handling
                 #:raise-projectgen-error)
@@ -120,6 +120,7 @@
   (format nil "~a-project" bot-name))
 
 (defun make-project-path (path)
+  (declare (ignore path))
   ;;TODO: implement me
   )
 
