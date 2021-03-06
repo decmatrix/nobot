@@ -12,6 +12,7 @@
            #:let-when
            #:to-symbol
            #:to-keyword
+           #:to-string
            #:pos-of-str))
 
 (in-package :nobot/utils/common-utils)
@@ -55,6 +56,12 @@
   (to-symbol str
              :case-sensitive case-sensitive
              :to-package :keyword))
+
+(defun to-string (sym &key case-sensitive)
+  (let ((str (string sym)))
+    (if case-sensitive
+        str
+        (string-downcase str))))
 
 (defun pos-of-str (string)
   "pos: (x . y)"

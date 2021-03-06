@@ -3,4 +3,5 @@
 
 
 (uiop:define-package :nobot/codegen/js
-    (:use :cl))
+    (:use :cl
+          :nobot/codegen/js/core))
