@@ -1,7 +1,130 @@
-Copyright (c) 2021 Bohdan Sokolovskyi
-Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+// Copyright (c) 2021 Bohdan Sokolovskyi
+// Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
 
 ########################### FOR PARSER ###########################
+
+<script> ::= <compiler-options> <bot-declaration>
+
+<compiler-options> ::= <compiler-option> <compiler-options>
+                       | <empty>
+
+<compiler-option> ::= <compiler-option-name> <string-or-number> ';'
+
+<compiler-option-name> ::= '@codegen'
+
+<bot-declarations> ::= <bot-options>
+                       <var-declarations>
+                       <start-from-stmt>
+                       <state-points-declarations>
+                       <state-actions-declarations>
+
+<bot-options> ::= 'options' '{' <bot-options-list> '}'
+
+<bot-options-list> ::= <bot-option> <bot-options-list>
+                       | <empty>
+
+<bot-option> ::= <id> ':' <string-or-number> ';'
+
+<var-declarations> ::= 'vars' '{' <var-decls-list> '}'
+                       | <empty>
+
+<var-decls-list> ::= <vad-decl> <var-decls-list>
+                     | <empty>
+
+
+<var-decl> ::= <id> ':' <literal> ';'
+
+<start-from-stmt> ::= 'start' 'from' <id> ';'
+
+<state-points-declarations> ::= 'state-points' '{' <state-points-decls> '}'
+
+<state-points-decls> ::= <state-point-decl> <state-points-decls>
+                         | <empty>
+
+<state-point-decl> ::= <id> ':' '{' <state-point-options> '}'
+
+<state-point-options> ::= <state-point-option> <state-point-options>
+                          | <empty>
+
+<state-point-option> ::= <id> ':' <id> ';'
+
+<state-actions-declarations> ::= 'state-actions' '{' <state-actions-decls> '}'
+
+<state-actions-decls> ::= <state-decl> <state-actions-decls>
+                          | <empty>
+
+<state-decl> ::= <id> ':' '{' <stmt-list> '}'
+
+<stmt-list> ::= <stmt> <stmt-list>
+                | <empty>
+
+<stmt> ::= <if-stmt>
+           | <expr> ';'
+
+<expr> ::= <gotov-expr>
+           | <say-expr>
+           | <save-to-expr>
+           | <empty>
+
+<gotov-expr> ::= 'gotov' <id>
+
+<say-expr> ::= 'say' <say-expr-args>
+
+<say-expr-args> ::= <say-expr-arg> <rest-say-expr-args>
+
+<say-expr-arg> ::= <char-string>
+                   | <number-string>
+                   | <id>
+
+<rest-say-expr-args> ::= <say-expr-arg> <rest-say-expr-args> |
+                         <empty>
+
+<save-to-expr> ::= 'save' <literal-or-id> 'to' <id>
+
+<if-stmt> ::= 'if' <cond-expr> '{' <stmt-list> '}' <else-block>
+
+<else-block> ::= 'else' '{' <stmt-list> '}'
+                 | <empty>
+
+<cond-expr> ::= <logic-expr>
+
+<logic-expr> ::= <comparison>
+
+<comparison> ::= <eql-expr> '==' <eql-expr>
+
+<eql-expr> ::= <id>
+               | <literal>
+               
+<literal-or-id> ::= <literal>
+                    | <id>
+
+<string-or-number> ::= <char-string>
+                       | <number-string>
+
+<literal> ::= <char-string>
+              | <num-string>
+              | <list>
+              | 'none'
+
+<list> ::= '[' <literal-list> ']'
+
+<literal-list> ::= <literal> <rest-literal-list>
+                   | <empty>
+
+<rest-literal-list> ::= ',' <literal> <rest-literal-list>
+                        | <empty>
+
+
+
+
+
+// old grammar
+
+
+
+
+
 
 <script> ::= <compiler-options> <bot-options> <data-decl-list> <vertex-decl-list>
              <action-decl-list> <start-stmt>

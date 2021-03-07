@@ -39,6 +39,9 @@
       (generate-bot-options-instance)
       (generate-bot-instance))))
 
+(defun generate-js-tree ()
+  )
+
 ;;TODO: generate comment with full description about project
 (defun generate-header ()
   (build-multi-comment

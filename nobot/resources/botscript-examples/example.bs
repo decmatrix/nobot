@@ -1,0 +1,74 @@
+@codegen "js";
+
+bot {
+    options {
+        name: "Test";
+        port: 8082;
+        host: "localhost";
+        author: "Bohdan Sokolovskyi";
+        version: "0.0.1";
+    }
+
+    vars {
+        start-command: "/start";
+        greetings: ["Hi", "Hello", "Hey you"];
+        user-name: none;
+    }
+
+    start from a;
+
+    state-points {
+        a: {
+            act: act-a;
+            type: in;
+        }
+
+        b: {
+            act: act-b;
+            type: out;
+        }
+
+        c: {
+            act: act-c;
+            type: out;
+        }
+
+        default: {
+            act: act-defualt;
+            type: out;
+        }
+    }
+
+    state-actions {
+        act-a: {
+            if input == start-command {
+                say "Hello";
+                gotov b;
+            } else {
+                gotov default;
+            }
+
+            if input in greetings {
+                gotov a;
+            } else {
+                gotov default;
+            }
+        }
+
+        act-b: {
+            say "What is your name ?";
+            gotov c;
+        }
+
+        act-c: {
+            save input to user-name;
+            say "Hello" input;
+            gotov a;
+        }
+
+        act-default {
+            say "Sorry, i can't understand you";
+            gotov a;
+        }
+    }
+}
