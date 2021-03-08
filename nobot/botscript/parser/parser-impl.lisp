@@ -49,191 +49,273 @@
                           :source-type (get-source-type (get-tokens-source))
                           :source (get-source (get-tokens-source)))
                          :pack-result return-instance)
-      
       (define-rule script ()
         (:and
          (:rule compiler-options)
-         (:rule bot-options)
-         (:rule data-decl-list)
-         (:rule vertex-decl-list)))
+         (:rule bot-declaration)))
 
       (define-rule compiler-options ()
+        (:or
+         (:and
+          (:rule compiler-option)
+          (:rule compiler-options))
+         (:empty)))
+
+      (define-rule compiler-option ()
         (:and
-         (:terminal keyword "c-opts")
-         (:rule c-opts-block)))
+         (:rule compiler-option-name)
+         (:rule string-or-number)
+         (:terminal delimiter ";" :exclude-from-tree)))
+
+      (define-rule compiler-option-name ()
+        (:and
+         (:terminal keyword "@codegen")))
+
+      (define-rule bot-declarations ()
+        (:and
+         (:rule bot-options)
+         (:rule var-declarations)
+         (:rule start-from-stmt)
+         (:rule state-points-declarations)
+         (:rule state-actions-declarations)))
 
       (define-rule bot-options ()
         (:and
-         (:terminal keyword "bot-opts")
-         (:rule bot-opts-block)))
+         (:terminal keyword "options" :exclude-from-tree)
+         (:terminal delimiter "{" :exclude-from-tree)
+         (:rule bot-options-list)
+         (:terminal delimiter "}" :exclude-from-tree)))
 
-      (define-rule data-decl-list ()
+      (define-rule bot-options-list ()
         (:or
          (:and
-          (:rule data-decl)
-          (:rule data-decl-list))
+          (:rule bot-option)
+          (:rule bot-options-list :as-single-list))
          (:empty)))
 
-      (define-rule vertex-decl-list ()
+      (define-rule bot-option ()
+        (:and
+         (:terminal id)
+         (:terminal delimiter ":" :exclude-from-tree)))
+
+      (define-rule var-declarations ()
+        (:and
+         (:terminal keyword "vars" :exclude-from-tree)
+         (:terminal delimiter "{" :exclude-from-tree)
+         (:rule var-decls-list)
+         (:terminal delimiter "}" :exclude-from-tree)))
+
+      (define-rule var-decls-list ()
         (:or
          (:and
-          (:rule vertex-decl)
-          (:rule vertex-decl-list))
+          (:rule var-decl)
+          (:rule var-decls-list :as-single-list))
          (:empty)))
 
-      (define-rule action-decl-list ()
+      (define-rule var-decl ()
+        (:and
+         (:terminal id)
+         (:terminal delimiter ":" :exclude-from-tree)
+         (:rule literal)
+         (:terminal delimiter ";")))
+
+      (define-rule start-from-stmt ()
+        (:and
+         (:terminal keyword "start" :exclude-from-tree)
+         (:terminal keyword "from" :exclude-from-tree)
+         (:terminal id)
+         (:terminal delimiter ";" :exclude-from-tree)))
+
+      (define-rule state-points-declarations ()
+        (:and
+         (:terminal keyword "state-points" :exclude-from-tree)
+         (:terminal delimiter "{" :exclude-from-tree)
+         (:rule state-points-decls)
+         (:terminal delimiter "}" :exclude-from-tree)))
+
+      (define-rule state-points-decls ()
         (:or
          (:and
-          (:rule action-decl)
-          (:rule action-decl-list))
+          (:rule state-point-decl)
+          (:rule state-points-decls :as-single-list))
          (:empty)))
 
-      (define-rule start-stmt ()
+      (define-rule state-point-decl ()
         (:and
-         (:terminal keyword "start")
-         (:terminal keyword "from")
-         (:terminal id)))
-
-      ;;TODO: redundant rule this and next
-      (define-rule c-opts-block ()
-        (:and
-         (:terminal delimiter #\{)
-         (:rule opts-list)
-         (:terminal delimiter #\})))
-
-      (define-rule bot-opts-block ()
-        (:and
-         (:terminal delimiter #\{)
-         (:rule opts-list)
-         (:terminal delimiter #\})))
-
-      (define-rule data-decl ()
-        (:and
-         (:terminal keyword "letd")
          (:terminal id)
-         (:rule data-expr)))
+         (:terminal delimiter ":" :exclude-from-tree)
+         (:terminal delimiter "{" :exclude-from-tree)
+         (:rule state-point-options)
+         (:terminal delimiter "}" :exclude-from-tree)))
 
-      (define-rule vertex-decl ()
+      (define-rule state-point-options ()
+        (:or
+         (:and
+          (:rule state-point-option)
+          (:rule state-point-options :as-single-list))
+         (:empty)))
+
+      (define-rule state-point-option ()
         (:and
-         (:terminal keyword "letv")
          (:terminal id)
-         (:rule vertex-options)))
-
-      (define-rule action-decl ()
-        (:and
-         (:terminal keyword "def-act")
+         (:terminal delimiter ":" :exclude-from-tree)
          (:terminal id)
-         (:rule stmt-block)))
+         (:terminal delimiter ";" :exclude-from-tree)))
 
-      (define-rule stmt-block ()
+      (define-rule state-actions-declarations ()
         (:and
-         (:terminal delimiter #\{)
+         (:terminal keyword "state-actions" :exclude-from-tree)
+         (:terminal delimiter "{" :exclude-from-tree)
+         (:rule state-actions-decls)))
+
+      (define-rule state-actions-decls ()
+        (:and
+         (:terminal keyword "state-actions" :exclude-from-tree)
+         (:terminal delimiter "{" :exclude-from-tree)
+         (:rule state-actions-decls)
+         (:terminal delimiter "}" :exclude-from-tree)))
+
+      (define-rule state-actions-decls ()
+        (:or
+         (:and
+          (:rule state-decl)
+          (:rule state-actions-decls :as-single-list))
+         (:emprty)))
+
+      (define-rule state-decl ()
+        (:and
+         (:terminal id)
+         (:terminal delimiter ":")
+         (:terminal delimiter "{")
          (:rule stmt-list)
-         (:terminal delimiter #\})))
-
-      (define-rule opts-list ()
-        (:or
-         (:and
-          (:rule opt)
-          (:rule opts-tail-list))
-         (:empty)))
-
-      (define-rule opt ()
-        (:and
-         (:terminal id)
-         (:terminal delimiter #\:)
-         (:rule string-or-num)))
-
-      (define-rule opts-tail-list ()
-        (:or
-         (:and
-          (:terminal delimiter #\,)
-          (:rule opt)
-          (:rule opts-tail-list))
-         (:empty)))
-
-      (define-rule string-or-num ()
-        (:or
-         (:terminal string)
-         (:terminal number-string)))
-
-      (define-rule data-expr ()
-        (:and
-         (:rule data-seq)))
-
-      (define-rule vertex-options ()
-        (:and
-         (:terminal delimiter #\[)
-         (:rule vertex-option-list)
-         (:terminal delimiter #\])))
+         (:terminal delimiter "}")))
 
       (define-rule stmt-list ()
         (:or
          (:and
           (:rule stmt)
-          (:rule stmt-list))
+          (:rule stmt-list :as-single-list))
          (:empty)))
 
       (define-rule stmt ()
-        (:and
-         (:rule expr)
-         (:terminal delimiter #\Newline)))
-
-      (define-rule data-seq ()
-        (:and
-         (:terminal delimiter #\[)
-         (:rule item-list)
-         (:terminal delimiter #\])))
-
-      (define-rule vertex-option-list ()
         (:or
+         (:rule if-stmt)
          (:and
-          (:rule vertex-option)
-          (:terminal delimiter #\,)
-          (:rule vertex-option-list))
-         (:empty)))
+          (:rule expr)
+          (:terminal delimiter ";" :exclude-from-tree))))
 
       (define-rule expr ()
-        (:and
+        (:or
+         (:rule gotov-expr)
+         (:rule say-expr)
+         (:rule save-to-expr)
          (:empty)))
 
-      (define-rule item-list ()
+      (define-rule gotov-expr ()
         (:and
-         (:rule item)
-         (:rule item-tail-list)))
+         (:terminal keyword "gotov" :exclude-from-tree)
+         (:terminal id)))
 
-      ;;TODO: bug with 
-      (define-rule item-tail-list ()
+      (define-rule say-expr ()
+        (:and
+         (:terminal keyword "say" :exclude-from-tree)
+         (:rule say-expr-args)))
+
+      (define-rule say-expr-args ()
+        (:and
+         (:rule say-expr-arg)
+         (:rule rest-say-expr-args)))
+
+      (define-rule say-expr-arg ()
+        (:or
+         (:terminal string)
+         (:terminal number-string)
+         (:terminal id)))
+
+      (define-rule rest-say-expr-args ()
         (:or
          (:and
-          (:terminal delimiter #\,)
-          (:rule item)
-          (:rule item-tail-list))
+          (:rule say-expr-arg)
+          (:rule rest-say-expr-args))
          (:empty)))
 
-      (define-rule item ()
+      (define-rule save-to-expr ()
         (:and
-         (:rule literal)))
+         (:terminal keyword "save" :exclude-from-tree)
+         (:rule literal-or-id)
+         (:terminal keyword "to" :exclude-from-tree)
+         (:terminal id)))
 
-      (define-rule vertex-option ()
+      (define-rule if-stmt ()
         (:and
-         (:rule vertex-option-name)
-         (:terminal delimiter #\=)
-         (:rule vertex-option-val)))
+         (:terminal keyword "if" :exclude-from-tree)
+         (:rule cond-expr)
+         (:terminal delimiter "{")
+         (:rule stmt-list)
+         (:terminal delimiter "}")
+         (:rule else-block)))
 
-      (define-rule vertex-option-name ()
+      (define-rule else-block ()
         (:or
-         (:terminal keyword "act")
-         (:terminal keyword "type")))
+         (:and
+          (:terminal keyword "else" :exclude-from-tree)
+          (:terminal delimiter "{" :exclude-from-tree)
+          (:rule stmt-list)
+          (:terminal delimiter "}" :exclude-from-tree))
+         (:empty)))
 
-      (define-rule vertex-option-val ()
+      (define-rule cond-expr ()
+        (:rule logic-expr))
+
+      (define-rule logic-expr ()
+        (:rule comparison-expr))
+
+      (define-rule comparison-expr ()
+        (:and
+         (:rule eql-expr)
+         (:terminal delimiter "==" :exclude-from-tree)
+         (:rule eql-expr)))
+
+      (define-rule eql-expr ()
         (:or
          (:terminal id)
-         (:terminal keyword "in")
-         (:terminal keyword "out")))
+         (:rule literal)))
+
+      (define-rule literal-or-id ()
+        (:or
+         (:rule literal)
+         (:terminal id)))
+
+      (define-rule string-or-number ()
+        (:or
+         (:terminal string)
+         (:terminal number-string)))
 
       (define-rule literal ()
         (:or
-         (:terminal char-string)
-         (:terminal number-string)))
+         (:terminal string)
+         (:terminal number-string)
+         (:rule item-list)
+         (:terminal keyword "none")))
+
+      (define-rule item-list ()
+        (:and
+         (:terminal delimiter "[" :exclude-from-tree)
+         (:rule literal-list)
+         (:terminal delimiter "]" :exclude-from-tree)))
+
+      (define-rule literal-list ()
+        (:or
+         (:and
+          (:rule literal)
+          (:rule rest-literal-list :as-single-list))
+         (:empty)))
+
+      (define-rule rest-literal-list ()
+        (:or
+         (:and
+          (:terminal delimiter "," :exclude-from-tree)
+          (:rule literal)
+          (:rule rest-literal-list :as-single-list))
+         (:empty)))
       )))

@@ -47,17 +47,20 @@
     :accessor get-string-state)))
 
 (defparameter +keyword-table+
-  '("c-opts"
-    "bot-opts"
+  '("@codegen"
+    "vars"
     "start"
     "from"
-    "letd"
-    "letv"
-    "def-act"
-    "act"
-    "type"
-    "in"
-    "out"))
+    "options"
+    "state-points"
+    "state-actions"
+    "gotov"
+    "say"
+    "save"
+    "to"
+    "if"
+    "else"
+    "none"))
 
 
 (defmacro with-lexical-switcher (() &body body)
@@ -143,29 +146,34 @@
           (t (error "unknown char or sym: ~a" terminal)))
         (error "unknown `to` value arg: ~a, expected: :sym ot :description" to))))
 
-(defun raise-lexer-error (on-error &optional val)
+(defun raise-lexer-error (on-error &optional val on-fixed-pos)
   ":on-char, :on-close-comment, :on-string"
-  (raise-bs-lexer-error
-   (concatenate
-    'string
-    (case on-error
-      (:on-char
-       (assert val)
-       (format nil "unknown symbol \"~a\"" val))
-      (:on-close-comment
-       "comment closing expected")
-      (:on-string
-       "double quotes expected at position")
-      (t
-       (error "unknown type of arg `on-error`: ~a, see fun doc"
-              on-error)))
-    " at position: line - ~a, column - ~a~a")
-   (get-position-y *source*)
-   (1+ (get-position-x *source*))
-   (if (eq (get-source-type *source*) :file)
-       (format nil ", file: ~a"
-               (get-source *source*))
-       "")))
+  (let ((fix-pos (get-fixed-cur-position *source*)))
+    (raise-bs-lexer-error
+     (concatenate
+      'string
+      (case on-error
+        (:on-char
+         (assert val)
+         (format nil "unknown symbol \"~a\"" val))
+        (:on-close-comment
+         "comment closing expected")
+        (:on-string
+         "double quotes expected at position")
+        (t
+         (error "unknown type of arg `on-error`: ~a, see fun doc"
+                on-error)))
+      " at position: line - ~a, column - ~a~a")
+     (if on-fixed-pos
+         (cdr fix-pos)
+         (get-position-y *source*))
+     (1+ (if on-fixed-pos
+             (car fix-pos)
+             (get-position-x *source*)))
+     (if (eq (get-source-type *source*) :file)
+         (format nil ", file: ~a"
+                 (get-source *source*))
+         ""))))
 
 (defun switch-ls-state (state)
   ":comment, :multi-comment, :string"

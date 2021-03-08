@@ -22,10 +22,10 @@
   (make-hash-table :test #'eq))
 
 (defclass delimiter ()
-  ((char
-    :initarg :char
-    :type character
-    :reader $del-get-char)
+  ((del
+    :initarg :del
+    :type string
+    :reader $del-get-del)
    (sym
     :initarg :sym
     :type symbol
@@ -35,70 +35,75 @@
     :type string
     :reader $del-get-description)))
 
-(defun define-delimiter (char-table sym-table &key ch sym-idea description)
+(defun define-delimiter (char-table sym-table &key del sym-idea description)
   (assert (and char-table sym-table ch sym-idea description))
   (let* ((sym (to-symbol sym-idea))
          (del
           (make-instance 'delimiter
-                         :char ch
+                         :del del
                          :sym sym
                          :description description)))
     (setf (gethash sym sym-table) del)
     (setf (gethash ch char-table) del)))
 
 (define-delimiter *char-delimiter-table* *sym-delimiter-table*
-  :ch #\{
+  :del "{"
   :sym-idea "o-fig-bracket"
   :description "open figurate bracket")
 
 (define-delimiter *char-delimiter-table* *sym-delimiter-table*
-  :ch #\}
+  :del "}"
   :sym-idea "c-fig-bracket"
   :description "close figurate bracket")
 
 (define-delimiter *char-delimiter-table* *sym-delimiter-table*
-  :ch #\[
+  :del "["
   :sym-idea "o-sq-bracket"
   :description "open square bracket")
 
 (define-delimiter *char-delimiter-table* *sym-delimiter-table*
-  :ch #\]
+  :del "]"
   :sym-idea "c-sq-bracket"
   :description "close sqaure bracket")
 
 (define-delimiter *char-delimiter-table* *sym-delimiter-table*
-  :ch #\,
+  :del ","
   :sym-idea "comma"
   :description "comma")
 
-(define-delimiter *char-delimiter-table* *sym-delimiter-table*
-  :ch #\=
-  :sym-idea "assign"
-  :description "assign")
+;; (define-delimiter *char-delimiter-table* *sym-delimiter-table*
+;;   :del "="
+;;   :sym-idea "assign"
+;;   :description "assign")
 
 (define-delimiter *char-delimiter-table* *sym-delimiter-table*
-  :ch #\:
+  :del ":"
   :sym-idea "colon"
   :description "colon")
 
 (define-delimiter *char-delimiter-table* *sym-delimiter-table*
-  :ch #\Newline
-  :sym-idea "newline"
-  :description "newline")
+  :del ";"
+  :sym-idea "semicolon"
+  :description "semicolon")
 
-(defun get-delimiter (sym-or-char)
-  (or (gethash sym-or-char *char-delimiter-table*)
-      (gethash sym-or-char *sym-delimiter-table*)))
+(define-delimiter *char-delimiter-table* *sym-delimiter-table*
+  :del "=="
+  :sym-idea "logic-equal"
+  :description "logic equal")
 
-(defun is-delimiter-? (sym-or-char)
-  (get-delimiter sym-or-char))
+(defun get-delimiter (sym-or-str)
+  (or (gethash sym-or-str *char-delimiter-table*)
+      (gethash sym-or-str *sym-delimiter-table*)))
 
-(defun delimiter-to (sym-or-char to)
-  "to arg it :sym or :value or :description, or sym representations"
-  (awhen (get-delimiter sym-or-char)
+(defun is-delimiter-? (sym-or-str)
+  (get-delimiter sym-or-str))
+
+(defun delimiter-to (sym-or-str to)
+  "to arg it :del or :sym or :description, or sym representations"
+  (awhen (get-delimiter sym-or-str)
     (case to
-      (:char
-       ($del-get-char it))
+      (:del
+       ($del-get-del it))
       (:sym
        ($del-get-sym it))
       (:description

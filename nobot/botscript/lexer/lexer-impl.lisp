@@ -64,8 +64,9 @@
                       :convert-with-pos convert-with-pos))
 
 (defmacro read-chars (prev-char type)
-  ":id-or-keyword, :num-string, :char-string, :comment, :multi-comment-end"
-  (with-gensyms (ch word is-keyword buff)
+  ":id-or-keyword, :num-string, :char-string,
+   :comment, :multi-comment-end ::compare-delimiter"
+  (with-gensyms (ch word is-keyword is-id buff frst-char-of-word)
     `(progn
        (clear-chars-buffer *source*)
        (push-char-to-buffer ,prev-char *source*)
@@ -75,6 +76,8 @@
             do  (progn
                   (update-pos ,ch *source*)
                   (if ,(case type
+                         (:compare-delimiter
+                          nil)
                          (:id-or-keyword
                           `(or (alphanumericp ,ch)
                                (eq ,ch #\-)))
@@ -102,12 +105,18 @@
                          (t
                           `(push-char-to-buffer ,ch *source*)))
                       (progn
-                        ,(if (find type '(:char-string :comment))
-                             `(progn
-                                ,(when (eq type :char-string)
-                                   `(switch-ls-state :string))
-                                (update-pos ,ch *source*)) 
-                             `(undo-next-char ,ch *source*))
+                        ,(cond
+                           ((find type '(:char-string :comment))
+                            `(progn
+                               ,(when (eq type :char-string)
+                                  `(switch-ls-state :string))
+                               (update-pos ,ch *source*)))
+                           ((find type '(:compare-delimiter))
+                            `(progn
+                               (if (eq ,ch #\=)
+                                   (push-char-to-buffer ,ch *source*)
+                                   (raise-lexer-error :on-char ,ch))))
+                           (t `(undo-next-char ,ch *source*)))
                         (return-from in-read-chars-loop))))))
        ,(unless (or (eq type :comment)
                     (eq type :multi-comment-end))
@@ -116,15 +125,24 @@
                      ,(if (eq type :id-or-keyword)
                           `,buff
                           `(string-upcase ,buff))))
-                  (,is-keyword (is-keyword-? ,word)))
+                  (,is-keyword (is-keyword-? ,word))
+                  (,frst-char-of-word (char ,word 0))
+                  (,is-id (not (eq ,frst-char-of-word #\@))))
              (declare (ignorable ,is-keyword))
              (push-token-to-buffer
               ,(case type
+                 (:compare-delimiter
+                  `(new-token
+                    :type :delimiter
+                    :value (terminal-to :sym :delimiter ,word)
+                    :position (get-fixed-cur-position *source*))
                  (:id-or-keyword
                   `(new-token
                     :type (if ,is-keyword
                               :keyword
-                              :id)
+                              (if ,is-id
+                                  :id
+                                  (raise-lexer-error :on-char ,frst-char-of-word t)))
                     :value (if ,is-keyword
                                (terminal-to :sym :keyword ,word)
                                ,word)
@@ -142,11 +160,11 @@
                  (t (error "unknown token type for read chars (see func doc): ~a" type)))
               *source*))))))
 
-(defun make-delimiter-token (ch)
+(defun make-delimiter-token (ch-or-str)
   (push-token-to-buffer
    (new-token
     :type :delimiter
-    :value (terminal-to :sym :delimiter ch)
+    :value (terminal-to :sym :delimiter (string ch-or-str))
     :position (get-fixed-cur-position *source*))
    *source*))
 
@@ -167,12 +185,19 @@
                  :comment)
      (unless (get-ls-state :comment)
        (raise-lexer-error :on-char ch)))
+    ((eq ch #\=)
+     ;; :compare-delimiter
+     (update-pos ch *source*)
+     (fix-cur-position *source*)
+     (read-chars ch
+                 :compare-delimiter))
     ((is-delimiter-? ch)
-     ;; :delimite
+     ;; :delimiter
      (update-pos ch *source*)
      (fix-cur-position *source*)
      (make-delimiter-token ch))
-    ((alpha-char-p ch)
+    ((or (alpha-char-p ch)
+         (eq ch #\@))
      ;; :id-or-keyword
      (update-pos ch *source*)
      (fix-cur-position *source*)

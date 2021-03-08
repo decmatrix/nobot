@@ -29,7 +29,7 @@
 <var-declarations> ::= 'vars' '{' <var-decls-list> '}'
                        | <empty>
 
-<var-decls-list> ::= <vad-decl> <var-decls-list>
+<var-decls-list> ::= <var-decl> <var-decls-list>
                      | <empty>
 
 
@@ -73,12 +73,12 @@
 
 <say-expr-args> ::= <say-expr-arg> <rest-say-expr-args>
 
-<say-expr-arg> ::= <char-string>
+<say-expr-arg> ::= <string>
                    | <number-string>
                    | <id>
 
-<rest-say-expr-args> ::= <say-expr-arg> <rest-say-expr-args> |
-                         <empty>
+<rest-say-expr-args> ::= <say-expr-arg> <rest-say-expr-args>
+                         | <empty>
 
 <save-to-expr> ::= 'save' <literal-or-id> 'to' <id>
 
@@ -89,9 +89,9 @@
 
 <cond-expr> ::= <logic-expr>
 
-<logic-expr> ::= <comparison>
+<logic-expr> ::= <comparison-expr>
 
-<comparison> ::= <eql-expr> '==' <eql-expr>
+<comparison-expr> ::= <eql-expr> '==' <eql-expr>
 
 <eql-expr> ::= <id>
                | <literal>
@@ -99,15 +99,15 @@
 <literal-or-id> ::= <literal>
                     | <id>
 
-<string-or-number> ::= <char-string>
+<string-or-number> ::= <string>
                        | <number-string>
 
-<literal> ::= <char-string>
-              | <num-string>
-              | <list>
+<literal> ::= <string>
+              | <number-string>
+              | <item-list>
               | 'none'
 
-<list> ::= '[' <literal-list> ']'
+<item-list> ::= '[' <literal-list> ']'
 
 <literal-list> ::= <literal> <rest-literal-list>
                    | <empty>
