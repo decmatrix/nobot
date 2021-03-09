@@ -13,11 +13,13 @@
 
 <compiler-option-name> ::= '@codegen'
 
-<bot-declarations> ::= <bot-options>
-                       <var-declarations>
-                       <start-from-stmt>
-                       <state-points-declarations>
-                       <state-actions-declarations>
+<bot-declarations> ::= 'bot' '{'
+                                <bot-options>
+                                <var-declarations>
+                                <start-from-stmt>
+                                <state-points-declarations>
+                                <state-actions-declarations>
+                       '}'
 
 <bot-options> ::= 'options' '{' <bot-options-list> '}'
 

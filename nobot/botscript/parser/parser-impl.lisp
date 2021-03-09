@@ -73,11 +73,14 @@
 
       (define-rule bot-declarations ()
         (:and
+         (:terminal keyword "bot" :exclude-from-tree)
+         (:terminal delimiter "{" :exclude-from-tree)
          (:rule bot-options)
          (:rule var-declarations)
          (:rule start-from-stmt)
          (:rule state-points-declarations)
-         (:rule state-actions-declarations)))
+         (:rule state-actions-declarations)
+         (:terminal delimiter "}" :exclude-from-tree)))
 
       (define-rule bot-options ()
         (:and

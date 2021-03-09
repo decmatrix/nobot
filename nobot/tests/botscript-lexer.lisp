@@ -28,91 +28,106 @@
   :with-pos t)
 
 (define-lexer-test bs-lexer.simple.2
-    "letv a [act = act-a, type = in]"
-  ((<KEYWORD> LETV (1 . 1)) (<ID> "a" (6 . 1)) (<DELIMITER> O-SQ-BRACKET (8 . 1))
-   (<KEYWORD> ACT (9 . 1)) (<DELIMITER> ASSIGN (13 . 1)) (<ID> "act-a" (15 . 1))
-   (<DELIMITER> COMMA (20 . 1)) (<KEYWORD> TYPE (22 . 1))
-   (<DELIMITER> ASSIGN (27 . 1)) (<KEYWORD> IN (29 . 1))
-   (<DELIMITER> C-SQ-BRACKET (31 . 1)))
+    "@codegen \"js\"; bot { options { name: \"Tobi\"; } }"
+  ((<KEYWORD> @CODEGEN (1 . 1)) (<CHAR-STRING> "\"js\"" (10 . 1))
+   (<DELIMITER> SEMICOLON (15 . 1)) (<KEYWORD> BOT (17 . 1))
+   (<DELIMITER> O-FIG-BRACKET (21 . 1)) (<KEYWORD> OPTIONS (23 . 1))
+   (<DELIMITER> O-FIG-BRACKET (31 . 1)) (<ID> "name" (33 . 1))
+   (<DELIMITER> COLON (37 . 1)) (<CHAR-STRING> "\"Tobi\"" (39 . 1))
+   (<DELIMITER> SEMICOLON (46 . 1)) (<DELIMITER> C-FIG-BRACKET (48 . 1))
+   (<DELIMITER> C-FIG-BRACKET (50 . 1)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.simple.3
-    "def-act act-default {}"
-  ((<KEYWORD> DEF-ACT (1 . 1)) (<ID> "act-default" (9 . 1))
-   (<DELIMITER> O-FIG-BRACKET (21 . 1)) (<DELIMITER> C-FIG-BRACKET (22 . 1)))
+    "if input == start-command { say \"Hello\"; } else { save input to buff; }"
+  ((<KEYWORD> IF (1 . 1)) (<ID> "input" (4 . 1))
+   (<DELIMITER> LOGIC-EQUAL (10 . 1)) (<ID> "start-command" (13 . 1))
+   (<DELIMITER> O-FIG-BRACKET (27 . 1)) (<KEYWORD> SAY (29 . 1))
+   (<CHAR-STRING> "\"Hello\"" (33 . 1)) (<DELIMITER> SEMICOLON (41 . 1))
+   (<DELIMITER> C-FIG-BRACKET (43 . 1)) (<KEYWORD> ELSE (45 . 1))
+   (<DELIMITER> O-FIG-BRACKET (50 . 1)) (<KEYWORD> SAVE (52 . 1))
+   (<ID> "input" (57 . 1)) (<KEYWORD> TO (63 . 1)) (<ID> "buff" (66 . 1))
+   (<DELIMITER> SEMICOLON (70 . 1)) (<DELIMITER> C-FIG-BRACKET (72 . 1)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.simple.4
-    "c-opts { lang: \"js\" }"
-  ((<KEYWORD> C-OPTS (1 . 1)) (<DELIMITER> O-FIG-BRACKET (8 . 1))
-   (<ID> "lang" (10 . 1)) (<DELIMITER> COLON (14 . 1))
-   (<CHAR-STRING> "\"JS\"" (16 . 1)) (<DELIMITER> C-FIG-BRACKET (22 . 1)))
+    "gotov a; a: {}"
+  ((<KEYWORD> GOTOV (1 . 1)) (<ID> "a" (7 . 1)) (<DELIMITER> SEMICOLON (8 . 1))
+   (<ID> "a" (10 . 1)) (<DELIMITER> COLON (11 . 1))
+   (<DELIMITER> O-FIG-BRACKET (13 . 1)) (<DELIMITER> C-FIG-BRACKET (14 . 1)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.simple.5
-  "c-opts {
-lang: \"js\",
-arch: \"chat\",
-project-dir: \"~/dev-bots/mybot/\",
-extension: \"tg\"
+    "options {
+name: \"Tobi\";
+port: 8082;
+host: \"localhost\";
+author: \"Bohdan Sokolovskyi\";
+version: \"0.0.1\";
 }"
-  ((<KEYWORD> C-OPTS (1 . 1)) (<DELIMITER> O-FIG-BRACKET (8 . 1))
-   (<DELIMITER> NEWLINE (8 . 2)) (<ID> "lang" (9 . 2))
-   (<DELIMITER> COLON (13 . 2)) (<CHAR-STRING> "\"JS\"" (15 . 2))
-   (<DELIMITER> COMMA (20 . 2)) (<DELIMITER> NEWLINE (20 . 3))
-   (<ID> "arch" (21 . 3)) (<DELIMITER> COLON (25 . 3))
-   (<CHAR-STRING> "\"CHAT\"" (27 . 3)) (<DELIMITER> COMMA (34 . 3))
-   (<DELIMITER> NEWLINE (34 . 4)) (<ID> "project-dir" (35 . 4))
-   (<DELIMITER> COLON (46 . 4)) (<CHAR-STRING> "\"~/DEV-BOTS/MYBOT/\"" (48 . 4))
-   (<DELIMITER> COMMA (68 . 4)) (<DELIMITER> NEWLINE (68 . 5))
-   (<ID> "extension" (69 . 5)) (<DELIMITER> COLON (78 . 5))
-   (<CHAR-STRING> "\"TG\"" (80 . 5)) (<DELIMITER> NEWLINE (84 . 6))
-   (<DELIMITER> C-FIG-BRACKET (85 . 6)))
+  ((<KEYWORD> OPTIONS (1 . 1)) (<DELIMITER> O-FIG-BRACKET (9 . 1))
+   (<ID> "name" (10 . 2)) (<DELIMITER> COLON (14 . 2))
+   (<CHAR-STRING> "\"Tobi\"" (16 . 2)) (<DELIMITER> SEMICOLON (23 . 2))
+   (<ID> "port" (24 . 3)) (<DELIMITER> COLON (28 . 3))
+   (<NUMBER-STRING> 8082 (30 . 3)) (<DELIMITER> SEMICOLON (34 . 3))
+   (<ID> "host" (35 . 4)) (<DELIMITER> COLON (39 . 4))
+   (<CHAR-STRING> "\"localhost\"" (41 . 4)) (<DELIMITER> SEMICOLON (53 . 4))
+   (<ID> "author" (54 . 5)) (<DELIMITER> COLON (60 . 5))
+   (<CHAR-STRING> "\"Bohdan Sokolovskyi\"" (62 . 5))
+   (<DELIMITER> SEMICOLON (83 . 5)) (<ID> "version" (84 . 6))
+   (<DELIMITER> COLON (91 . 6)) (<CHAR-STRING> "\"0.0.1\"" (93 . 6))
+   (<DELIMITER> SEMICOLON (101 . 6)) (<DELIMITER> C-FIG-BRACKET (102 . 7)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.simple.6
-    "act = in"
-  ((<KEYWORD> ACT (1 . 1)) (<DELIMITER> ASSIGN (5 . 1)) (<KEYWORD> IN (7 . 1)))
+    "[1, 2, 3, 4]"
+  ((<DELIMITER> O-SQ-BRACKET (1 . 1)) (<NUMBER-STRING> 1 (2 . 1))
+   (<DELIMITER> COMMA (3 . 1)) (<NUMBER-STRING> 2 (5 . 1))
+   (<DELIMITER> COMMA (6 . 1)) (<NUMBER-STRING> 3 (8 . 1))
+   (<DELIMITER> COMMA (9 . 1)) (<NUMBER-STRING> 4 (11 . 1))
+   (<DELIMITER> C-SQ-BRACKET (12 . 1)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.keywords.1
-    "c-opts bot-opts start from letd letv def-act act type in out"
-  ((<KEYWORD> C-OPTS (1 . 1)) (<KEYWORD> BOT-OPTS (8 . 1))
-   (<KEYWORD> START (17 . 1)) (<KEYWORD> FROM (23 . 1)) (<KEYWORD> LETD (28 . 1))
-   (<KEYWORD> LETV (33 . 1)) (<KEYWORD> DEF-ACT (38 . 1))
-   (<KEYWORD> ACT (46 . 1)) (<KEYWORD> TYPE (50 . 1)) (<KEYWORD> IN (55 . 1))
-   (<KEYWORD> OUT (58 . 1)))
+    "bot @codegen vars start from options state-points state-actions
+     gotov say save to if else none"
+  ((<KEYWORD> BOT (1 . 1)) (<KEYWORD> @CODEGEN (5 . 1)) (<KEYWORD> VARS (14 . 1))
+   (<KEYWORD> START (19 . 1)) (<KEYWORD> FROM (25 . 1))
+   (<KEYWORD> OPTIONS (30 . 1)) (<KEYWORD> STATE-POINTS (38 . 1))
+   (<KEYWORD> STATE-ACTIONS (51 . 1)) (<KEYWORD> GOTOV (69 . 2))
+   (<KEYWORD> SAY (75 . 2)) (<KEYWORD> SAVE (79 . 2)) (<KEYWORD> TO (84 . 2))
+   (<KEYWORD> IF (87 . 2)) (<KEYWORD> ELSE (90 . 2)) (<KEYWORD> NONE (95 . 2)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.delimiters.1
-    "{}[],   =:"
+    "{}[], :;=="
   ((<DELIMITER> O-FIG-BRACKET (1 . 1)) (<DELIMITER> C-FIG-BRACKET (2 . 1))
    (<DELIMITER> O-SQ-BRACKET (3 . 1)) (<DELIMITER> C-SQ-BRACKET (4 . 1))
-   (<DELIMITER> COMMA (5 . 1)) (<DELIMITER> ASSIGN (9 . 1))
-   (<DELIMITER> COLON (10 . 1)))
+   (<DELIMITER> COMMA (5 . 1)) (<DELIMITER> COLON (7 . 1))
+   (<DELIMITER> SEMICOLON (8 . 1)) (<DELIMITER> LOGIC-EQUAL (9 . 1)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.string.1
     "\"js\" \"\"\"\""
-  ((<CHAR-STRING> "\"JS\"" (1 . 1)) (<CHAR-STRING> "\"\"" (7 . 1))
+  ((<CHAR-STRING> "\"js\"" (1 . 1)) (<CHAR-STRING> "\"\"" (7 . 1))
    (<CHAR-STRING> "\"\"" (10 . 1)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.string.2
     "\" hello
 world\""
-  ((<CHAR-STRING> "\" HELLO
-WORLD\""
+  ((<CHAR-STRING> "\" hello
+world\""
                   (1 . 1)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.ids.1
-    "def act def-act def:act act:1 a = b"
-  ((<ID> "def" (1 . 1)) (<KEYWORD> ACT (5 . 1)) (<KEYWORD> DEF-ACT (9 . 1))
-   (<ID> "def" (17 . 1)) (<DELIMITER> COLON (20 . 1)) (<KEYWORD> ACT (21 . 1))
-   (<KEYWORD> ACT (25 . 1)) (<DELIMITER> COLON (28 . 1))
-   (<NUMBER-STRING> 1 (29 . 1)) (<ID> "a" (31 . 1)) (<DELIMITER> ASSIGN (33 . 1))
-   (<ID> "b" (35 . 1)))
+    "state actions state-actions  state:actions state:1 a == b"
+  ((<ID> "state" (1 . 1)) (<ID> "actions" (7 . 1))
+   (<KEYWORD> STATE-ACTIONS (15 . 1)) (<ID> "state" (30 . 1))
+   (<DELIMITER> COLON (35 . 1)) (<ID> "actions" (36 . 1)) (<ID> "state" (44 . 1))
+   (<DELIMITER> COLON (49 . 1)) (<NUMBER-STRING> 1 (50 . 1)) (<ID> "a" (52 . 1))
+   (<DELIMITER> LOGIC-EQUAL (54 . 1)) (<ID> "b" (57 . 1)))
   :with-pos t)
 
 (define-lexer-test bs-lexer.single-comment.1
@@ -120,7 +135,6 @@ WORLD\""
   ((<ID> "a" (1 . 1)) (<ID> "b" (3 . 1)) (<ID> "c" (5 . 1)))
   :with-pos t)
 
-;;TODO: see issue #11
 (define-lexer-test bs-lexer.single-comment.2
     "a b c // smth test /* */
 d e f g h"

@@ -15,11 +15,11 @@
 
 (in-package :nobot/botscript/lexer/delimiter)
 
-(defparameter *char-delimiter-table*
-  (make-hash-table :test #'eq))
+(defparameter *str-delimiter-table*
+  (make-hash-table :test #'equal))
 
 (defparameter *sym-delimiter-table*
-  (make-hash-table :test #'eq))
+  (make-hash-table :test #'equal))
 
 (defclass delimiter ()
   ((del
@@ -38,61 +38,61 @@
 (defun define-delimiter (char-table sym-table &key del sym-idea description)
   (assert (and char-table sym-table del sym-idea description))
   (let* ((sym (to-symbol sym-idea))
-         (del
+         (del-obj
           (make-instance 'delimiter
                          :del del
                          :sym sym
                          :description description)))
-    (setf (gethash sym sym-table) del)
-    (setf (gethash del char-table) del)))
+    (setf (gethash sym sym-table) del-obj)
+    (setf (gethash del char-table) del-obj)))
 
-(define-delimiter *char-delimiter-table* *sym-delimiter-table*
+(define-delimiter *str-delimiter-table* *sym-delimiter-table*
   :del "{"
   :sym-idea "o-fig-bracket"
   :description "open figurate bracket")
 
-(define-delimiter *char-delimiter-table* *sym-delimiter-table*
+(define-delimiter *str-delimiter-table* *sym-delimiter-table*
   :del "}"
   :sym-idea "c-fig-bracket"
   :description "close figurate bracket")
 
-(define-delimiter *char-delimiter-table* *sym-delimiter-table*
+(define-delimiter *str-delimiter-table* *sym-delimiter-table*
   :del "["
   :sym-idea "o-sq-bracket"
   :description "open square bracket")
 
-(define-delimiter *char-delimiter-table* *sym-delimiter-table*
+(define-delimiter *str-delimiter-table* *sym-delimiter-table*
   :del "]"
   :sym-idea "c-sq-bracket"
   :description "close sqaure bracket")
 
-(define-delimiter *char-delimiter-table* *sym-delimiter-table*
+(define-delimiter *str-delimiter-table* *sym-delimiter-table*
   :del ","
   :sym-idea "comma"
   :description "comma")
 
-;; (define-delimiter *char-delimiter-table* *sym-delimiter-table*
+;; (define-delimiter *str-delimiter-table* *sym-delimiter-table*
 ;;   :del "="
 ;;   :sym-idea "assign"
 ;;   :description "assign")
 
-(define-delimiter *char-delimiter-table* *sym-delimiter-table*
+(define-delimiter *str-delimiter-table* *sym-delimiter-table*
   :del ":"
   :sym-idea "colon"
   :description "colon")
 
-(define-delimiter *char-delimiter-table* *sym-delimiter-table*
+(define-delimiter *str-delimiter-table* *sym-delimiter-table*
   :del ";"
   :sym-idea "semicolon"
   :description "semicolon")
 
-(define-delimiter *char-delimiter-table* *sym-delimiter-table*
+(define-delimiter *str-delimiter-table* *sym-delimiter-table*
   :del "=="
   :sym-idea "logic-equal"
   :description "logic equal")
 
 (defun get-delimiter (sym-or-str)
-  (or (gethash sym-or-str *char-delimiter-table*)
+  (or (gethash sym-or-str *str-delimiter-table*)
       (gethash sym-or-str *sym-delimiter-table*)))
 
 (defun is-delimiter-? (sym-or-str)

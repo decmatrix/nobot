@@ -47,7 +47,8 @@
     :accessor get-string-state)))
 
 (defparameter +keyword-table+
-  '("@codegen"
+  '("bot"
+    "@codegen"
     "vars"
     "start"
     "from"

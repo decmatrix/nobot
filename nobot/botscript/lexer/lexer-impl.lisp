@@ -65,7 +65,7 @@
 
 (defmacro read-chars (prev-char type)
   ":id-or-keyword, :num-string, :char-string,
-   :comment, :multi-comment-end ::compare-delimiter"
+   :comment, :multi-comment-end :compare-delimiter"
   (with-gensyms (ch word is-keyword is-id buff frst-char-of-word)
     `(progn
        (clear-chars-buffer *source*)
@@ -77,7 +77,7 @@
                   (update-pos ,ch *source*)
                   (if ,(case type
                          (:compare-delimiter
-                          nil)
+                          `(eq ,ch #\=))
                          (:id-or-keyword
                           `(or (alphanumericp ,ch)
                                (eq ,ch #\-)))
@@ -89,8 +89,13 @@
                           `(eq ,ch #\/))
                          (:comment
                           `(or (eq ,ch #\/)
-                               (eq ,ch #\*))))
+                               (eq ,ch #\*)))
+                         (t (error "unknown type ~a" type)))
                       ,(case type
+                         (:compare-delimiter
+                          `(progn
+                             (push-char-to-buffer ,ch *source*)
+                             (return-from in-read-chars-loop)))
                          (:comment
                           `(progn
                              (when (eq ,ch #\*)
@@ -106,29 +111,30 @@
                           `(push-char-to-buffer ,ch *source*)))
                       (progn
                         ,(cond
-                           ((find type '(:char-string :comment))
+                           ((find type '(:char-string :comment) :test #'eq)
                             `(progn
                                ,(when (eq type :char-string)
                                   `(switch-ls-state :string))
+                               ;;TODO maybe no need this update
                                (update-pos ,ch *source*)))
-                           ((find type '(:compare-delimiter))
-                            `(progn
-                               (if (eq ,ch #\=)
-                                   (push-char-to-buffer ,ch *source*)
-                                   (raise-lexer-error :on-char ,ch))))
                            (t `(undo-next-char ,ch *source*)))
                         (return-from in-read-chars-loop))))))
        ,(unless (or (eq type :comment)
                     (eq type :multi-comment-end))
           `(let* ((,word
                    (let ((,buff (concatenate 'string (get-chars-buffer *source*))))
-                     ,(if (eq type :id-or-keyword)
+                     ,(if (or (eq type :id-or-keyword)
+                              (eq type :char-string))
                           `,buff
                           `(string-upcase ,buff))))
                   (,is-keyword (is-keyword-? ,word))
                   (,frst-char-of-word (char ,word 0))
                   (,is-id (not (eq ,frst-char-of-word #\@))))
              (declare (ignorable ,is-keyword))
+             ,(case type
+                (:compare-delimiter
+                 `(unless (equal ,word "==")
+                    (raise-lexer-error :on-char ,prev-char t))))
              (push-token-to-buffer
               ,(case type
                  (:compare-delimiter
@@ -191,7 +197,7 @@
      (fix-cur-position *source*)
      (read-chars ch
                  :compare-delimiter))
-    ((is-delimiter-? ch)
+    ((is-delimiter-? (string ch))
      ;; :delimiter
      (update-pos ch *source*)
      (fix-cur-position *source*)
