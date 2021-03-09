@@ -40,19 +40,19 @@
 ;; TODO: impl test
 (define-parser-test bs-parser.literal.4
     "[1, none, \"aa\", 4, 5]"
-  '()
+  ()
   :literal)
 
 ;; TODO: impl test
 (define-parser-test bs-parser.rest-literal-list.1
     ", 1, none, \"hello\""
-  '()
+  ()
   :rest-literal-list)
 
 ;; TODO: impl test
 (define-parser-test bs-parser.literal-list.1
     "[1, [], [1, [1]], \"1\"]"
-  '()
+  ()
   :literal-list)
 
 (define-parser-test bs-parser.string-or-number.1
@@ -73,7 +73,7 @@
 ;; TODO: impl test
 (define-parser-test bs-parser.literal-or-id.2
     "greetings"
-  '()
+  ()
   :literal-or-id)
 
 (define-parser-test bs-parser.eql-expr.1
@@ -89,23 +89,68 @@
 ;; TODO: impl test
 (define-parser-test bs-parser.comparison-expr.1
     "11 == greetings"
-  '()
+  ()
   :comparison-expr)
 
 ;; TODO: impl test
 (define-parser-test bs-parser.logic-expr.1
     "11 == greetings"
-  '()
+  ()
   :logic-expr)
 
 ;; TODO: impl test
 (define-parser-test bs-parser.cond-expr.1
     "11 == greetings"
-  '()
+  ()
   :cond-expr)
 
 ;; TODO: impl test
 (define-parser-test bs-parser.save-to-expr.1
     "save 21 to user-age"
-  '()
+  ()
   :save-to-expr)
+
+(define-parser-test bs-parser.say-expr-arg.1
+    "\"hello\""
+  (<SAY-EXPR-ARG> (<CHAR-STRING> "\"hello\""))
+  :say-expr-arg)
+
+(define-parser-test bs-parser.say-expr-arg.2
+    "21"
+  (<SAY-EXPR-ARG> (<NUMBER-STRING> 21))
+  :say-expr-arg)
+
+(define-parser-test bs-parser.say-expr-arg.3
+    "user-name"
+  (<SAY-EXPR-ARG> (<ID> "user-name"))
+  :say-expr-arg)
+
+;; TODO: impl test
+(define-parser-test bs-parser.rest-say-expr-args.1
+    "\"Hello,\" user-name \". Your age is\" 21"
+  ()
+  :rest-say-expr-args)
+
+;; TODO: impl test
+(define-parser-test bs-parser.rest-say-expr-args.2
+    ""
+  ()
+  :rest-say-expr-args)
+
+;; TODO: impl test
+(define-parser-test bs-parser.say-expr-args.1
+    "\"Hi, \" user-name"
+  ()
+  :say-expr-args)
+
+;; TODO: impl test
+(define-parser-test bs-parser.say-expr.1
+    "say \"Hello, world!\""
+  ()
+  :say-expr)
+
+;; TODO: impl test
+(define-parser-test bs-parser.gotov-expr.1
+    "gotov a"
+  ()
+  :gotov-expr)
