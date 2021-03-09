@@ -16,7 +16,8 @@
            #:acacia-expected-empty-rule
            #:cond-parser-error-handle
            #:acacia-expected-empty-rule
-           #:acacia-undefined-rule))
+           #:acacia-undefined-rule
+           #:acacia-unknown-argument-of-rule))
 
 (in-package :nobot/botscript/parser/acacia/error-handling)
 
@@ -85,4 +86,14 @@
    (lambda (condition stream)
      (format stream "[ACACIA]: undefined rule ~a"
              (get-rule condition)))))
+
+(define-condition acacia-unknown-argument-of-rule (error)
+  ((unknown-arg
+    :initarg :unknown-arg
+    :initform nil
+    :accessor get-unknown-arg))
+  (:report
+   (lambda (condition stream)
+     (format stream "[ACACIA]: unknown arg ~a"
+             (get-unknown-arg condition)))))
 

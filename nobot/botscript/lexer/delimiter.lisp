@@ -36,7 +36,7 @@
     :reader $del-get-description)))
 
 (defun define-delimiter (char-table sym-table &key del sym-idea description)
-  (assert (and char-table sym-table ch sym-idea description))
+  (assert (and char-table sym-table del sym-idea description))
   (let* ((sym (to-symbol sym-idea))
          (del
           (make-instance 'delimiter
@@ -44,7 +44,7 @@
                          :sym sym
                          :description description)))
     (setf (gethash sym sym-table) del)
-    (setf (gethash ch char-table) del)))
+    (setf (gethash del char-table) del)))
 
 (define-delimiter *char-delimiter-table* *sym-delimiter-table*
   :del "{"

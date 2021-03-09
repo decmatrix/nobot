@@ -74,7 +74,7 @@
               "not avaliable compiler option: ~a~a"
               id
               (make-source-msg)))))
-     (get-sub-tree bot-options-tree :opt :all))
+     (get-sub-tree bot-options-tree :opt :all t))
     table))
 
 (defun make-compiler-options-table (compiler-options-tree)
@@ -91,7 +91,7 @@
               "not avaliable bot option: ~a~a"
               id
               (make-source-msg)))))
-     (get-sub-tree compiler-options-tree :opt :all))
+     (get-sub-tree compiler-options-tree :opt :all t))
     table))
 
 (defun is-avaliable-compiler-option-? (option)

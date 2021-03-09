@@ -55,7 +55,7 @@
     (:value "literal" :description "literal")
     (:value "item-list" :description "list of items")
     (:value "literal-list" :description "list of literals")
-    (:value "rest-literal-list" :description "rest of list of literals"))
+    (:value "rest-literal-list" :description "rest of list of literals")))
 
 (defmethod get-from-type (type (class-type (eql :sort)) what-need)
   (let ((converted-sort-type (convert-type type)))

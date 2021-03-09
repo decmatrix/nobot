@@ -180,7 +180,7 @@
          (:and
           (:rule state-decl)
           (:rule state-actions-decls :as-single-list))
-         (:emprty)))
+         (:empty)))
 
       (define-rule state-decl ()
         (:and
@@ -264,11 +264,14 @@
           (:terminal delimiter "}" :exclude-from-tree))
          (:empty)))
 
+      ;;TODO: redundant AND rule fir single RULE rule
       (define-rule cond-expr ()
-        (:rule logic-expr))
+        (:and
+         (:rule logic-expr)))
 
       (define-rule logic-expr ()
-        (:rule comparison-expr))
+        (:and
+         (:rule comparison-expr)))
 
       (define-rule comparison-expr ()
         (:and

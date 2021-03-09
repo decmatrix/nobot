@@ -135,7 +135,7 @@
                   `(new-token
                     :type :delimiter
                     :value (terminal-to :sym :delimiter ,word)
-                    :position (get-fixed-cur-position *source*))
+                    :position (get-fixed-cur-position *source*)))
                  (:id-or-keyword
                   `(new-token
                     :type (if ,is-keyword

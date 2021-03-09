@@ -32,9 +32,9 @@
 
 (in-package :nobot/botscript/parser/acacia/parser-generator)
 
-(defgeneric rule-> (rule-name &key first-fail-no-error)
-  (:method (rule-name &key first-fail-no-error)
-    (declare (ignore first-fail-no-error))
+(defgeneric rule-> (rule-name &key first-fail-no-error as-single-list)
+  (:method (rule-name &key first-fail-no-error as-single-list)
+    (declare (ignore first-fail-no-error as-single-list))
     (error 'acacia-undefined-rule
            :rule rule-name)))
 
@@ -44,8 +44,8 @@
 
 (defmacro define-rule (rule-name () body)
   (let ((rule-name (intern (string rule-name) :keyword)))
-    `(defmethod rule-> ((rule-name (eql ,rule-name)) &key first-fail-no-error)
-       (declare (ignorable first-fail-no-error))
+    `(defmethod rule-> ((rule-name (eql ,rule-name)) &key first-fail-no-error as-single-list)
+       (declare (ignorable first-fail-no-error as-single-list))
        ,(build-rule-body `(,body) `,rule-name))))
 
 (defun build-rule-body (quote-body-tree rule-name)
@@ -55,9 +55,14 @@
              (let ((root (car body-tree)))
                (case root
                  (:rule
-                  (destructuring-bind (rule-name)
+                  (destructuring-bind (rule-name &optional as-single-list)
                       (cdr body-tree)
-                    `(awhen (rule-> ,(to-kword rule-name) :first-fail-no-error ,first-fail-no-error)
+                    (unless (or (null as-single-list)
+                                (eq as-single-list :as-single-list))
+                      (error 'acacia-unknown-argument-of-rule
+                             :unknown-arg as-single-list))
+                    `(awhen (rule-> ,(to-kword rule-name)
+                                    :first-fail-no-error ,first-fail-no-error)
                        (list it))))
                  (:and
                   (let* ((sub-rules (cdr body-tree))
@@ -102,8 +107,12 @@
                        (when (cdr it)
                          it))))
                  (:terminal
-                  (destructuring-bind (sym &optional val)
+                  (destructuring-bind (sym &optional val exclude-from-tree)
                       (cdr body-tree)
+                    (unless (or (null exclude-from-tree)
+                                (eq exclude-from-tree :exclude-from-tree))
+                      (error 'acacia-unknown-argument-of-rule
+                             :unknown-arg exclude-from-tree))
                     (with-gensyms (converted-sym converted-val pos-list)
                       `(with-next-token ()
                          (let ((,converted-sym ($conf-token-rule->token-sym ',sym))
@@ -117,7 +126,8 @@
                                 ,(if val
                                      `(token-value-equal-to next ,converted-val)
                                      t))
-                               (list (convert-token next :with-pos nil))
+                               (unless ,exclude-from-tree
+                                 (list (convert-token next :with-pos nil)))
                                (if ,(if first-fail-no-error
                                         t
                                         `first-fail-no-error)
@@ -137,8 +147,11 @@
                                            `($conf-token-rule->description ',sym))
                                       (if next
                                           ,(if val
-                                               `($conf-terminal->description ',sym (value-of-token next))
-                                               `($conf-token-rule->description (get-token-type next)))
+                                               `($conf-terminal->description
+                                                 ',sym
+                                                 (value-of-token next))
+                                               `($conf-token-rule->description
+                                                 (get-token-type next)))
                                           "end of source")
                                       (cdr ,pos-list)
                                       (car ,pos-list)
@@ -146,8 +159,6 @@
                                           (format nil ", file: ~a."
                                                   ($conf-get-source))
                                           "."))))))))))
-                 ;;FIXME: temporary solution for `expr' rule
-                 (:empty t)
                  (t (error 'acacia-unknown-parser-rule
                            :unknown-rule root))))))
     (let* ((body-tree (car quote-body-tree))
