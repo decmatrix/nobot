@@ -231,7 +231,7 @@
 
       (define-rule say-expr-arg ()
         (:or
-         (:terminal string)
+         (:terminal char-string)
          (:terminal number-string)
          (:terminal id)))
 
@@ -294,12 +294,12 @@
 
       (define-rule string-or-number ()
         (:or
-         (:terminal string)
+         (:terminal char-string)
          (:terminal number-string)))
 
       (define-rule literal ()
         (:or
-         (:terminal string)
+         (:terminal char-string)
          (:terminal number-string)
          (:rule item-list)
          (:terminal keyword "none")))
