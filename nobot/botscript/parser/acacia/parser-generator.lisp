@@ -73,11 +73,13 @@
                     `(awhen ,(%build first-rule
                                      :first-fail-no-error first-fail-no-error
                                      :merge-sub-trees t)
-                       (append
-                        (unless ,merge-sub-trees
-                          (list ($conf-rule->term-sym ,rule-name)))
-                        it
-                        ,@ (mapcar (rcurry #'%build :merge-sub-trees t) (cdr sub-rules))))))
+                       (remove
+                        nil
+                        (append
+                         (unless ,merge-sub-trees
+                           (list ($conf-rule->term-sym ,rule-name)))
+                         it
+                         ,@ (mapcar (rcurry #'%build :merge-sub-trees t) (cdr sub-rules)))))))
                  (:or
                   (let* ((sub-rules (cdr body-tree))
                          (last-rule (lastcar sub-rules)))
@@ -116,7 +118,7 @@
                     (with-gensyms (converted-sym converted-val pos-list)
                       `(with-next-token ()
                          (let ((,converted-sym ($conf-token-rule->token-sym ',sym))
-                               (,converted-val (if (characterp ,val)
+                               (,converted-val (if (stringp ,val)
                                                    ($conf-terminal->sym ',sym ,val)
                                                    ',(to-symbol val))))
                            (declare (ignorable ,converted-val))
@@ -126,8 +128,9 @@
                                 ,(if val
                                      `(token-value-equal-to next ,converted-val)
                                      t))
-                               (unless ,exclude-from-tree
-                                 (list (convert-token next :with-pos nil)))
+                               (if ,exclude-from-tree
+                                   (list nil)
+                                   (list (convert-token next :with-pos nil)))
                                (if ,(if first-fail-no-error
                                         t
                                         `first-fail-no-error)
