@@ -93,7 +93,7 @@
         (:or
          (:and
           (:rule bot-option)
-          (:rule bot-options-list :as-single-list))
+          (:rule* bot-options-list))
          (:empty)))
 
       (define-rule bot-option ()
@@ -112,7 +112,7 @@
         (:or
          (:and
           (:rule var-decl)
-          (:rule var-decls-list :as-single-list))
+          (:rule* var-decls-list))
          (:empty)))
 
       (define-rule var-decl ()
@@ -140,7 +140,7 @@
         (:or
          (:and
           (:rule state-point-decl)
-          (:rule state-points-decls :as-single-list))
+          (:rule* state-points-decls))
          (:empty)))
 
       (define-rule state-point-decl ()
@@ -155,7 +155,7 @@
         (:or
          (:and
           (:rule state-point-option)
-          (:rule state-point-options :as-single-list))
+          (:rule* state-point-options))
          (:empty)))
 
       (define-rule state-point-option ()
@@ -182,7 +182,7 @@
         (:or
          (:and
           (:rule state-decl)
-          (:rule state-actions-decls :as-single-list))
+          (:rule* state-actions-decls))
          (:empty)))
 
       (define-rule state-decl ()
@@ -197,7 +197,7 @@
         (:or
          (:and
           (:rule stmt)
-          (:rule stmt-list :as-single-list))
+          (:rule* stmt-list))
          (:empty)))
 
       (define-rule stmt ()
@@ -307,14 +307,14 @@
       (define-rule item-list ()
         (:and
          (:terminal delimiter "[" :exclude-from-tree)
-         (:rule literal-list)
+         (:rule* literal-list)
          (:terminal delimiter "]" :exclude-from-tree)))
 
       (define-rule literal-list ()
         (:or
          (:and
           (:rule literal)
-          (:rule rest-literal-list :as-single-list))
+          (:rule* rest-literal-list))
          (:empty)))
 
       (define-rule rest-literal-list ()
@@ -322,6 +322,6 @@
          (:and
           (:terminal delimiter "," :exclude-from-tree)
           (:rule literal)
-          (:rule rest-literal-list :as-single-list))
+          (:rule* rest-literal-list))
          (:empty)))
       )))

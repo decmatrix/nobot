@@ -37,23 +37,25 @@
   (<LITERAL> (<KEYWORD> NONE))
   :literal)
 
-;; TODO: impl test
 (define-parser-test bs-parser.literal.4
     "[1, none, \"aa\", 4, 5]"
-  ()
+  (<LITERAL>
+   (<ITEM-LIST> (<LITERAL> (<NUMBER-STRING> 1)) (<LITERAL> (<KEYWORD> NONE))
+                (<LITERAL> (<CHAR-STRING> "\"aa\"")) (<LITERAL> (<NUMBER-STRING> 4))
+                (<LITERAL> (<NUMBER-STRING> 5))))
   :literal)
 
-;; TODO: impl test
 (define-parser-test bs-parser.rest-literal-list.1
     ", 1, none, \"hello\""
-  ()
+  (<REST-LITERAL-LIST> (<LITERAL> (<NUMBER-STRING> 1))
+                       (<LITERAL> (<KEYWORD> NONE)) (<LITERAL> (<CHAR-STRING> "\"hello\"")))
   :rest-literal-list)
 
-;; TODO: impl test
-(define-parser-test bs-parser.literal-list.1
+;; TODO: impl test, [] ?
+(define-parser-test bs-parser.item-list.1
     "[1, [], [1, [1]], \"1\"]"
   ()
-  :literal-list)
+  :item-list)
 
 (define-parser-test bs-parser.string-or-number.1
     "\"hello\""
@@ -86,28 +88,31 @@
   (<EQL-EXPR> (<ID> "greetings"))
   :eql-expr)
 
-;; TODO: impl test
 (define-parser-test bs-parser.comparison-expr.1
     "11 == greetings"
-  ()
+  (<COMPARISON-EXPR> (<EQL-EXPR> (<LITERAL> (<NUMBER-STRING> 11)))
+                     (<EQL-EXPR> (<ID> "greetings")))
   :comparison-expr)
 
-;; TODO: impl test
 (define-parser-test bs-parser.logic-expr.1
     "11 == greetings"
-  ()
+  (<LOGIC-EXPR>
+   (<COMPARISON-EXPR> (<EQL-EXPR> (<LITERAL> (<NUMBER-STRING> 11)))
+                      (<EQL-EXPR> (<ID> "greetings"))))
   :logic-expr)
 
-;; TODO: impl test
 (define-parser-test bs-parser.cond-expr.1
     "11 == greetings"
-  ()
+  (<COND-EXPR>
+   (<LOGIC-EXPR>
+    (<COMPARISON-EXPR> (<EQL-EXPR> (<LITERAL> (<NUMBER-STRING> 11)))
+                       (<EQL-EXPR> (<ID> "greetings")))))
   :cond-expr)
 
-;; TODO: impl test
 (define-parser-test bs-parser.save-to-expr.1
     "save 21 to user-age"
-  ()
+  (<SAVE-TO-EXPR> (<LITERAL-OR-ID> (<LITERAL> (<NUMBER-STRING> 21)))
+                  (<ID> "user-age"))
   :save-to-expr)
 
 (define-parser-test bs-parser.say-expr-arg.1
@@ -149,10 +154,41 @@
   ()
   :say-expr)
 
-;; TODO: impl test
 (define-parser-test bs-parser.gotov-expr.1
     "gotov a"
-  ()
+  (<GOTOV-EXPR> (<ID> "a"))
   :gotov-expr)
+
+;; TODO: impl test
+(define-parser-test bs-parser.else-block.1
+    "else { gotov a; }"
+  :else-block)
+
+;; TODO: impl test
+(define-parser-test bs-parser.if-stmt.1
+    :if-stmt)
+
+(define-parser-test bs-parser.stmt.1
+    "gotov a;"
+  (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "a"))))
+  :stmt)
+
+(define-parser-test bs-parser.expr.1
+    "gotov a"
+  (<EXPR> (<GOTOV-EXPR> (<ID> "a")))
+  :expr)
+
+;; TODO: impl test
+(define-parser-test bs-parser.stmt-list.1
+    "gotov a; save 1 to b;"
+  ()
+  :stmt-list)
+
+;; TODO: impl test
+(define-parser-test bs-parser.state-decl.1
+    "act-a : {}"
+  ()
+  :state-decl)
+
 
 

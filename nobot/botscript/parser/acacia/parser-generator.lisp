@@ -32,9 +32,9 @@
 
 (in-package :nobot/botscript/parser/acacia/parser-generator)
 
-(defgeneric rule-> (rule-name &key first-fail-no-error as-single-list)
-  (:method (rule-name &key first-fail-no-error as-single-list)
-    (declare (ignore first-fail-no-error as-single-list))
+(defgeneric rule-> (rule-name &key first-fail-no-error)
+  (:method (rule-name &key first-fail-no-error)
+    (declare (ignore first-fail-no-error))
     (error 'acacia-undefined-rule
            :rule rule-name)))
 
@@ -44,8 +44,8 @@
 
 (defmacro define-rule (rule-name () body)
   (let ((rule-name (intern (string rule-name) :keyword)))
-    `(defmethod rule-> ((rule-name (eql ,rule-name)) &key first-fail-no-error as-single-list)
-       (declare (ignorable first-fail-no-error as-single-list))
+    `(defmethod rule-> ((rule-name (eql ,rule-name)) &key first-fail-no-error)
+       (declare (ignorable first-fail-no-error))
        ,(build-rule-body `(,body) `,rule-name))))
 
 (defun build-rule-body (quote-body-tree rule-name)
@@ -54,17 +54,15 @@
                               merge-sub-trees)
              (let ((root (car body-tree)))
                (case root
-                 (:rule
-                  (destructuring-bind (rule-name &optional as-single-list)
+                 ((:rule :rule*)
+                  (destructuring-bind (rule-name)
                       (cdr body-tree)
-                    (unless (or (null as-single-list)
-                                (eq as-single-list :as-single-list))
-                      (error 'acacia-unknown-argument-of-rule
-                             :unknown-arg as-single-list))
                     `(awhen (rule-> ,(to-kword rule-name)
                                     :first-fail-no-error ,first-fail-no-error)
-                       (list it))))
-                 (:and
+                       (remove nil ,(if (eq root :rule*)
+                                        '(cdr it)
+                                        '(list it))))))
+                 ((:and)
                   (let* ((sub-rules (cdr body-tree))
                          (first-rule (car sub-rules)))
                     (unless sub-rules
@@ -73,13 +71,16 @@
                     `(awhen ,(%build first-rule
                                      :first-fail-no-error first-fail-no-error
                                      :merge-sub-trees t)
+                       ;;TODO: no need using this remove function
                        (remove
                         nil
                         (append
                          (unless ,merge-sub-trees
                            (list ($conf-rule->term-sym ,rule-name)))
                          it
-                         ,@ (mapcar (rcurry #'%build :merge-sub-trees t) (cdr sub-rules)))))))
+                         ,@ (mapcar
+                             (rcurry #'%build :merge-sub-trees t)
+                             (cdr sub-rules)))))))
                  (:or
                   (let* ((sub-rules (cdr body-tree))
                          (last-rule (lastcar sub-rules)))
@@ -107,7 +108,7 @@
                             (raise-bs-parser-error
                              "error on rule ~a" ,rule-name)))
                        (when (cdr it)
-                         it))))
+                         (remove nil it)))))
                  (:terminal
                   (destructuring-bind (sym &optional val exclude-from-tree)
                       (cdr body-tree)
@@ -177,5 +178,6 @@
    (eq (car rule) :empty)
    (not (cdr rule))))
 
+;;TODO: use to-kword from nobot utils
 (defun to-kword (sym)
   (reintern sym :keyword))
