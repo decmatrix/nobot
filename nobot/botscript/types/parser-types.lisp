@@ -19,7 +19,7 @@
     (:value "compiler-options" :description "compiler options")
     (:value "compiler-option" :description "compiler option")
     (:value "compiler-option-name" :description "compiler option name")
-    (:value "bot-declarations" :description "bot declarations")
+    (:value "bot-declaration" :description "bot declaration")
     (:value "bot-options" :description "bot options")
     (:value "bot-options-list" :description "bot options list")
     (:value "bot-option" :description "bot option")

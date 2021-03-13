@@ -13,13 +13,13 @@
 
 <compiler-option-name> ::= '@codegen'
 
-<bot-declarations> ::= 'bot' '{'
+<bot-declaration> ::= 'bot' '{'
                                 <bot-options>
                                 <var-declarations>
                                 <start-from-stmt>
                                 <state-points-declarations>
                                 <state-actions-declarations>
-                       '}'
+                      '}'
 
 <bot-options> ::= 'options' '{' <bot-options-list> '}'
 
@@ -67,7 +67,6 @@
 <expr> ::= <gotov-expr>
            | <say-expr>
            | <save-to-expr>
-           | <empty>
 
 <gotov-expr> ::= 'gotov' <id>
 

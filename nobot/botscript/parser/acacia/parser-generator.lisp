@@ -58,11 +58,12 @@
                   (destructuring-bind (rule-name)
                       (cdr body-tree)
                     `(awhen (rule-> ,(to-kword rule-name)
-                                    :first-fail-no-error ,first-fail-no-error)
+                                    :first-fail-no-error (or ,first-fail-no-error
+                                                             first-fail-no-error))
                        (remove nil ,(if (eq root :rule*)
                                         '(cdr it)
                                         '(list it))))))
-                 ((:and)
+                 (:and
                   (let* ((sub-rules (cdr body-tree))
                          (first-rule (car sub-rules)))
                     (unless sub-rules
@@ -102,13 +103,15 @@
                                      (%build last-rule
                                              :first-fail-no-error t
                                              :merge-sub-trees t)))
-                            (if (eq it t)
-                                nil
-                                it)
-                            (raise-bs-parser-error
-                             "error on rule ~a" ,rule-name)))
-                       (when (cdr it)
-                         (remove nil it)))))
+                            it
+                            (unless first-fail-no-error
+                              (raise-bs-parser-error
+                               "error on rule ~a" ,rule-name))))
+                       (cond
+                         ((eq (cdr it) t)
+                          (list (car it)))
+                         ((cdr it) (remove nil it))
+                         (t nil)))))
                  (:terminal
                   (destructuring-bind (sym &optional val exclude-from-tree)
                       (cdr body-tree)
@@ -134,7 +137,7 @@
                                    (list (convert-token next :with-pos nil)))
                                (if ,(if first-fail-no-error
                                         t
-                                        `first-fail-no-error)
+                                        'first-fail-no-error)
                                    (progn
                                      ($conf-mv-ptr-to-prev-token)
                                      nil)

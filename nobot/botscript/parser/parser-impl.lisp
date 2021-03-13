@@ -58,7 +58,7 @@
         (:or
          (:and
           (:rule compiler-option)
-          (:rule compiler-options))
+          (:rule* compiler-options))
          (:empty)))
 
       (define-rule compiler-option ()
@@ -71,7 +71,7 @@
         (:and
          (:terminal keyword "@codegen")))
 
-      (define-rule bot-declarations ()
+      (define-rule bot-declaration ()
         (:and
          (:terminal keyword "bot" :exclude-from-tree)
          (:terminal delimiter "{" :exclude-from-tree)
@@ -86,7 +86,7 @@
         (:and
          (:terminal keyword "options" :exclude-from-tree)
          (:terminal delimiter "{" :exclude-from-tree)
-         (:rule bot-options-list)
+         (:rule* bot-options-list)
          (:terminal delimiter "}" :exclude-from-tree)))
 
       (define-rule bot-options-list ()
@@ -99,13 +99,15 @@
       (define-rule bot-option ()
         (:and
          (:terminal id)
-         (:terminal delimiter ":" :exclude-from-tree)))
+         (:terminal delimiter ":" :exclude-from-tree)
+         (:rule string-or-number)
+         (:terminal delimiter ";" :exclude-from-tree)))
 
       (define-rule var-declarations ()
         (:and
          (:terminal keyword "vars" :exclude-from-tree)
          (:terminal delimiter "{" :exclude-from-tree)
-         (:rule var-decls-list)
+         (:rule* var-decls-list)
          (:terminal delimiter "}" :exclude-from-tree)))
 
       (define-rule var-decls-list ()
@@ -120,7 +122,7 @@
          (:terminal id)
          (:terminal delimiter ":" :exclude-from-tree)
          (:rule literal)
-         (:terminal delimiter ";")))
+         (:terminal delimiter ";" :exclude-from-tree)))
 
       (define-rule start-from-stmt ()
         (:and
@@ -133,7 +135,7 @@
         (:and
          (:terminal keyword "state-points" :exclude-from-tree)
          (:terminal delimiter "{" :exclude-from-tree)
-         (:rule state-points-decls)
+         (:rule* state-points-decls)
          (:terminal delimiter "}" :exclude-from-tree)))
 
       (define-rule state-points-decls ()
@@ -169,13 +171,7 @@
         (:and
          (:terminal keyword "state-actions" :exclude-from-tree)
          (:terminal delimiter "{" :exclude-from-tree)
-         (:rule state-actions-decls)))
-
-      (define-rule state-actions-decls ()
-        (:and
-         (:terminal keyword "state-actions" :exclude-from-tree)
-         (:terminal delimiter "{" :exclude-from-tree)
-         (:rule state-actions-decls)
+         (:rule* state-actions-decls)
          (:terminal delimiter "}" :exclude-from-tree)))
 
       (define-rule state-actions-decls ()
@@ -188,10 +184,10 @@
       (define-rule state-decl ()
         (:and
          (:terminal id)
-         (:terminal delimiter ":")
-         (:terminal delimiter "{")
+         (:terminal delimiter ":" :exclude-from-tree)
+         (:terminal delimiter "{" :exclude-from-tree)
          (:rule stmt-list)
-         (:terminal delimiter "}")))
+         (:terminal delimiter "}" :exclude-from-tree)))
 
       (define-rule stmt-list ()
         (:or
@@ -211,8 +207,7 @@
         (:or
          (:rule gotov-expr)
          (:rule say-expr)
-         (:rule save-to-expr)
-         (:empty)))
+         (:rule save-to-expr)))
 
       (define-rule gotov-expr ()
         (:and
@@ -227,7 +222,7 @@
       (define-rule say-expr-args ()
         (:and
          (:rule say-expr-arg)
-         (:rule rest-say-expr-args)))
+         (:rule* rest-say-expr-args)))
 
       (define-rule say-expr-arg ()
         (:or
@@ -239,7 +234,7 @@
         (:or
          (:and
           (:rule say-expr-arg)
-          (:rule rest-say-expr-args))
+          (:rule* rest-say-expr-args))
          (:empty)))
 
       (define-rule save-to-expr ()
@@ -253,9 +248,9 @@
         (:and
          (:terminal keyword "if" :exclude-from-tree)
          (:rule cond-expr)
-         (:terminal delimiter "{")
+         (:terminal delimiter "{" :exclude-from-tree)
          (:rule stmt-list)
-         (:terminal delimiter "}")
+         (:terminal delimiter "}" :exclude-from-tree)
          (:rule else-block)))
 
       (define-rule else-block ()
