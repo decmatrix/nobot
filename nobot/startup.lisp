@@ -103,7 +103,7 @@
 
 (defun print-help-description ()
   (opts:describe
-   :prefix (get-text-of-program-version)
+   :prefix (get-text-logo)
    :suffix (format nil "more, ~A"
                    (get-text-of-program-description))))
 
@@ -114,6 +114,22 @@
 (defun get-text-of-program-description ()
   (format nil "go to --> http://nobot.space"))
 
+(defun get-text-author ()
+  (format nil "Designed by Bohdan Sokolovskyi~%"))
+
 (defun get-text-of-program-version ()
-  (format nil "NOBOT platform v.~A"
+  (format nil "platform v.~A"
           (get-program-version)))
+
+(defun get-text-logo ()
+  (format nil "~a~a~%~a~%"
+          "
+███╗   ██╗ ██████╗ ██████╗  ██████╗ ████████╗
+████╗  ██║██╔═══██╗██╔══██╗██╔═══██╗╚══██╔══╝
+██╔██╗ ██║██║   ██║██████╔╝██║   ██║   ██║   
+██║╚██╗██║██║   ██║██╔══██╗██║   ██║   ██║   
+██║ ╚████║╚██████╔╝██████╔╝╚██████╔╝   ██║   
+╚═╝  ╚═══╝ ╚═════╝ ╚═════╝  ╚═════╝    ╚═╝
+"
+          (get-text-of-program-version)
+          (get-text-author)))
