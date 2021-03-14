@@ -488,59 +488,63 @@ bot {
                          (<STATE-POINT-OPTION> (<ID> "act") (<ID> "act-defualt"))
                          (<STATE-POINT-OPTION> (<ID> "type") (<ID> "out")))))
    (<STATE-ACTIONS-DECLARATIONS>
-    (<STATE-DECL> (<ID> "act-a")
-                  (<STMT-LIST>
-                   (<STMT>
-                    (<IF-STMT>
-                     (<COND-EXPR>
-                      (<LOGIC-EXPR>
-                       (<COMPARISON-EXPR> (<EQL-EXPR> (<ID> "input"))
-                                          (<EQL-EXPR> (<ID> "start-command")))))
-                     (<STMT-LIST>
-                      (<STMT>
-                       (<EXPR>
-                        (<SAY-EXPR>
-                         (<SAY-EXPR-ARGS> (<SAY-EXPR-ARG> (<CHAR-STRING> "\"Hello\""))))))
-                      (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "b")))))
-                     (<ELSE-BLOCK>
-                      (<STMT-LIST> (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "default"))))))))
-                   (<STMT>
-                    (<IF-STMT>
-                     (<COND-EXPR>
-                      (<LOGIC-EXPR>
-                       (<COMPARISON-EXPR> (<EQL-EXPR> (<ID> "input"))
-                                          (<EQL-EXPR> (<ID> "greetings")))))
-                     (<STMT-LIST> (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "a")))))
-                     (<ELSE-BLOCK>
-                      (<STMT-LIST> (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "default"))))))))))
-    (<STATE-DECL> (<ID> "act-b")
-                  (<STMT-LIST>
-                   (<STMT>
-                    (<EXPR>
-                     (<SAY-EXPR>
-                      (<SAY-EXPR-ARGS>
-                       (<SAY-EXPR-ARG> (<CHAR-STRING> "\"What is your name ?\""))))))
-                   (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "c"))))))
-    (<STATE-DECL> (<ID> "act-c")
-                  (<STMT-LIST>
-                   (<STMT>
-                    (<EXPR>
-                     (<SAVE-TO-EXPR> (<LITERAL-OR-ID> (<ID> "input")) (<ID> "user-name"))))
-                   (<STMT>
-                    (<EXPR>
-                     (<SAY-EXPR>
-                      (<SAY-EXPR-ARGS> (<SAY-EXPR-ARG> (<CHAR-STRING> "\"Hello\""))
-                                       (<SAY-EXPR-ARG> (<ID> "input"))))))
-                   (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "a"))))))
-    (<STATE-DECL> (<ID> "act-default")
-                  (<STMT-LIST>
-                   (<STMT>
-                    (<EXPR>
-                     (<SAY-EXPR>
-                      (<SAY-EXPR-ARGS>
-                       (<SAY-EXPR-ARG>
-                        (<CHAR-STRING> "\"Sorry, i can't understand you\""))))))
-                   (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "a"))))))))
+    (<STATE-DECL>
+     (<ID> "act-a")
+     (<STMT-LIST>
+      (<STMT>
+       (<IF-STMT>
+        (<COND-EXPR>
+         (<LOGIC-EXPR>
+          (<COMPARISON-EXPR> (<EQL-EXPR> (<ID> "input"))
+                             (<EQL-EXPR> (<ID> "start-command")))))
+        (<STMT-LIST>
+         (<STMT>
+          (<EXPR>
+           (<SAY-EXPR>
+            (<SAY-EXPR-ARGS> (<SAY-EXPR-ARG> (<CHAR-STRING> "\"Hello\""))))))
+         (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "b")))))
+        (<ELSE-BLOCK>
+         (<STMT-LIST> (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "default"))))))))
+      (<STMT>
+       (<IF-STMT>
+        (<COND-EXPR>
+         (<LOGIC-EXPR>
+          (<COMPARISON-EXPR> (<EQL-EXPR> (<ID> "input"))
+                             (<EQL-EXPR> (<ID> "greetings")))))
+        (<STMT-LIST> (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "a")))))
+        (<ELSE-BLOCK>
+         (<STMT-LIST> (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "default"))))))))))
+    (<STATE-DECL>
+     (<ID> "act-b")
+     (<STMT-LIST>
+      (<STMT>
+       (<EXPR>
+        (<SAY-EXPR>
+         (<SAY-EXPR-ARGS>
+          (<SAY-EXPR-ARG> (<CHAR-STRING> "\"What is your name ?\""))))))
+      (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "c"))))))
+    (<STATE-DECL>
+     (<ID> "act-c")
+     (<STMT-LIST>
+      (<STMT>
+       (<EXPR>
+        (<SAVE-TO-EXPR> (<LITERAL-OR-ID> (<ID> "input")) (<ID> "user-name"))))
+      (<STMT>
+       (<EXPR>
+        (<SAY-EXPR>
+         (<SAY-EXPR-ARGS> (<SAY-EXPR-ARG> (<CHAR-STRING> "\"Hello\""))
+                          (<SAY-EXPR-ARG> (<ID> "input"))))))
+      (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "a"))))))
+    (<STATE-DECL>
+     (<ID> "act-default")
+     (<STMT-LIST>
+      (<STMT>
+       (<EXPR>
+        (<SAY-EXPR>
+         (<SAY-EXPR-ARGS>
+          (<SAY-EXPR-ARG>
+           (<CHAR-STRING> "\"Sorry, i can't understand you\""))))))
+      (<STMT> (<EXPR> (<GOTOV-EXPR> (<ID> "a"))))))))
   :bot-declaration)
 
 (define-parser-test bs-parser.script.1

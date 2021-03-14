@@ -4,6 +4,9 @@
 
 (uiop:define-package :nobot/botscript/parser/acacia/tree-tools
     (:use :cl)
+  (:import-from :anaphora
+                #:awhen
+                #:it)
   (:import-from :nobot/utils
                 #:equals
                 #:reintern)
@@ -15,9 +18,13 @@
 
 (in-package :nobot/botscript/parser/acacia/tree-tools)
 
+(defvar *sort-type*)
+(defvar *result*)
+
 (defgeneric same-parse-tree-? (obj1 obj2))
 (defgeneric normolize-tree (tree))
-(defgeneric get-sub-tree-aux (tree))
+(defgeneric get-sub-tree-aux (tree)
+  (:method (tree) tree))
 
 (defmethod normolize-tree ((tree list))
   (mapcar (lambda (elm)
@@ -38,13 +45,16 @@
   (equals (normolize-tree obj1)
           (normolize-tree obj2)))
 
-(defun get-sub-tree (tree sort-type &key all)
-  (declare (ignore tree sort-type all))
-  )
+(defun get-sub-tree (tree sort-type &key (convert-sort-type-fn #'identity))
+  (let ((*sort-type* sort-type)
+        (*result* nil))
+    (get-sub-tree-aux tree)
+    *result*))
 
+;;TODO: try get rid of push fn
 (defmethod get-sub-tree-aux ((tree list))
-  )
-
-
-
+  (when (eq (car tree) *sort-type*)
+    (push tree *result*))
+  (awhen (cdr tree)
+    (mapc #'get-sub-tree-aux it)))
 
