@@ -19,11 +19,14 @@
 (in-package :nobot/botscript/parser/acacia/tree-tools)
 
 (defvar *sort-type*)
+(defvar *is-all*)
 (defvar *result*)
 
 (defgeneric same-parse-tree-? (obj1 obj2))
 (defgeneric normolize-tree (tree))
-(defgeneric get-sub-tree-aux (tree)
+(defgeneric get-all-sub-trees (tree)
+  (:method (tree) tree))
+(defgeneric get-first-sub-tree (tree)
   (:method (tree) tree))
 
 (defmethod normolize-tree ((tree list))
@@ -45,16 +48,26 @@
   (equals (normolize-tree obj1)
           (normolize-tree obj2)))
 
-(defun get-sub-tree (tree sort-type &key (convert-sort-type-fn #'identity))
-  (let ((*sort-type* sort-type)
+(defun get-sub-tree (tree sort-type &key all (convert-sort-type-fn #'identity))
+  (let ((*sort-type* (funcall convert-sort-type-fn sort-type))
+        (*is-all* all)
         (*result* nil))
-    (get-sub-tree-aux tree)
+    (if *is-all*
+        (get-all-sub-trees tree)
+        (get-first-sub-tree tree))
     *result*))
 
-;;TODO: try get rid of push fn
-(defmethod get-sub-tree-aux ((tree list))
+;;TODO: try get rid of push
+(defmethod get-all-sub-trees ((tree list))
   (when (eq (car tree) *sort-type*)
     (push tree *result*))
   (awhen (cdr tree)
-    (mapc #'get-sub-tree-aux it)))
+    (mapc #'get-all-sub-trees it)))
+
+;;TODO: try get rid of setf
+(defmethod get-first-sub-tree ((tree list))
+  (if (eq (car tree) *sort-type*)
+      (setf *result* tree)
+      (awhen (cdr tree)
+        (mapc #'get-first-sub-tree it))))
 

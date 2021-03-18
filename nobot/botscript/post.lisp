@@ -4,6 +4,10 @@
 
 (uiop:define-package :nobot/botscript/post
     (:use :cl)
+  (:import-from :alexandria
+                #:rcurry)
+  (:import-from :nobot/botscript/lexer
+                #:terminal-to)
   (:import-from :nobot/utils
                 #:to-keyword)
   (:import-from :nobot/botscript/types/types-utils
@@ -59,6 +63,41 @@
      :compiler-options (make-compiler-options-table
                         (get-sub-tree parse-tree :compiler-options))
      :parse-tree (get-sub-tree parse-tree :script-rest))))
+
+(defun botscript-post-process ()
+  (let* ((*parser-result* (get-parser-result *context*))
+         (parse-tree (acacia-get-parse-tree *parser-result*)))
+    (make-instance
+     'botscript-post-process-info
+     :compiler-options (get-sub-tree
+                        parse-tree
+                        :compiler-options
+                        :convert-sort-type-fn (curry #'terminal-to :sym))
+     :var-declarations (get-sub-tree
+                        parse-tree
+                        :var-declarations
+                        :convert-sort-type-fn (curry #'terminal-to :sym))
+     :state-points-declarations (get-sub-tree
+                                 parse-tree
+                                 :state-points-declarations
+                                 :convert-sort-type-fn (curry #'terminal-to :sym))
+     :state-actions-declarations (get-sub-tree
+                                  parse-tree
+                                  :state-actions-declarations
+                                  :convert-sort-type-fn (curry #'terminal-to :sym)))))
+
+(defun make-declaration-table (type declarations-list)
+  (let ((table (make-hash-table :test #'eq)))
+    (mapc
+     (lambda (decl)
+       (let ((id (to-keyword (get-sub-tree
+                              decl
+                              (case type
+                                (:compiler-options)
+                                ())))))))
+     declarations-list)
+    table))
+
 
 (defun make-bot-options-table (bot-options-tree)
   (let ((table (make-hash-table :test #'eq)))
