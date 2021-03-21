@@ -98,6 +98,7 @@
   (invoke-restart 'opts:skip-option))
 
 (defun print-program-description ()
+  (format t "~A~%~A")
   (format t "~A~%"
           (get-text-of-program-description)))
 
@@ -108,21 +109,41 @@
                    (get-text-of-program-description))))
 
 (defun print-program-version ()
-  (format t "~A~%"
+  (format t "~A~%~A~%"
+          (get-text-logo)
           (get-text-of-program-version)))
+
+(defun get-text-of-program-description ()
+  (format nil
+          "
+NOBOT platform is engine for creation bots\
+for different ebsites or social networks. \
+Platform consist of own declarative description \
+language of  bot's logic - BotScript and translator \
+whose translate BotScript to popular programming \
+languages for creation bots like JavaScipt and etc.\
+For more detail about platform see documentation at \
+website  http://nobot.space. Also exist web version of platform.
+If you want to help improve platform write me to \
+email -> <sokol.chemist@gmail.com> Bohdan Sokolovskyi. \
+I would be glad to receive any help.\
+Enjoy using the platform ;).~%"))
 
 (defun get-text-of-program-description ()
   (format nil "go to --> http://nobot.space"))
 
 (defun get-text-author ()
-  (format nil "Designed by Bohdan Sokolovskyi~%"))
+  (format nil "designed by Bohdan Sokolovskyi~%"))
 
 (defun get-text-of-program-version ()
   (format nil "platform v.~A"
           (get-program-version)))
 
+(defun get-text-year ()
+  (format nil "copyright (c) NOBOT 2021~%"))
+
 (defun get-text-logo ()
-  (format nil "~a~a~%~a~%"
+  (format nil "~a~a~%~a~%~a"
           "
 ███╗   ██╗ ██████╗ ██████╗  ██████╗ ████████╗
 ████╗  ██║██╔═══██╗██╔══██╗██╔═══██╗╚══██╔══╝
@@ -132,4 +153,5 @@
 ╚═╝  ╚═══╝ ╚═════╝ ╚═════╝  ╚═════╝    ╚═╝
 "
           (get-text-of-program-version)
-          (get-text-author)))
+          (get-text-author)
+          (get-text-year)))
