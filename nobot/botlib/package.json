@@ -1,0 +1,22 @@
+{
+  "name": "wisteria",
+  "version": "0.0.1",
+  "description": "JS lib for creation bots",
+  "main": "wisteria.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bohdan-sokolovskyi/wisteria.git"
+  },
+  "author": "Bohdan Sokolovskyi <sokol.chemist@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bohdan-sokolovskyi/wisteria/issues"
+  },
+  "homepage": "https://github.com/bohdan-sokolovskyi/wisteria#readme",
+  "dependencies": {
+    "graphlib": "^2.1.8"
+  }
+}
