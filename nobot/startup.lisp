@@ -129,9 +129,6 @@ email -> <sokol.chemist@gmail.com> Bohdan Sokolovskyi. \
 I would be glad to receive any help.\
 Enjoy using the platform ;).~%"))
 
-(defun get-text-of-program-description ()
-  (format nil "go to --> http://nobot.space"))
-
 (defun get-text-author ()
   (format nil "designed by Bohdan Sokolovskyi~%"))
 
