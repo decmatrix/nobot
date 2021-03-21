@@ -69,22 +69,30 @@
          (parse-tree (acacia-get-parse-tree *parser-result*)))
     (make-instance
      'botscript-post-process-info
-     :compiler-options (get-sub-tree
-                        parse-tree
+     :compiler-options (make-declaration-table
                         :compiler-options
-                        :convert-sort-type-fn (curry #'terminal-to :sym))
-     :var-declarations (get-sub-tree
-                        parse-tree
+                        (get-sub-tree
+                         parse-tree
+                         :compiler-options
+                         :convert-sort-type-fn (curry #'terminal-to :sym)))
+     :var-declarations (make-declaration-table
                         :var-declarations
-                        :convert-sort-type-fn (curry #'terminal-to :sym))
-     :state-points-declarations (get-sub-tree
-                                 parse-tree
+                        (get-sub-tree
+                         parse-tree
+                         :var-declarations
+                         :convert-sort-type-fn (curry #'terminal-to :sym)))
+     :state-points-declarations (make-declaration-table
                                  :state-points-declarations
-                                 :convert-sort-type-fn (curry #'terminal-to :sym))
-     :state-actions-declarations (get-sub-tree
+                                 (get-sub-tree
                                   parse-tree
+                                  :state-points-declarations
+                                  :convert-sort-type-fn (curry #'terminal-to :sym)))
+     :state-actions-declarations (make-declaration-table
                                   :state-actions-declarations
-                                  :convert-sort-type-fn (curry #'terminal-to :sym)))))
+                                  (get-sub-tree
+                                   parse-tree
+                                   :state-actions-declarations
+                                   :convert-sort-type-fn (curry #'terminal-to :sym))))))
 
 (defun make-declaration-table (type declarations-list)
   (let ((table (make-hash-table :test #'eq)))
@@ -94,7 +102,9 @@
                               decl
                               (case type
                                 (:compiler-options)
-                                ())))))))
+                                (:var-declarations)
+                                (:state-points-declarations)
+                                (:state-actions-declarations))))))))
      declarations-list)
     table))
 
