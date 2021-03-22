@@ -4,6 +4,10 @@
 
 (uiop:define-package :nobot/botscript/post
     (:use :cl)
+  (:import-from :anaphora
+                #:aif
+                #:awhen
+                #:it)
   (:import-from :alexandria
                 #:rcurry)
   (:import-from :nobot/botscript/lexer
@@ -24,142 +28,203 @@
                 #:acacia-get-source-type
                 #:acacia-get-source)
   (:import-from :nobot/botscript/parser/acacia/tree-tools
-                #:get-sub-tree)
+                #:get-sub-tree
+                #:get-custom-sub-tree-getter)
   (:export #:bot-project-info
            #:botscript-post-process
-           #:botscript-post-process-info))
+           #:botscript-post-process-info
+           #:get-compiler-options
+           #:get-bot-options
+           #:get-var-declarations
+           #:get-state-points-declarations
+           #:get-state-actions-declarations
+           #:get-start-from-id))
 
 (in-package :nobot/botscript/post)
 
 (defclass botscript-post-process-info ()
-  ((bot-options
-    :initarg :bot-options
-    :type hash-table
-    :reader get-bot-options)
-   (compiler-options
+  ((compiler-options
     :initarg :compiler-options
     :type hash-table
     :reader get-compiler-options)
-   (parse-tree
-    :initarg :parse-tree
-    :type list
-    :reader get-parse-tree)))
+   (bot-options
+    :initarg :bot-options
+    :type hash-table
+    :reader get-bot-options)
+   (var-declarations
+    :initarg :var-declarations
+    :type hash-table
+    :reader get-var-declarations)
+   (state-points-declarations
+    :initarg :state-points-declarations
+    :type hash-table
+    :reader get-state-points-declarations)
+   (state-actions-declarations
+    :initarg :state-actions-declarations
+    :type hash-table
+    :reader get-state-actions-declarations)
+   (start-from-id
+    :initarg :start-from-id
+    :type keyword
+    :reader get-start-from-id)))
+
+(defgeneric check-start-from-id (obj))
 
 (defparameter *avaliable-compiler-options*
-  '(:lang :author :version))
+  '(:@codegen))
 
 (defparameter *avaliable-bot-options*
-  '(:name :port :host))
+  '(:name :port :host :author :version))
 
 (defvar *parser-result*)
+(defvar *table*)
+(defvar *custom-get-sub-tree*)
 
 (defun botscript-post-process ()
-  (let* ((*parser-result* (get-parser-result *context*))
+  (let* ((*custom-get-sub-tree*
+          (get-custom-sub-tree-getter
+           (curry #'terminal-to :sym)))
+         (*parser-result* (get-parser-result *context*))
          (parse-tree (acacia-get-parse-tree *parser-result*)))
-    (make-instance
-     'botscript-post-process-info
-     :bot-options (make-bot-options-table
-                   (get-sub-tree parse-tree :bot-options))
-     :compiler-options (make-compiler-options-table
-                        (get-sub-tree parse-tree :compiler-options))
-     :parse-tree (get-sub-tree parse-tree :script-rest))))
+    (awhen (make-instance
+            'botscript-post-process-info
+            :compiler-options (make-declaration-table
+                               (funcall
+                                *custom-get-sub-tree*
+                                parse-tree
+                                :compiler-option
+                                :all t)
+                               #'process-compiler-option)
+            :bot-options (make-declaration-table
+                          (funcall
+                           *custom-get-sub-tree*
+                           parse-tree
+                           :bot-option
+                           :all t)
+                          #'process-bot-option)
+            :var-declarations (make-declaration-table
+                               (funcall
+                                *custom-get-sub-tree*
+                                parse-tree
+                                :var-decl
+                                :all t)
+                               #'process-var-decl)
+            :state-points-declarations (make-declaration-table
+                                        (funcall
+                                         *custom-get-sub-tree*
+                                         parse-tree
+                                         :state-point-decl
+                                         :all t)
+                                        #'process-state-point-decl)
+            :state-actions-declarations (make-declaration-table
+                                         (funcall
+                                          *custom-get-sub-tree*
+                                          parse-tree
+                                          :state-decl
+                                          :all t)
+                                         #'process-state-decl)
+            :start-from-id (get-start-from-id parse-tree))
+      (check-start-from-id it)
+      it)))
 
-(defun botscript-post-process ()
-  (let* ((*parser-result* (get-parser-result *context*))
-         (parse-tree (acacia-get-parse-tree *parser-result*)))
-    (make-instance
-     'botscript-post-process-info
-     :compiler-options (make-declaration-table
-                        :compiler-options
-                        (get-sub-tree
-                         parse-tree
-                         :compiler-options
-                         :convert-sort-type-fn (curry #'terminal-to :sym)))
-     :var-declarations (make-declaration-table
-                        :var-declarations
-                        (get-sub-tree
-                         parse-tree
-                         :var-declarations
-                         :convert-sort-type-fn (curry #'terminal-to :sym)))
-     :state-points-declarations (make-declaration-table
-                                 :state-points-declarations
-                                 (get-sub-tree
-                                  parse-tree
-                                  :state-points-declarations
-                                  :convert-sort-type-fn (curry #'terminal-to :sym)))
-     :state-actions-declarations (make-declaration-table
-                                  :state-actions-declarations
-                                  (get-sub-tree
-                                   parse-tree
-                                   :state-actions-declarations
-                                   :convert-sort-type-fn (curry #'terminal-to :sym))))))
+(defun make-declaration-table (declarations-list process-fn)
+  "process fn args: declaration"
+  (let ((*table* (make-hash-table :test #'eq)))
+    (mapc process-fn declarations-list)
+    *table*))
 
-(defun make-declaration-table (type declarations-list)
-  (let ((table (make-hash-table :test #'eq)))
-    (mapc
-     (lambda (decl)
-       (let ((id (to-keyword (get-sub-tree
-                              decl
-                              (case type
-                                (:compiler-options)
-                                (:var-declarations)
-                                (:state-points-declarations)
-                                (:state-actions-declarations))))))))
-     declarations-list)
-    table))
+(defun process-compiler-option (option)
+  (let ((id (to-keyword
+             (second
+              (second
+               (second option)))))
+        (value (second
+                (second
+                 (third option)))))
+    (when (is-avaliable-option-? id :compiler)
+      (setf (gethash id *table*)
+            (awhen (is-avaliable-value-type-? id value)
+              it)))))
 
+(defun process-bot-option (bot-option)
+  (let ((id (to-keyword
+             (second
+              (second bot-option))))
+        (value (second
+                (third bot-option))))
+    (when (is-avaliable-option-? id :bot)
+      (setf (gethash id *table*)
+            (awhen (is-avaliable-value-type-? id value)
+              it)))))
 
-(defun make-bot-options-table (bot-options-tree)
-  (let ((table (make-hash-table :test #'eq)))
-    (mapc
-     (lambda (option)
-       (let ((id (to-keyword (second (second option))))
-             (value (second (fourth option))))
-         (if (is-avaliable-bot-option-? id)
-             (setf (gethash id table)
-                   (and (check-option-value-type (first value) id)
-                        (second value)))
-             (raise-bs-post-process-error
-              "not avaliable compiler option: ~a~a"
-              id
-              (make-source-msg)))))
-     (get-sub-tree bot-options-tree :opt :all t))
-    table))
+(defun process-var-decl (var-decl)
+  (setf (gethash (to-keyword
+                  (second
+                   (second var-decl)))
+                 *table)
+        (third var-decl)))
 
-(defun make-compiler-options-table (compiler-options-tree)
-  (let ((table (make-hash-table :test #'eq)))
-    (mapc
-     (lambda (option)
-       (let ((id (to-keyword (second (second option))))
-             (value (fourth option)))
-         (if (is-avaliable-compiler-option-? id)
-             (setf (gethash id table)
-                   (and (check-option-value-type (first value) id)
-                        (second value)))
-             (raise-bs-post-process-error
-              "not avaliable bot option: ~a~a"
-              id
-              (make-source-msg)))))
-     (get-sub-tree compiler-options-tree :opt :all t))
-    table))
+(defun process-state-point-decl (state-point-decl)
+  (setf (gethash (to-keyword
+                  (second
+                   (second state-point-decl)))
+                 *table*)
+        (third state-point-decl)))
 
-(defun is-avaliable-compiler-option-? (option)
-  (find option *avaliable-compiler-options* :test #'eq))
+(defun process-state-decl (state-decl)
+  (setf (gethash (to-keyword
+                  (second
+                   (second state-decl)))
+                 *table)
+        (third state-decl)))
 
-(defun is-avaliable-bot-option-? (option)
-  (find option *avaliable-bot-options* :test #'eq))
+(defun get-start-from-id (parse-tree)
+  (to-keyword
+   (second
+    (second
+     (funcall *custom-get-sub-tree* parse-tree
+              :start-from-stmt)))))
 
-(defun check-option-value-type (type id)
-  (let ((converted-type (convert-type type)))
+(defmethod check-start-from-id ((obj botscript-post-process-info))
+  (let ((start-from-id (get-start-from-id obj)))
+    (unless (get-state-points-declarations obj start-from-id)
+      (raise-bs-post-process-error
+       "undefined state point ~a~a"
+       start-from-id
+       (make-source-msg)))))
+
+(defun is-avaliable-option-? (option type)
+  (case type
+    (:bot
+     (if (find option *avaliable-bot-options* :test #'eq)
+         t
+         (raise-bs-post-process-error
+          "not avaliable bot option: ~a~a"
+          option
+          (make-source-msg))))
+    (:compiler
+     (if (find option *avaliable-compiler-options* :test #'eq)
+         t
+         (raise-bs-post-process-error
+          "not avaliable compiler option ~a~a"
+          option
+          (make-source-msg))))
+    (t (error "unknown type ~a" type))))
+
+(defun check-option-value-type (id value)
+  (let ((converted-type
+         (convert-type (first value))))
     (case id 
-      ((:lang :name :host :version :author)
-       (or (eq converted-type :char-string)
+      ((:@codegen :name :host :version :author)
+       (if (eq converted-type :char-string)
+           (second value)
            (raise-type-error
             converted-type
             :char-string
             id)))
       (:port
-       (or (eq converted-type :number-string)
+       (if (eq converted-type :number-string)
+           (second value)
            (raise-type-error
             converted-type
             :number-string

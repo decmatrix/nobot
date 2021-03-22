@@ -98,8 +98,8 @@
   (invoke-restart 'opts:skip-option))
 
 (defun print-program-description ()
-  (format t "~A~%~A")
-  (format t "~A~%"
+  (format t "~A~%~A"
+          (get-text-logo)
           (get-text-of-program-description)))
 
 (defun print-help-description ()

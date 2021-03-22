@@ -3,7 +3,8 @@
 
 
 (uiop:define-package :nobot/projectgen/common
-    (:use :cl)
+    (:use :cl
+          :nobot/botscript/post)
   (:import-from :nobot/utils
                 #:to-keyword
                 #:get-pwd)
@@ -18,10 +19,6 @@
   (:import-from :nobot/botscript/parser/acacia/result-packaging
                 #:acacia-get-source
                 #:acacia-get-source-type)
-  (:import-from :nobot/botscript/post
-                #:get-compiler-options
-                #:get-bot-options
-                #:botscript-post-process-info)
   (:export #:create-project
            #:generate-project
            #:*project*
@@ -86,20 +83,23 @@
          (compiler-options (get-compiler-options post-process-instance))
          (bot-options (get-bot-options post-process-instance))
          (project-lang (to-keyword
-                        (or (gethash :lang compiler-options)
+                        (or (gethash :@codegen compiler-options)
                             (raise-projectgen-error
-                             "undefined compiler option 'lang'~a"
+                             "undefined compiler option: @codegen~a"
                              (make-source-msg)))))
          (project-name (make-project-name
-                        (gethash :name bot-options))))
+                        (or (gethash :name bot-options)
+                            (raise-projectgen-error
+                             "undefined bot option: name~a"
+                             (make-source-msg))))))
     (make-instance
      'bot-project
      :project-type (determine-project-type project-lang)
      :project-lang project-lang
      :project-name project-name
      ;;TODO: check version
-     :project-version (gethash :version compiler-options "")
-     :project-author (gethash :author compiler-options "")
+     :project-version (gethash :version bot-options "")
+     :project-author (gethash :author bot-options "")
      :project-path (if (eq (acacia-get-source-type *parser-result*)
                            :string)
                        (error "string as source type in projectgen")
@@ -114,10 +114,6 @@
         (make-source-msg)))))
 
 (defun make-project-name (bot-name)
-  (unless bot-name
-    (raise-projectgen-error
-     "undefined bot option 'name'~a"
-     (make-source-msg)))
   (format nil "~a-project" bot-name))
 
 (defun make-project-path (project-name)

@@ -14,7 +14,8 @@
                 #:acacia-packed-result
                 #:acacia-get-parse-tree)
   (:export #:same-parse-tree-?
-           #:get-sub-tree))
+           #:get-sub-tree
+           #:get-custom-sub-tre-getter))
 
 (in-package :nobot/botscript/parser/acacia/tree-tools)
 
@@ -47,6 +48,12 @@
 (defmethod same-parse-tree-? ((obj1 list) (obj2 list))
   (equals (normolize-tree obj1)
           (normolize-tree obj2)))
+
+(defun get-custom-sub-tree-getter (convert-sort-type-fn)
+  (lambda (tree sort-type &key all)
+    (get-sub-tree tree sort-type
+                  :all all
+                  :convert-sort-type-fn convert-sort-type-fn)))
 
 (defun get-sub-tree (tree sort-type &key all (convert-sort-type-fn #'identity))
   (let ((*sort-type* (funcall convert-sort-type-fn sort-type))
