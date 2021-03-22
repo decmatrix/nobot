@@ -83,7 +83,7 @@
 (defun botscript-post-process ()
   (let* ((*custom-get-sub-tree*
           (get-custom-sub-tree-getter
-           (curry #'terminal-to :sym)))
+           (rcurry #'terminal-to :sym)))
          (*parser-result* (get-parser-result *context*))
          (parse-tree (acacia-get-parse-tree *parser-result*)))
     (awhen (make-instance
@@ -123,7 +123,7 @@
                                           :state-decl
                                           :all t)
                                          #'process-state-decl)
-            :start-from-id (get-start-from-id parse-tree))
+            :start-from-id (from-tree-get-start-from-id parse-tree))
       (check-start-from-id it)
       it)))
 
@@ -161,7 +161,7 @@
   (setf (gethash (to-keyword
                   (second
                    (second var-decl)))
-                 *table)
+                 *table*)
         (third var-decl)))
 
 (defun process-state-point-decl (state-point-decl)
@@ -175,10 +175,10 @@
   (setf (gethash (to-keyword
                   (second
                    (second state-decl)))
-                 *table)
+                 *table*)
         (third state-decl)))
 
-(defun get-start-from-id (parse-tree)
+(defun from-tree-get-start-from-id (parse-tree)
   (to-keyword
    (second
     (second
@@ -187,7 +187,7 @@
 
 (defmethod check-start-from-id ((obj botscript-post-process-info))
   (let ((start-from-id (get-start-from-id obj)))
-    (unless (get-state-points-declarations obj start-from-id)
+    (unless (gethash (get-state-points-declarations obj) start-from-id)
       (raise-bs-post-process-error
        "undefined state point ~a~a"
        start-from-id
@@ -211,7 +211,7 @@
           (make-source-msg))))
     (t (error "unknown type ~a" type))))
 
-(defun check-option-value-type (id value)
+(defun is-avaliable-value-type-? (id value)
   (let ((converted-type
          (convert-type (first value))))
     (case id 
@@ -229,10 +229,7 @@
             converted-type
             :number-string
             id)))
-      (t (raise-bs-post-process-error
-          "expected ~a type, but got ~a for option~a"
-          type
-          (make-source-msg))))))
+      (t (error "unknown option, ~a" id)))))
 
 (defun raise-type-error (input-type expected-type option)
   (raise-bs-post-process-error
