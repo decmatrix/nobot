@@ -1,2 +1,4 @@
-const wisteria = require("../wisteria.js");
+'use strick'
+
+
 

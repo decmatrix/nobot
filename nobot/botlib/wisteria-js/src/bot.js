@@ -1,6 +1,6 @@
 'use strict'
 
-class Bot {
+class WisteriaBot {
     #options = null;
     #vertexes = [];
     #entryPoint = null;

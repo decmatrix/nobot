@@ -8,6 +8,7 @@ class Server {
     #app = null;
     #port = 8082;
     #host = "localhost";
+    #baseUrl = "localhost";
 
     constructor(port=8082, host="localhost") {
         this.#port = 8082;
@@ -29,6 +30,10 @@ Server.prototype.getHost = function() {
     return this.#host;
 }
 
+// setters
+Server.prototype.setBaseUrl = function() {
+    
+}
 
 Server.prototype.run = function() {
     this.#app.listen(
