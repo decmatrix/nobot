@@ -1,0 +1,54 @@
+@codegen "js"
+@type "chat-bot"
+@platform "web"
+
+bot {
+    options {
+        name: "Tom";
+        port: 8082;
+        host: "localhost";
+        author: "Bohdan Sokolovskyi";
+        version: "0.0.1";
+    }
+
+    vars {
+        user-name: none;
+    }
+
+    start from a;
+
+    state-points {
+        a: {
+            act: on-a;
+        }
+
+        b: {
+            act: on-b;
+        }
+
+        c: {
+            act: on-c;
+        }
+    }
+
+    state-actions {
+        on-a: {
+            if ?input == "Hello" {
+                say "Hello, what is your name?";
+                gotov b;
+            } else {
+                gotov def;
+            }
+        }
+
+        on-b: {
+            save ?input to user-name;
+            gotov a;
+        }
+
+        on-c: {
+            say "Sorry, i don't understand you";
+            gotov a;
+        }
+    }
+}
