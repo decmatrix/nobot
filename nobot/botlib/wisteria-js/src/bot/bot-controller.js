@@ -1,18 +1,17 @@
-
 //TODO: several sessions ?
-export class BotStateResolver {
-    #stateTable
-    #msgStack
-    #nextState
+class BotStateResolver {
+    #stateTable;
+    #msgStack;
+    #nextState;
 
     constructor() {
-        this.#stateTable = {}
+        this.#stateTable = {};
     }
 
     add(name, fn) {
         this.#nextState = name;
         if(this.#stateTable[name] !== undefined) {
-            throw new Error(`state ${name} is already exist`)
+            throw new Error(`state ${name} is already exist`);
         }
 
         this.#stateTable[name] = fn;
@@ -27,21 +26,23 @@ export class BotStateResolver {
     }
 
     callNext(inputMsg) {
-        this.#stateTable[this.#nextState](inputMsg, this.#getController())
+        this.#stateTable[this.#nextState](inputMsg, this.#makeController());
         return this.#msgStack;
     }
 
-    #getController() {
-        this.#msgStack = []
+    #makeController() {
+        this.#msgStack = [];
 
         return {
             say(msg) {
-                this.#msgStack.push(msg)
+                this.#msgStack.push(msg);
             },
 
             next(name) {
-                this.#nextState = name
+                this.setNextState(name);
             }
         }
     }
 }
+
+export { BotStateResolver };
