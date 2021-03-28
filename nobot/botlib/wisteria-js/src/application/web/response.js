@@ -1,5 +1,0 @@
-class Response {
-
-}
-
-export { Response };

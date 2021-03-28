@@ -6,17 +6,31 @@ class Bot {
     #name;
     #type;
     #stateResolver;
+    #startFrom;
 
     constructor(options) {
-        this.#name = options.name ?? throw new Error('undefined name option');
+        this.#name = options.name;
         this.#type = options.type;
 
-        if(!BOT_TYPES.find(this.#type)) {
+        if(this.#name === undefined) {
+            throw new Error('undefined name option');
+        }
+
+        if(!BOT_TYPES.includes(this.#type)) {
             throw new Error(`unknown type: ${this.#type}`);
         }
 
         this.#stateResolver = new BotStateResolver();
-        this.#stateResolver.setNextState(options.startFrom ?? throw new Error('undefined startFrom option'));
+
+        if(options.startFrom === undefined) {
+            throw new Error('undefined startFrom option');
+        }
+        this.#startFrom = options.startFrom;
+    }
+
+    configure() {
+        this.#stateResolver.setNextState(this.#startFrom);
+        return this;
     }
 
     getName() {
@@ -29,10 +43,6 @@ class Bot {
 
     on(stateName, callback) {
         this.#stateResolver.add(stateName, callback);
-    }
-
-    runFrom(startStateName) {
-        this.#stateResolver.setNextState(startStateName);
     }
 }
 

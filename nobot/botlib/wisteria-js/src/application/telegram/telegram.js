@@ -1,5 +1,5 @@
 import { Telegraf } from 'telegraf';
-import { debug } from '../../utils/logger.js';
+import {debug, error} from '../../utils/logger.js';
 import { Application } from "../application.js";
 
 class TelegramApplication extends Application {
@@ -9,13 +9,34 @@ class TelegramApplication extends Application {
     constructor(options) {
         super();
 
-        this.#token = options.token ?? throw new Error('undefined token option');
+        this.#token = options.token;
 
-        this.#app = new Telegraf(token);
+        if(this.#token === undefined) {
+            throw new Error('undefined token option');
+        }
+
+        this.#app = new Telegraf(this.#token);
     }
 
     configure(bot) {
+        this.#app.on(
+            'text',
+            (ctx, next) => {
+                let resMessages;
 
+                //try {
+                    resMessages = bot.getStateResolver().callNext(ctx.message.text);
+                //} catch (err) {
+                //    error(err);
+                //    return;
+                //}
+
+                for(let msg of resMessages) {
+                    ctx.telegram.sendMessage(ctx.message.chat.id, msg);
+                }
+            });
+
+        return this;
     }
 
     getApp() {

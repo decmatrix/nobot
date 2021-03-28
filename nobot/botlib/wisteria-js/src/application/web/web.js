@@ -23,6 +23,9 @@ class WebApplication extends Application {
         this.#asModule = options.asModule ?? this.#asModule;
 
         this.#app = express();
+
+        this.#app.use(express.json());
+        this.#app.use(express.static(this.#staticDir));
     }
 
     getApp() {
@@ -30,13 +33,38 @@ class WebApplication extends Application {
     }
 
     configure(bot) {
+        this.#baseUrl = `${this.#baseUrl}:msg`;
+
+        this.#app.use(
+            this.#baseUrl,
+            (req, res) => {
+
+                if(req.msg === undefined) {
+                    res.status(400);
+                    return;
+                }
+
+                let resMessages;
+
+                try {
+                    resMessages = bot.getStateResolver().callNext(req.msg);
+                } catch (err) {
+                    error(err);
+                    res.status(500);
+                    return;
+                }
+
+                res.send({
+                    botName: bot.getName(),
+                    messages: resMessages
+                });
+            }
+        );
+
         return this;
     }
 
     run() {
-        this.#app.use(express.json());
-        this.#app.use(express.static(this.#staticDir));
-
         this.#app.listen(this.#port, this.#host, (err) => {
             if(err) {
                 error(err);

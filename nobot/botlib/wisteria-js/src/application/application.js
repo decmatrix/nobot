@@ -1,14 +1,14 @@
 class Application {
     configure () {
-        return throw new Error('unsupported operation');
+        return this;
     }
 
     run() {
-        return throw new Error('unsupported operation');
+        return this;
     }
 
     getApp() {
-        return throw new Error('unsupported operation');
+        return this;
     }
 }
 

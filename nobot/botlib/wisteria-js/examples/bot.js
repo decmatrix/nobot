@@ -4,35 +4,40 @@
     Version: 0.0.1
 */
 
-import {Bot, BotOptions} from '../src/wisteria.js'
+import {Bot, TelegramApplication, WebApplication} from '../src/wisteria.js';
 
-const options = new BotOptions()
-    .setHost('localhost')
-    .setName('Tom')
-    .setPort(3000)
-    .setType('chat')
-    .setPlatform('web')
-const bot = new Bot(options)
+const bot = new Bot({
+    name: 'Tom',
+    type: 'chat',
+    startFrom: 'a'
+});
+// const application = new WebApplication({
+//     host: 'localhost',
+//     port: 3000
+// });
+const application = new TelegramApplication({
+   token: '1783807678:AAGHn8spvjEa8SJzR9oJeNcNeYIRQgI3ldw'
+});
 
 let userName = null;
 
 bot.on("a", (inputMsg, controller) => {
     if (inputMsg === "Hello") {
-        controller.say("Hello, what is your name?")
-        controller.next("b")
+        controller.say("Hello, what is your name?");
+        controller.next("b");
     } else {
-        controller.next("def")
+        controller.next("def");
     }
-})
+});
 
 bot.on("b", (inputMsg, controller) => {
-    userName = inputMsg
-    controller.next("a")
-})
+    userName = inputMsg;
+    controller.next("a");
+});
 
 bot.on("c", (inputMsg, controller) => {
-    controller.say("Sorry, i don't understand you")
-    controller.next("a")
-})
+    controller.say("Sorry, i don't understand you");
+    controller.next("a");
+});
 
-bot.configure().runFrom("a")
+application.configure(bot.configure()).run();

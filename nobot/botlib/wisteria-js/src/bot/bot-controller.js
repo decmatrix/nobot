@@ -6,6 +6,7 @@ class BotStateResolver {
 
     constructor() {
         this.#stateTable = {};
+        this.#msgStack = [];
     }
 
     add(name, fn) {
@@ -26,20 +27,25 @@ class BotStateResolver {
     }
 
     callNext(inputMsg) {
-        this.#stateTable[this.#nextState](inputMsg, this.#makeController());
-        return this.#msgStack;
+        let controller = this.#makeController();
+        this.#stateTable[this.#nextState](inputMsg, controller);
+        this.setNextState(controller.nextState);
+        return controller.msgStack;
     }
 
     #makeController() {
         this.#msgStack = [];
 
         return {
+            msgStack: [],
+            nextState: this.#nextState,
+
             say(msg) {
-                this.#msgStack.push(msg);
+                this.msgStack.push(msg);
             },
 
             next(name) {
-                this.setNextState(name);
+                this.nextState = name;
             }
         }
     }
