@@ -11,7 +11,7 @@ class WebApplication extends Application {
     #app;
     #port = 8082;
     #host = 'localhost';
-    #staticDir = path.resolve(__dirname + '../../../../resources/index.html');
+    #staticDir = path.resolve(__dirname + '../../../../resources');
     #baseUrl = '/';
     #asModule = false;
 
