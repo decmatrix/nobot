@@ -1,3 +1,6 @@
+// Copyright (c) 2021 Bohdan Sokolovskyi
+// Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+
 import { BotStateResolver } from "./bot-controller.js";
 
 const BOT_TYPES = ['chat'];
@@ -7,6 +10,7 @@ class Bot {
     #type;
     #stateResolver;
     #startFrom;
+    #sessionData
 
     constructor(options) {
         this.#name = options.name;
@@ -30,6 +34,11 @@ class Bot {
 
     configure() {
         this.#stateResolver.setNextState(this.#startFrom);
+        return this;
+    }
+
+    registSessionData(sessionData) {
+        this.#sessionData = sessionData;
         return this;
     }
 

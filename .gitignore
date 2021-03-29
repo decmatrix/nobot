@@ -6,3 +6,4 @@
 \#*
 release/
 **node_modules**
+**.idea**
