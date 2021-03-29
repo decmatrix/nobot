@@ -11,7 +11,7 @@ class WebApplication extends Application {
     #app;
     #port = 8082;
     #host = 'localhost';
-    #staticDir = path.resolve(__dirname + '../../../../resources');
+    #staticDir = path.resolve(__dirname + '../../../../resources'); //FIXME: hard code
     #baseUrl = '/';
     #asModule = false;
 
@@ -36,10 +36,9 @@ class WebApplication extends Application {
         this.#app.use(express.static(this.#staticDir));
 
         this.#app.post(
-            `${this.#baseUrl}:msg`,
+            `${this.#baseUrl}`,
             (req, res) => {
-
-                if(req.msg === undefined) {
+                if(req.body.msg === undefined) {
                     res.status(400);
                     return;
                 }
@@ -47,7 +46,7 @@ class WebApplication extends Application {
                 let resMessages;
 
                 try {
-                    resMessages = bot.getStateResolver().callNext(req.msg);
+                    resMessages = bot.getStateResolver().callNext(req.body.msg);
                 } catch (err) {
                     error(err);
                     res.status(500);

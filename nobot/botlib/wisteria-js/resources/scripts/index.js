@@ -45,7 +45,8 @@ window.onload = () => {
         updateCountOfMsgsFromUser(1);
 
         let response = await fetch(
-            window.location.href, 
+            //window.location.href, 
+            'http://localhost:3000/',
             {
                 method: 'POST',
                 headers: {
