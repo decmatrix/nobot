@@ -11,13 +11,13 @@ const bot = new Bot({
     type: 'chat',
     startFrom: 'a'
 });
-// const application = new WebApplication({
-//     host: 'localhost',
-//     port: 3000
-// });
-const application = new TelegramApplication({
-   token: '1783807678:AAGHn8spvjEa8SJzR9oJeNcNeYIRQgI3ldw'
+const application = new WebApplication({
+    host: 'localhost',
+    port: 3000
 });
+// const application = new TelegramApplication({
+//    token: '1783807678:AAGHn8spvjEa8SJzR9oJeNcNeYIRQgI3ldw'
+// });
 
 let userName = null;
 
@@ -35,7 +35,7 @@ bot.on("b", (inputMsg, controller) => {
     controller.next("a");
 });
 
-bot.on("c", (inputMsg, controller) => {
+bot.on("def", (inputMsg, controller) => {
     controller.say("Sorry, i don't understand you");
     controller.next("a");
 });

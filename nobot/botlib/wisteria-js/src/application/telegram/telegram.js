@@ -24,12 +24,12 @@ class TelegramApplication extends Application {
             (ctx, next) => {
                 let resMessages;
 
-                //try {
+                try {
                     resMessages = bot.getStateResolver().callNext(ctx.message.text);
-                //} catch (err) {
-                //    error(err);
-                //    return;
-                //}
+                } catch (err) {
+                    error(err);
+                    return;
+                }
 
                 for(let msg of resMessages) {
                     ctx.telegram.sendMessage(ctx.message.chat.id, msg);

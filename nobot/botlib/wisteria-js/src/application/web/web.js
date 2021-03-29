@@ -1,15 +1,17 @@
 import express from 'express';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { debug, error } from '../../utils/logger.js';
 import { Application } from "../application.js";
 
-const __dirname = path.resolve();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __filename = fileURLToPath(import.meta.url);
 
 class WebApplication extends Application {
     #app;
     #port = 8082;
     #host = 'localhost';
-    #staticDir = path.resolve(__dirname, '..', '..', 'resources');
+    #staticDir = path.resolve(__dirname + '../../../../resources/index.html');
     #baseUrl = '/';
     #asModule = false;
 
@@ -23,9 +25,6 @@ class WebApplication extends Application {
         this.#asModule = options.asModule ?? this.#asModule;
 
         this.#app = express();
-
-        this.#app.use(express.json());
-        this.#app.use(express.static(this.#staticDir));
     }
 
     getApp() {
@@ -33,10 +32,11 @@ class WebApplication extends Application {
     }
 
     configure(bot) {
-        this.#baseUrl = `${this.#baseUrl}:msg`;
+        this.#app.use(express.json());
+        this.#app.use(express.static(this.#staticDir));
 
-        this.#app.use(
-            this.#baseUrl,
+        this.#app.post(
+            `${this.#baseUrl}:msg`,
             (req, res) => {
 
                 if(req.msg === undefined) {

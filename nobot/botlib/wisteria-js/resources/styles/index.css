@@ -10,10 +10,6 @@
 }
 
 #bot-dialog-window {
-    /* make resizable window */
-    /* resize: both;
-    overflow: auto; */
-
     height: auto;
     margin-top: 5%;
     width: 50%;
@@ -25,7 +21,7 @@
 #bot-dialog-output {
     background-color:deepskyblue;
     height: auto;
-    min-height: 150px; /* set auto resizable */
+    min-height: 150px;
     border-bottom: 5px solid black;
 }
 
@@ -39,6 +35,11 @@
     height: auto;
     min-height: 15px;
     border-bottom: 5px solid black;
+}
+
+#bot-dialog-textarea:empty::before {
+    content: attr(placeholder-text);
+    color: gray;
 }
 
 #bot-dialog-send {
@@ -62,6 +63,14 @@
     border-color: black;
     border-style: solid;
     border-width: 5px;
+}
+
+.table-cell {
+    text-align: left;
+}
+
+.value-cell {
+    background-color: deepskyblue;
 }
 
 [contenteditable]:focus {

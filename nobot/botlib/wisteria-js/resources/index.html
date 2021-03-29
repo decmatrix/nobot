@@ -16,17 +16,29 @@
 <body>
     <img alt="NOBOT platform" src="./imgs/little-nobot-logo.png" id="logo">
 </body>
+    <h3>BOT WORKSHOP</h3>
     <div id="bot-dialog-window">
-        <div id="bot-dialog-output" contenteditable="true"></div>
+        <div id="bot-dialog-output"></div>
         <div id="bot-dialog-input">
-            <div id="bot-dialog-textarea" contenteditable="true">Enter message...</div>
+            <div id="bot-dialog-textarea" contenteditable="true" placeholder-text="Enter message..."></div>
             <button id="bot-dialog-send">SEND</button>
         </div>
     </div>
     <div id='bot-statistics'>
         <div id="statistics-sign">BOT STATISTICS</div>
-        <div>Count of messages from bot: <ins>0</ins></div>
-        <div>Count of messages from user: <ins>0</ins></div>
-        <div>Count of messages from all: <ins>0</ins></div>
+        <table id="statistics-table">
+            <tr>
+                <td class="table-cell">Count of messages from bot:</td>
+                <td class="table-cell value-cell" id="cnt-of-msgs-from-bot">0</td>
+            </tr>
+            <tr>
+                <td class="table-cell">Count of messages from user:</td>
+                <td class="table-cell value-cell" id="cnt-of-msgs-from-user">0</td>
+            </tr>
+            <tr>
+                <td class="table-cell">Count of messages from all:</td>
+                <td class="table-cell value-cell" id="cnt-of-msgs-from-all">0</td>
+            </tr>
+        </table>
     </div>
 </html>
