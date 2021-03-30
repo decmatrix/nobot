@@ -1,3 +1,8 @@
+/*
+     Copyright (c) 2021 Bohdan Sokolovskyi
+     Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
+ */
+
 function outputMessages(from, messages) {
     let area = document.getElementById('bot-dialog-output');
     let lines = area.innerText.split('\n');

@@ -15,11 +15,14 @@ const application = new WebApplication({
     host: 'localhost',
     port: 3000
 });
+
 // const application = new TelegramApplication({
 //    token: '1783807678:AAGHn8spvjEa8SJzR9oJeNcNeYIRQgI3ldw'
 // });
 
-let userName = null;
+bot.use({
+    userName: null
+});
 
 bot.on("a", (inputMsg, controller) => {
     if (inputMsg === "Hello") {
@@ -31,7 +34,7 @@ bot.on("a", (inputMsg, controller) => {
 });
 
 bot.on("b", (inputMsg, controller) => {
-    userName = inputMsg;
+    controller.save(inputMsg, "userName");
     controller.next("a");
 });
 
@@ -40,4 +43,4 @@ bot.on("def", (inputMsg, controller) => {
     controller.next("a");
 });
 
-application.configure(bot.configure()).run();
+application.configure(bot).run();
