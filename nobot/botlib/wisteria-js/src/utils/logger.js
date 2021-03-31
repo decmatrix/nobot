@@ -6,16 +6,16 @@
 const libName = "wisteria";
 
 export function debug(...args) {
-    args.unshift(`[${libName}] - <DEBUG> /${Date.now()}/:`);
+    args.unshift(`[${libName}] - <DEBUG> /${new Date()}/:`);
     console.log.apply(console, args);
 }
 
 export function warn(...args) {
-    args.unshift(`[${libName}] - <WARN> /${Date.now()}/:`);
+    args.unshift(`[${libName}] - <WARN> /${new Date()}/:`);
     console.warn.apply(console, args);
 }
 
 export function error(...args) {
-    args.unshift(`[${libName}] - <ERROR> /${Date.now()}/:`);
+    args.unshift(`[${libName}] - <ERROR> /${new Date()}/:`);
     console.error.apply(console, args);
 }

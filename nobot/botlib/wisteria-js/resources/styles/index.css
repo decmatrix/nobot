@@ -14,9 +14,25 @@
     display: block;
 }
 
+#server-status-window {
+    height: 50px;
+    margin-top: 5%;
+    width: 50%;
+    border-color: black;
+    border-style: solid;
+    border-width: 5px;
+    background-color: #ffe5cc;
+}
+
+#server-response-sign {
+    background-color: rgb(153, 153, 153);
+    text-align: center;
+    border-bottom: 5px solid black;
+}
+
 #bot-dialog-window {
     height: auto;
-    margin-top: 5%;
+    margin-top: 1%;
     width: 50%;
     border-color: black;
     border-style: solid;
@@ -25,8 +41,9 @@
 
 #bot-dialog-output {
     background-color:deepskyblue;
-    height: auto;
-    min-height: 150px;
+    /* height: auto;*/
+    overflow-y: auto;
+    height: 170px;
     border-bottom: 5px solid black;
 }
 

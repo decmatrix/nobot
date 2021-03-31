@@ -3,6 +3,11 @@
      Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
  */
 
+function outputServerStatusResponse(response) {
+    document.getElementById('output-server-response').innerText =
+        `Status: ${response.status ?? response.message ?? response}`;
+}
+
 function outputMessages(from, messages) {
     let area = document.getElementById('bot-dialog-output');
     let lines = area.innerText.split('\n');
@@ -14,14 +19,14 @@ function outputMessages(from, messages) {
     area.innerText = lines.join('\n');
 }
 
-function updateCountOfMsgsFromBot(count) {
+function updateCountOfMessagesFromBot(count) {
     let counter = document.getElementById('cnt-of-msgs-from-bot');
     counter.innerText = (count + parseInt(counter.innerText)) + '';
 
     updateCountOfMsgsFromAll();
 }
 
-function updateCountOfMsgsFromUser(count) {
+function updateCountOfMessagesFromUser(count) {
     let counter = document.getElementById('cnt-of-msgs-from-user');
     counter.innerText = (count + parseInt(counter.innerText)) + '';
 
@@ -41,31 +46,40 @@ window.onload = () => {
         let msg = document.getElementById('bot-dialog-textarea').innerText;
 
         //TODO: bug with empty str
-        if(msg === "\n") {
+        if(msg.trim() === "") {
             //TODO: set message about send data is empty
+            outputServerStatusResponse('sent empty message');
             return;
         }
 
         outputMessages("User", [msg]);
-        updateCountOfMsgsFromUser(1);
+        updateCountOfMessagesFromUser(1);
 
-        let response = await fetch(
-            //window.location.href, 
-            'http://localhost:3000/',
-            {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    msg: msg
-                })
-            }
+        let jsonResponse;
+
+        try {
+            let response = await fetch(
+                //window.location.href,
+                'http://localhost:3000/',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        msg: msg
+                    })
+                }
             );
-        let jsonResponse = await response.json();
-        
-        outputMessages(jsonResponse.botName, jsonResponse.messages);
-        updateCountOfMsgsFromBot(jsonResponse.messages.length);
+
+            jsonResponse = await response.json();
+
+            outputServerStatusResponse(response);
+            outputMessages(jsonResponse.botName, jsonResponse.messages);
+            updateCountOfMessagesFromBot(jsonResponse.messages.length);
+        } catch (err) {
+            outputServerStatusResponse(err);
+        }
     }
 }

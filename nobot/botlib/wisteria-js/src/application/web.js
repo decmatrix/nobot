@@ -41,15 +41,23 @@ class WebApplication extends Application {
         this.#app.use(express.json());
         this.#app.use(express.static(this.#staticDir));
         this.#app.use(session({
-            saveUninitialized: false,
-            resave: false,
+            saveUninitialized: true,
+            resave: true,
             secret: 'secret',
             cookie: {}
         }));
 
-        this.#app.post(
-            `${this.#baseUrl}`,
-            (req, res) => {
+        this.#app.use(this.#baseUrl, (req, res, next) => {
+            //TODO: try better solution
+            if(req.session.bot === undefined) {
+                console.log('HERE');
+                req.session.bot = bot.buildSession();
+            }
+
+            next();
+        });
+
+        this.#app.post(this.#baseUrl, (req, res) => {
                 if(req.body.msg === undefined) {
                     res.status(400);
                     return;
@@ -58,12 +66,7 @@ class WebApplication extends Application {
                 let resMessages;
 
                 try {
-                    //TODO: because express-session is fucking shit
-                    if(req.session.cookie.bot === undefined) {
-                        req.session.cookie.bot = bot.buildSession();
-                    }
-
-                    resMessages = req.session.cookie.bot.stateResolver.callNext(req.body.msg);
+                    resMessages = req.session.bot.stateResolver.callNext(req.body.msg);
                 } catch (err) {
                     error(err);
                     res.status(500);
@@ -71,7 +74,7 @@ class WebApplication extends Application {
                 }
 
                 res.send({
-                    botName: req.session.cookie.bot.name,
+                    botName: req.session.bot.name,
                     messages: resMessages
                 });
             }
