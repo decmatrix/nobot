@@ -18,6 +18,7 @@
                  "nobot/logger"
                  ;;"nobot/server"
                  ;; 3th part libs
+                 "copy-directory"
                  "alexandria"
                  "anaphora"
                  "lisp-unit"

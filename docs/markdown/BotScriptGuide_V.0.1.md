@@ -20,7 +20,6 @@ Let's see the next exmaple code of bot in `BotScript`,  `example.bs`:
 @codegen "js"
 @platform "web"
 
-
 bot {
     options {
         name: "Tom";
@@ -66,14 +65,6 @@ bot {
 }
 ```
 
-
-
-
-
 ---
 
 [chat-bot]: chat-bot -   
-
-
-
-

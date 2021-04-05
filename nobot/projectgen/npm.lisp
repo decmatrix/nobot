@@ -21,7 +21,7 @@
 (in-package :nobot/projectgen/npm)
 
 (defmethod create-project ((project-type (eql :npm)))
-  (let ((file-path (make-pathname
+  (let ((file-path (get-file-path
                     :name "package"
                     :type "json")))
     (with-open-file
@@ -35,11 +35,16 @@
           "version"     ,(get-project-version *project*)
           "description" "generatet bot by NOBOT platform"
           "main"        "index.js"
+          "type"        "module"
           "author"      ,(get-project-author *project*)
           "scripts"     ,(hash-table-plist
                           '("test" "echo \"Error: no test specified\" && exit 1"))
           "license"     "<none>"))
-       stream))))
+       stream))
+    (copy-bot-lib)))
+
+(defun copy-bot-lib ()
+  )
 
 (defun get-file-path (name type)
   (merge-pathnames

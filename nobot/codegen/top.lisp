@@ -4,23 +4,36 @@
 
 (uiop:define-package :nobot/codegen/top
     (:use :cl)
+  (:import-from :nobot/projectgen/top
+                #:get-project-path
+                #:get-project-lang)
   (:import-from :nobot/toplevel/context
                 #:*context*
                 #:get-projectgen-info
-                #:get-post-processing-result)
-  (:export #:generate-code
+                #:get-post-processing-result
+                #:get-projectgen-result)
+  (:export #:*post-process-result*
+           #:generate-code
            #:generate-output-code
            #:codegen-info))
 
 (in-package :nobot/codegen/top)
 
+(defvar *post-process-result*)
+
 (defclass codegen-info () ())
 
-(defgeneric generate-output-code (tree project-path lang))
+(defgeneric generate-output-code (project-path lang))
 
 (defun generate-code ()
-  (generate-output-code)
-  (make-codegen-info))
+  (let ((*post-process-result*
+         (get-post-processing-result *context*))
+        (projectgen-result
+         (get-projectgen-result *context*)))
+    (generate-output-code
+     (get-project-type projectgen-result)
+     (get-project-lang projectgen-result))
+    (make-codegen-info)))
 
 (defun make-codegen-info ()
   (make-instance 'codegen-info))
