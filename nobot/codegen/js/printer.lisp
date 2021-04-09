@@ -34,7 +34,7 @@
       (:multi-comment
        (format *stream* "/* ~a */" (second tree)))
       (:import
-       (format *stream* "import {~{~a~^, ~}} from ~a"
+       (format *stream* "import {~{~a~^, ~}} from ~a;"
                (second tree)
                (third tree)))
       (:const
