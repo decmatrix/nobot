@@ -11,14 +11,14 @@
 
 (in-package :nobot/codegen/utils)
 
-(defmacro with-new-file ((path name type) &body)
+(defmacro with-new-file ((path name type) &body body)
   `(with-open-file ($file-stream (merge-pathnames
-                                 path
+                                 ,path
                                  (make-pathname
-                                  :name name
-                                  :type (if (keywordp type)
-                                            (to-string type)
-                                            type)))
+                                  :name ,name
+                                  :type (if (keywordp ,type)
+                                            (to-string ,type)
+                                            ,type)))
                                 :direction :output
                                 :if-does-not-exist :create)
      ,@body))

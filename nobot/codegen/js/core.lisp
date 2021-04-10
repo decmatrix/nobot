@@ -41,6 +41,7 @@
 
 (defvar *bot-options*)
 (defvar *compiler-options*)
+(defvar *project-path*)
 
 (defmethod generate-output-code (project-path (lang (eql :js)))
   (let ((*project-path* project-path)
@@ -102,7 +103,7 @@
                        (get-var-declarations *post-process-result*)))))))
 
 (defun generate-import ()
-  (case (gethash :platform *compiler-options*)
+  (case (gethash :@platform *compiler-options*)
     (:web
      '(:import ("Bot" "WebApplication") "botlib/src/wisteria.js"))
     (:telegram

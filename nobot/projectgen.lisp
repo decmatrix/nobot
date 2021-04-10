@@ -4,6 +4,6 @@
 
 (uiop:define-package :nobot/projectgen
     (:use :cl
-          :nobot/projectgen/top
+          :nobot/projectgen/common
           :nobot/projectgen/npm)
-  (:reexport :nobot/projectgen/top))
+  (:reexport :nobot/projectgen/common))

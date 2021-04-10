@@ -4,9 +4,10 @@
 
 (uiop:define-package :nobot/codegen/top
     (:use :cl)
-  (:import-from :nobot/projectgen/top
+  (:import-from :nobot/projectgen/common
                 #:get-project-path
-                #:get-project-lang)
+                #:get-project-lang
+                #:get-project-type)
   (:import-from :nobot/botscript/types
                 #:type->keyword)
   (:import-from :nobot/toplevel/context
