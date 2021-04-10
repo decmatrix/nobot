@@ -12,6 +12,7 @@
 <compiler-option> ::= <compiler-option-name> <string-or-number> ';'
 
 <compiler-option-name> ::= '@codegen'
+                           | '@platform'
 
 <bot-declaration> ::= 'bot' '{'
                                 <bot-options>
@@ -117,92 +118,6 @@
                         | <empty>
 
 
-
-
-
-// old grammar
-
-
-
-
-
-
-<script> ::= <compiler-options> <bot-options> <data-decl-list> <vertex-decl-list>
-             <action-decl-list> <start-stmt>
-
-<compiler-options> ::= 'c-opts' <c-opts-block>
-
-<bot-options> ::= 'bot-opts' <bot-opts-block>
-
-<data-decl-list> ::= <data-decl> <data-decl-list> |
-                     <empty>
-
-<vertex-decl-list> ::= <vertex-decl> <vertex-decl-list> |
-                       <empty>
-
-<action-decl-list> ::= <action-decl> <action-decl-list> |
-                       <empty>
-
-<start-stmt> ::= 'start' 'from' <id>
-
-<c-opts-block> ::= '{' <opts-list> '}'
-
-<bot-opts-block> ::= '{' <opts-list> '}'
-
-<data-decl> ::= 'letd' <id> <data-expr>
-
-<vertex-decl> ::= 'letv' <id> <vertex-options>
-
-<action-decl> ::= 'def-act' <id> <stmt-block>
-
-<stmt-block> ::= '{' <stmt-list> '}'
-
-<opts-list> ::= <opt> <opts-tail-list> |
-                  <empty>
-
-<opt> ::= <id> ':' <string-or-num>
-
-<opts-tail-list> ::= ',' <opt> <opts-tail-list> |
-                     <empty>
-
-<string-or-num> ::= <char-string> |
-                    <number-string>
-
-<data-expr> ::= <data-seq>
-
-<vertex-options> ::= '[' <vertex-option-list> ']'
-
-<stmt-list> ::= <stmt> <stmt-list> |
-                <empty>
-
-<stmt> ::= <expr> ^newline
-
-<data-seq> ::= '[' <item-list> ']'
-
-<vertex-option-list> ::= <vertex-option> ',' <vertex-option-list> |
-                         <empty>
-
-<expr> ::= ?
-
-<item-list> ::= <item> <item-tail-list>
-
-<item-tail-list> ::= ',' <item> <item-tail-list> |
-                       <empty>
-
-<item> ::= <literal>
-
-<vertex-option> ::= <vertex-option-name> '=' <vertex-option-val>
-
-<vertex-option-name> ::= 'act' |
-                         'type'
-                     
-<vertex-option-val> ::= <id> |
-                        'in' |
-                        'out'
-
-<literal> ::= <char-string> |
-              <number-string>
-
 ########################### FOR LEXER ###########################
 
 <string> ::= '"' <char-list> '"'
@@ -229,7 +144,3 @@
 <single-comment> ::= '//' ...
 
 <multi-comment> ::= '/*' ... '*/'
-
-########################### NOTES ###########################
-
-^newline - non printed symbol of new line

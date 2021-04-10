@@ -64,8 +64,8 @@ window.onload = () => {
                 {
                     method: 'POST',
                     headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                        'Accept': 'middleware/json',
+                        'Content-Type': 'middleware/json'
                     },
                     body: JSON.stringify({
                         msg: msg

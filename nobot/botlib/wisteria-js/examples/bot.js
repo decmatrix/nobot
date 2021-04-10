@@ -11,14 +11,14 @@ const bot = new Bot({
     type: 'chat',
     startFrom: 'a'
 });
-const application = new WebApplication({
-    host: 'localhost',
-    port: 3000
-});
-
-// const application = new TelegramApplication({
-//    token: '1783807678:AAGHn8spvjEa8SJzR9oJeNcNeYIRQgI3ldw'
+// const application = new WebApplication({
+//     host: 'localhost',
+//     port: 3000
 // });
+
+const application = new TelegramApplication({
+   token: '1783807678:AAGHn8spvjEa8SJzR9oJeNcNeYIRQgI3ldw'
+});
 
 bot.use({
     userName: null

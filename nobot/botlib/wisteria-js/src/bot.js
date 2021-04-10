@@ -148,6 +148,16 @@ class StateController {
         return this;
     }
 
+    get(from) {
+        let fromData = this.#externalData[from];
+
+        if(fromData === undefined) {
+            throw new Error(`undefined external data: ${from}`);
+        }
+
+        return fromData;
+    }
+
     //TODO: maybe not only data
     say(msg) {
         this.#internalData.push(msg);

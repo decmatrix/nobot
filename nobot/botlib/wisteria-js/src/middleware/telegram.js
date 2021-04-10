@@ -4,6 +4,7 @@
  */
 
 import { Telegraf } from 'telegraf';
+import session from '@telegraf/session';
 import {debug, error} from '../utils/logger.js';
 import { Application } from "./application.js";
 
@@ -24,20 +25,27 @@ class TelegramApplication extends Application {
     }
 
     configure(bot) {
+        this.#app.use(session());
+
         this.#app.on(
             'text',
-            (ctx, next) => {
+            async (ctx, next) => {
+                if(ctx.session.bot === undefined) {
+                    ctx.session.bot = bot.buildSession();
+                }
+
                 let resMessages;
 
                 try {
-                    resMessages = bot.getStateResolver().callNext(ctx.message.text);
+                    resMessages = ctx.session.bot.stateResolver.callNext(ctx.message.text);
                 } catch (err) {
                     error(err);
                     return;
                 }
 
                 for(let msg of resMessages) {
-                    ctx.telegram.sendMessage(ctx.message.chat.id, msg);
+                    //TODO: promise here!
+                    await ctx.telegram.sendMessage(ctx.message.chat.id, msg);
                 }
             });
 
