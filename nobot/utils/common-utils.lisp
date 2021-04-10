@@ -13,7 +13,8 @@
            #:to-symbol
            #:to-keyword
            #:to-string
-           #:pos-of-str))
+           #:pos-of-str
+           #:get-date-now))
 
 (in-package :nobot/utils/common-utils)
 
@@ -79,3 +80,10 @@
                  cur-pos-y)))
          (incf cur-pos-x)))
      (coerce string 'list))))
+
+(defun get-date-now ()
+  (let ((decoded-time (multiple-value-list (get-decoded-time))))
+    (format nil "~d.~2,'0d.~d"
+            (nth 3 decoded-time)
+            (nth 4 decoded-time)
+            (nth 5 decoded-time))))

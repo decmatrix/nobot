@@ -9,4 +9,5 @@
           :nobot/botscript/types/types-utils)
   (:export #:get-from-type
            #:get-type-value-list
-           #:convert-type))
+           #:convert-type
+           #:type->keyword))

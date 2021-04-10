@@ -5,4 +5,5 @@
 (uiop:define-package :nobot/codegen
     (:use :cl
           :nobot/codegen/top)
-  (:reexport :nobot/codegen/top))
+  (:reexport :nobot/codegen/top
+             :nobot/codegen/js))

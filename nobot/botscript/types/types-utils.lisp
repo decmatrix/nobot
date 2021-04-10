@@ -12,13 +12,15 @@
   (:import-from :alexandria
                 #:with-gensyms)
   (:import-from :nobot/utils
-                #:reintern)
+                #:reintern
+                #:to-keyword)
   (:export #:define-types
            #:convert-type
            #:$get-value
            #:$get-description
            #:get-from-type
-           #:get-type-value-list))
+           #:get-type-value-list
+           #:type->keyword))
 
 (in-package :nobot/botscript/types/types-utils)
 
@@ -55,14 +57,21 @@ What need: [:value, :description]"))
         ',types-and-descriptions-list)
        ,table)))
 
+(defun type->keyword (type)
+  (aif (register-groups-bind (word)
+                             ("<((\\w|\\s|-)+)>" str-type)
+                             word)
+    (to-keyword it)
+    (error "is not type: ~a" type)))
+
 (defun convert-type (type &key only-to-symbol)
   (let ((str-type (string type))
         (package (if only-to-symbol
                      :cl-user
                      :keyword)))
     (let ((type (aif (register-groups-bind (word)
-                         ("<((\\w|\\s|-)+)>" str-type)
-                       word)
+                                           ("<((\\w|\\s|-)+)>" str-type)
+                                           word)
                   it
                   type)))
       (cond

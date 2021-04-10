@@ -64,10 +64,15 @@
        (format *stream* "~{~a~^.~}"
                (let ((*stream* nil))
                  (mapcar #'pprint-js-tree (cddr tree)))))
-      (:call-expr "~a(~{~a~^, ~})"
-                  (second tree)
-                  (let ((*stream* nil))
-                    (mapcar #'pprint-js-tree (cddr tree))))
+      (:list
+       (format *stream* "[~{~a~^, ~}]"
+               (let ((*stream* nil))
+                 (mapcar #'pprint-js-tree (cdr tree)))))
+      (:call-expr
+       (format *stream* "~a(~{~a~^, ~})"
+               (second tree)
+               (let ((*stream* nil))
+                 (mapcar #'pprint-js-tree (cddr tree)))))
       (:if-stmt
        (format *stream* "if(~a) {~{~a~^~%~}} ~a"
                (pprint-js-tree (second tree))
