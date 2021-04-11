@@ -4,6 +4,8 @@
 
 (uiop:define-package :nobot/utils/program-utils
     (:use :cl)
+  (:import-from :cl-fad
+                #:pathname-directory-pathname)
   (:import-from :unix-opts)
   (:import-from :cl-ppcre
                 #:scan)
@@ -11,7 +13,8 @@
            #:get-program-version
            #:when-option
            #:it-opt
-           #:get-pwd))
+           #:get-pwd
+           #:get-root-dir))
 
 (in-package :nobot/utils/program-utils)
 
@@ -32,3 +35,6 @@
 
 (defun get-pwd ()
   (truename "."))
+
+(defun get-root-dir ()
+  (pathname-directory-pathname sb-ext:*core-pathname*))

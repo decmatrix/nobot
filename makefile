@@ -1,6 +1,7 @@
 # Copyright (c) 2021 Bohdan Sokolovskyi
 # Author: Bohdan Sokolovskyi <sokol.chemist@gmail.com>
 
+
 # config variables
 project-dir=nobot/
 SHELL=/bin/bash
@@ -11,6 +12,7 @@ all: build install
 
 build: clean
 	mkdir release
+	cp -r ./nobot/botlib release/
 	sbcl --disable-debugger \
 		 --load make-image.lisp
 

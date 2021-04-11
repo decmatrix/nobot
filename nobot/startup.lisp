@@ -11,10 +11,12 @@
                 #:unknown-option)
   (:import-from :nobot/utils
                 #:log-info
+                #:get-pwd
                 #:when-option
                 #:it-opt
                 #:is-valid-file-format-?
-                #:get-program-version)
+                #:get-program-version
+                #:get-root-dir)
   (:export #:*run*))
 
 (in-package :nobot/startup)
@@ -55,7 +57,10 @@
   (:name :debug-mode
    :description "run transaltor in debug mode"
    :short #\d
-   :long "debug"))
+   :long "debug")
+  (:name :pwd
+   :description "get pwd"
+   :long "pwd"))
 
 (defun *run* ()
   (multiple-value-bind (options free-args)
@@ -73,6 +78,11 @@
           (format t "fatal: ~a~%"
                   condition)
           (opts:exit 1)))
+    (when-option (options :pwd)
+      (format t "PWD: ~a~%PROJECT LOCATION: ~a~%PROJECT DIRECTORY: ~a~%"
+              (get-pwd)
+              sb-ext:*core-pathname*
+              (get-root-dir)))
     (when-option (options :help)
       (print-help-description))
     (when-option (options :version)

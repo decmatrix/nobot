@@ -10,6 +10,7 @@
            #:split-list
            #:reintern
            #:let-when
+           #:copy-file
            #:to-symbol
            #:to-keyword
            #:to-string
@@ -87,3 +88,17 @@
             (nth 3 decoded-time)
             (nth 4 decoded-time)
             (nth 5 decoded-time))))
+
+(defun copy-file (infile outfile)
+  (with-open-file (instream infile
+                            :direction :input
+                            :element-type '(unsigned-byte 8)
+                            :if-does-not-exist nil)
+    (when instream
+      (with-open-file (outstream outfile
+                                 :direction :output
+                                 :element-type '(unsigned-byte 8)
+                                 :if-exists :supersede)
+        (loop for byte = (read-byte instream nil)
+           while byte
+           do (write-byte byte outstream))))))

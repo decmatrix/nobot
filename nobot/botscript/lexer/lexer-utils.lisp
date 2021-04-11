@@ -49,6 +49,7 @@
 (defparameter +keyword-table+
   '("bot"
     "@codegen"
+    "@platform"
     "vars"
     "start"
     "from"

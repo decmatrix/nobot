@@ -5,6 +5,7 @@
 (uiop:define-package :nobot/botscript/parser/parser-impl
     (:use :cl
           :nobot/botscript/parser/acacia)
+  (:nicknames :botscript-parser)
   (:import-from :alexandria
                 #:rcurry
                 #:curry)
@@ -68,8 +69,9 @@
          (:terminal delimiter ";" :exclude-from-tree)))
 
       (define-rule compiler-option-name ()
-        (:and
-         (:terminal keyword "@codegen")))
+        (:or
+         (:terminal keyword "@codegen")
+         (:terminal keyword "@platform")))
 
       (define-rule bot-declaration ()
         (:and
