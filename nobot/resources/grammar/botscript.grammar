@@ -13,6 +13,7 @@
 
 <compiler-option-name> ::= '@codegen'
                            | '@platform'
+                           | '@arch-type'
 
 <bot-declaration> ::= 'bot' '{'
                                 <bot-options>

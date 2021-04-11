@@ -50,6 +50,8 @@
   '("bot"
     "@codegen"
     "@platform"
+    "@arch-type"
+    "?input"
     "vars"
     "start"
     "from"

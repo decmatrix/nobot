@@ -71,7 +71,8 @@
       (define-rule compiler-option-name ()
         (:or
          (:terminal keyword "@codegen")
-         (:terminal keyword "@platform")))
+         (:terminal keyword "@platform")
+         (:terminal keyword "@arch-type")))
 
       (define-rule bot-declaration ()
         (:and
@@ -219,11 +220,11 @@
       (define-rule say-expr ()
         (:and
          (:terminal keyword "say" :exclude-from-tree)
-         (:rule say-expr-args)))
+         (:rule* say-expr-args)))
 
       (define-rule say-expr-args ()
         (:and
-         (:rule say-expr-arg)
+         (:rule* say-expr-arg)
          (:rule* rest-say-expr-args)))
 
       (define-rule say-expr-arg ()
@@ -235,7 +236,7 @@
       (define-rule rest-say-expr-args ()
         (:or
          (:and
-          (:rule say-expr-arg)
+          (:rule* say-expr-arg)
           (:rule* rest-say-expr-args))
          (:empty)))
 

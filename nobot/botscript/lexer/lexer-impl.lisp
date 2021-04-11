@@ -129,7 +129,7 @@
                           `(string-upcase ,buff))))
                   (,is-keyword (is-keyword-? ,word))
                   (,frst-char-of-word (char ,word 0))
-                  (,is-id (not (eq ,frst-char-of-word #\@))))
+                  (,is-id (not (find ,frst-char-of-word '(#\@ #\?) :test #'eq))))
              (declare (ignorable ,is-keyword ,is-id))
              ,(case type
                 (:compare-delimiter
@@ -203,7 +203,7 @@
      (fix-cur-position *source*)
      (make-delimiter-token ch))
     ((or (alpha-char-p ch)
-         (eq ch #\@))
+         (find ch '(#\@ #\?)))
      ;; :id-or-keyword
      (update-pos ch *source*)
      (fix-cur-position *source*)
