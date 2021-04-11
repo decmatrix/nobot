@@ -130,7 +130,7 @@
                   (,is-keyword (is-keyword-? ,word))
                   (,frst-char-of-word (char ,word 0))
                   (,is-id (not (eq ,frst-char-of-word #\@))))
-             (declare (ignorable ,is-keyword))
+             (declare (ignorable ,is-keyword ,is-id))
              ,(case type
                 (:compare-delimiter
                  `(unless (equal ,word "==")
