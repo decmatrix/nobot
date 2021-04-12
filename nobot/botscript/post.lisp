@@ -219,7 +219,7 @@
 (defun is-avaliable-option-? (option type)
   (case type
     (:bot
-     (if (find option *avaliable-bot-options* :test #'eq)
+     (if (find option *avaliable-bot-common-options* :test #'eq)
          (is-avaliable-option-for-platform-? option)
          (raise-bs-post-process-error
           "not avaliable bot option: ~a~a"

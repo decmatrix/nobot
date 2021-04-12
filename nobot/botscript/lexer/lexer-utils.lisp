@@ -98,7 +98,8 @@
                             :fstream (open
                                       ,source
                                       :direction :input
-                                      :if-does-not-exist :error)
+                                      :if-does-not-exist (raise-bs-lexer-error
+                                                          "file ~a not exist" ,source))
                             :source ,source
                             :type ,type))
                           (:string
