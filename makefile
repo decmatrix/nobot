@@ -26,6 +26,8 @@ ifeq ($(OS),Darwin)
 else ifeq ($(OS),Linux)
 	sudo cp -r nobot-platform /usr/local/
 	sudo ln -s /usr/local/nobot-platform/nobot-pt.bin /usr/local/bin/nobot
+else
+	$(error unsupported operation system: $(OS))
 endif
 
 uninstall: clean
@@ -33,6 +35,8 @@ ifeq ($(OS),Darwin)
 	sudo rm -rf /usr/local/Cellar/nobot-platform/ && rm -rf /usr/local/bin/nobot
 else ifeq ($(OS),Linux)
 	sudo rm -rf /usr/local/nobot-platform/ && rm -rf /usr/local/bin/nobot
+else
+	$(error unsupported operation system)
 endif
 
 clean:
