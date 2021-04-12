@@ -5,6 +5,9 @@
 (uiop:define-package :nobot/startup
     (:use :cl
           :nobot/toplevel)
+  (:import-from :anaphora
+                #:it
+                #:awhen)
   (:import-from :unix-opts
                 #:define-opts
                 #:get-opts
@@ -25,7 +28,7 @@
   (if (is-valid-file-format-? str)
       str
       (progn
-        (format t "fatal: unknown extension of file, expected <name>.bs~%")
+        (format t "fatal: unknown extension of file, expected '<file-name>.bs'~%")
         (opts:exit 1))))
 
 (define-opts
@@ -41,26 +44,10 @@
    :description "print description about program"
    :short #\a
    :long "about")
-  (:name :run
-   :description "run program"
-   :short #\r
-   :long "run")
-  (:name :compile-file
-   :description "transale code and generate bot"
-   :short #\c
-   :long "compile"
-   :arg-parser #'parse-file)
   (:name :run-server
    :description "run translator as server"
    :short #\s
-   :long "server")
-  (:name :debug-mode
-   :description "run transaltor in debug mode"
-   :short #\d
-   :long "debug")
-  (:name :pwd
-   :description "get pwd"
-   :long "pwd"))
+   :long "server"))
 
 (defun *run* ()
   (multiple-value-bind (options free-args)
@@ -78,30 +65,28 @@
           (format t "fatal: ~a~%"
                   condition)
           (opts:exit 1)))
-    (when-option (options :pwd)
-      (format t "PWD: ~a~%PROJECT LOCATION: ~a~%PROJECT DIRECTORY: ~a~%"
-              (get-pwd)
-              sb-ext:*core-pathname*
-              (get-root-dir)))
     (when-option (options :help)
       (print-help-description))
     (when-option (options :version)
       (print-program-version))
     (when-option (options :description)
       (print-program-description))
-    (when-option (options :debug-mode)
-      ;; TODO: implement debug mode
-      )
-    (when-option (options :run)
-      (*run-and-burn-in-runtime*))
     (when-option (options :run-server)
       ;; TODO: check port argument
+      (format t "sorry, feature not implemented ;(~%")
       (*run-and-burn-as-server*))
-    (when-option (options :compile-file)
-      (*run-and-burn* it-opt))
-    (when free-args
-      (format t "fatal: extra arguments~%")
-      (opts:exit 1))))
+    (when (and options free-args)
+      (format t "fatal: extra arguments: ~{~a~^, ~}~%"
+              free-args)
+      (opts:exit 1))
+    (when (null options)
+      (unless free-args
+        (format t "fatal: expected file of BotScript: '<file-name>.bs'~%")
+        (opts:exit 1))
+      (awhen (cdr free-args)
+        (format t "fatal: extra arguments: ~{~a~^, ~}~%" it)
+        (opts:exit 1))
+      (*run-and-burn* (parse-file (car free-args))))))
 
 (defun unknown-option-handler (condition)
   (format t "warning: unknown option ~s~%" (opts:option condition))
@@ -114,14 +99,11 @@
 
 (defun print-help-description ()
   (opts:describe
-   :prefix (get-text-logo)
-   :suffix (format nil "more, ~A"
-                   (get-text-of-program-description))))
+   :prefix (get-text-logo)))
 
 (defun print-program-version ()
-  (format t "~A~%~A~%"
-          (get-text-logo)
-          (get-text-of-program-version)))
+  (format t "~A~%"
+          (get-text-logo)))
 
 (defun get-text-of-program-description ()
   (format nil
