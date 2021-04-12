@@ -5,7 +5,7 @@
 (uiop:define-package :nobot/botscript/parser/parser-impl
     (:use :cl
           :nobot/botscript/parser/acacia)
-  (:nicknames :botscript-parser)
+  (:nicknames :bs-parser)
   (:import-from :alexandria
                 #:rcurry
                 #:curry)
@@ -127,7 +127,7 @@
         (:and
          (:terminal id)
          (:terminal delimiter ":" :exclude-from-tree)
-         (:rule literal)
+         (:rule* literal)
          (:terminal delimiter ";" :exclude-from-tree)))
 
       (define-rule start-from-stmt ()
@@ -213,12 +213,18 @@
         (:or
          (:rule gotov-expr)
          (:rule say-expr)
-         (:rule save-to-expr)))
+         (:rule save-to-expr)
+         (:rule get-from-expr)))
 
       (define-rule gotov-expr ()
         (:and
          (:terminal keyword "gotov" :exclude-from-tree)
-         (:terminal id)))
+         (:rule gotov-arg)))
+
+      (define-rule gotov-arg ()
+        (:or
+         (:terminal id)
+         (:terminal keyword "self")))
 
       (define-rule say-expr ()
         (:and
@@ -234,7 +240,8 @@
         (:or
          (:terminal char-string)
          (:terminal number-string)
-         (:terminal id)))
+         (:terminal id)
+         (:terminal keyword "?input")))
 
       (define-rule rest-say-expr-args ()
         (:or
@@ -246,7 +253,7 @@
       (define-rule save-to-expr ()
         (:and
          (:terminal keyword "save" :exclude-from-tree)
-         (:rule literal-or-id)
+         (:rule* literal-or-id-or-input)
          (:terminal keyword "to" :exclude-from-tree)
          (:terminal id)))
 
@@ -275,23 +282,46 @@
 
       (define-rule logic-expr ()
         (:and
-         (:rule comparison-expr)))
+         (:rule equal-expr)
+         (:rule in-expr)))
 
-      (define-rule comparison-expr ()
+      (define-rule equal-expr ()
         (:and
-         (:rule eql-expr)
+         (:rule* eq-sub-expr)
          (:terminal delimiter "==" :exclude-from-tree)
-         (:rule eql-expr)))
+         (:rule* eq-sub-expr)))
 
-      (define-rule eql-expr ()
+      (define-rule eq-sub-expr ()
         (:or
          (:terminal id)
-         (:rule literal)))
+         (:terminal char-string)
+         (:terminal number-string)
+         (:terminal keyword "?input")))
 
-      (define-rule literal-or-id ()
+      (define-rule in-expr ()
+        (:and
+         (:rule* left-in-expr)
+         (:terminal keyword "in" :exclude-from-tree)
+         (:rule* right-in-expr)))
+
+      (define-rule left-in-expr ()
+        (:or
+         (:terminal char-string)
+         (:terminal number-string)
+         (:terminal id)
+         (:terminal keyword "?input")))
+
+      (define-rule right-in-expr ()
+        (:or
+         (:terminal char-string)
+         (:terminal keyword "?input")
+         (:rule item-list)))
+
+      (define-rule literal-or-id-or-input ()
         (:or
          (:rule literal)
-         (:terminal id)))
+         (:terminal id)
+         (:terminal keyword "?input")))
 
       (define-rule string-or-number ()
         (:or

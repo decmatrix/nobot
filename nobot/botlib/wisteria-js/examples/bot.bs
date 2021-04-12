@@ -1,5 +1,5 @@
 @codegen "js"
-@type "chat-bot"
+@arch-type "chat"
 @platform "web"
 
 bot {
@@ -25,10 +25,6 @@ bot {
         b: {
             act: on-b;
         }
-
-        c: {
-            act: on-c;
-        }
     }
 
     state-actions {
@@ -37,17 +33,20 @@ bot {
                 say "Hello, what is your name?";
                 gotov b;
             } else {
-                gotov def;
+                say "Sorry, i don't understand you";
+                gotov a;
             }
         }
 
         on-b: {
             save ?input to user-name;
-            gotov a;
-        }
 
-        on-c: {
-            say "Sorry, i don't understand you";
+            if "root" in ?input {
+               say "Hello, root!";
+            } else {
+              say "Hello," user-name ". So new what?";
+            }
+            
             gotov a;
         }
     }

@@ -70,20 +70,24 @@
            | <say-expr>
            | <save-to-expr>
 
-<gotov-expr> ::= 'gotov' <id>
+<gotov-expr> ::= 'gotov' <gotov-arg>
+
+<gotov-arg> ::= <id>
+                | 'self'
 
 <say-expr> ::= 'say' <say-expr-args>
 
 <say-expr-args> ::= <say-expr-arg> <rest-say-expr-args>
 
-<say-expr-arg> ::= <string>
+<say-expr-arg> ::= <char-string>
                    | <number-string>
                    | <id>
+                   | '?input'
 
 <rest-say-expr-args> ::= <say-expr-arg> <rest-say-expr-args>
                          | <empty>
 
-<save-to-expr> ::= 'save' <literal-or-id> 'to' <id>
+<save-to-expr> ::= 'save' <literal-or-id-or-input> 'to' <id>
 
 <if-stmt> ::= 'if' <cond-expr> '{' <stmt-list> '}' <else-block>
 
@@ -92,20 +96,35 @@
 
 <cond-expr> ::= <logic-expr>
 
-<logic-expr> ::= <comparison-expr>
+<logic-expr> ::= <equal-expr>
+                 | <in-expr>
 
-<comparison-expr> ::= <eql-expr> '==' <eql-expr>
+<equal-expr> ::= <eq-sub-expr> '==' <eq-sub-expr>
 
-<eql-expr> ::= <id>
-               | <literal>
+<in-expr> ::= <left-in-expr> in <right-in-expr>
+
+<left-in-expr> ::= <char-string>
+                   | <id>
+                   | <number-string>
+                   | '?input'
+
+<right-in-expr> ::= <char-string>
+                    | <item-list>
+                    | '?input'
+
+<eq-sub-expr> ::= <id>
+               | <number-string>
+               | <char-string>
+               | '?input'
                
-<literal-or-id> ::= <literal>
+<literal-or-id-or-input> ::= <literal>
                     | <id>
+                    | '?input'
 
-<string-or-number> ::= <string>
+<string-or-number> ::= <char-string>
                        | <number-string>
 
-<literal> ::= <string>
+<literal> ::= <char-string>
               | <number-string>
               | <item-list>
               | 'none'
@@ -121,7 +140,7 @@
 
 ########################### FOR LEXER ###########################
 
-<string> ::= '"' <char-list> '"'
+<char-string> ::= '"' <char-list> '"'
 
 <char-list> ::= <char> <char-list> |
                 <empty>

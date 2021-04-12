@@ -52,6 +52,8 @@
     "@platform"
     "@arch-type"
     "?input"
+    "in"
+    "self"
     "vars"
     "start"
     "from"
