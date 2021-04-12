@@ -43,7 +43,10 @@
                           :fun/rule->term-sym    (rcurry #'get-from-type :sort :value)
                           :fun/rule->description (rcurry #'get-from-type :sort :description)
                           :fun/token-rule->token-sym (rcurry #'get-from-type :token :value)
-                          :fun/token-rule->description (rcurry #'get-from-type :token :description)
+                          :fun/token-rule->description (rcurry
+                                                        #'get-from-type
+                                                        :token
+                                                        :description)
                           :fun/terminal->sym (curry #'terminal-to :sym)
                           :fun/terminal->description (curry #'terminal-to :description)
                           :tokens-source (get-tokens-source)

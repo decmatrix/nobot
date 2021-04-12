@@ -71,30 +71,48 @@
 (defgeneric check-start-from-id (obj))
 
 (defparameter *avaliable-compiler-options*
-  '(:@codegen))
+  '(:@codegen :@platform :@arch-type))
 
-(defparameter *avaliable-bot-options*
-  '(:name :port :host :author :version))
+(defparameter *avaliable-bot-common-options*
+  '(:name :author :version))
+
+(defparameter *avaliable-bot-web-options*
+  '(:port :host))
+
+(defparameter *avaliable-bot-telegram-options*
+  '(:token))
+
+(defparameter *avaliable-values-of-codegen-opt*
+  '("js"))
+
+(defparameter *avaliable-values-of-platform-opt*
+  '("web" "telegram" "tg"))
+
+(defparameter *avaliable-values-of-arch-type-opt*
+  '("chat"))
 
 (defvar *parser-result*)
 (defvar *table*)
 (defvar *custom-get-sub-tree*)
+(defvar *compiler-options*)
 
 (defun botscript-post-process ()
   (let* ((*custom-get-sub-tree*
           (get-custom-sub-tree-getter
            (rcurry #'terminal-to :sym)))
          (*parser-result* (get-parser-result *context*))
-         (parse-tree (acacia-get-parse-tree *parser-result*)))
+         (parse-tree (acacia-get-parse-tree *parser-result*))
+         (*compiler-options*
+          (make-declaration-table
+           (funcall
+            *custom-get-sub-tree*
+            parse-tree
+            :compiler-option
+            :all t)
+           #'process-compiler-option)))
     (awhen (make-instance
             'botscript-post-process-info
-            :compiler-options (make-declaration-table
-                               (funcall
-                                *custom-get-sub-tree*
-                                parse-tree
-                                :compiler-option
-                                :all t)
-                               #'process-compiler-option)
+            :compiler-options *compiler-options*
             :bot-options (make-declaration-table
                           (funcall
                            *custom-get-sub-tree*
@@ -133,6 +151,7 @@
     (mapc process-fn declarations-list)
     *table*))
 
+;;TODO: optimized it 
 (defun process-compiler-option (option)
   (let ((id (to-keyword
              (second
@@ -143,7 +162,7 @@
                  (third option)))))
     (when (is-avaliable-option-? id :compiler)
       (setf (gethash id *table*)
-            (awhen (is-avaliable-value-type-? id value)
+            (awhen (is-avaliable-value-and-type-? id value)
               it)))))
 
 (defun process-bot-option (bot-option)
@@ -154,7 +173,7 @@
                 (third bot-option))))
     (when (is-avaliable-option-? id :bot)
       (setf (gethash id *table*)
-            (awhen (is-avaliable-value-type-? id value)
+            (awhen (is-avaliable-value-and-type-? id value)
               it)))))
 
 (defun process-var-decl (var-decl)
@@ -197,7 +216,7 @@
   (case type
     (:bot
      (if (find option *avaliable-bot-options* :test #'eq)
-         t
+         (is-avaliable-option-for-platform-? option)
          (raise-bs-post-process-error
           "not avaliable bot option: ~a~a"
           option
@@ -211,25 +230,67 @@
           (make-source-msg))))
     (t (error "unknown type ~a" type))))
 
-(defun is-avaliable-value-type-? (id value)
+(defun is-avaliable-value-and-type-? (id value)
   (let ((converted-type
-         (convert-type (first value))))
-    (case id 
-      ((:@codegen :name :host :version :author)
-       (if (eq converted-type :char-string)
-           (second value)
-           (raise-type-error
-            converted-type
-            :char-string
-            id)))
+         (convert-type (first value)))
+        (value (string-trim '(#\Space #\Tab #\Newline)
+                            (string-downcase (second value)))))
+    (case id
+      (:@codegen
+       (is-char-string-? converted-type id)
+       (if (find value *avaliable-values-of-codegen-opt* :test #'equal)
+           value
+           (raise-bs-post-process-error
+            "unavailable value of @codegen option: ~a"
+            value)))
+      (:@platform
+       (is-char-string-? converted-type id)
+       (if (find value *avaliable-values-of-platform-opt* :test #'equal)
+           value
+           (raise-bs-post-process-error
+            "unavaliable value of @platform option: ~a"
+            value)))
+      (:@arch-type
+       (is-char-string-? converted-type id)
+       (if (find value *avaliable-values-of-arch-type-opt* :test #'equal)
+           value
+           (raise-bs-post-process-error
+            "unavaliable value of @arch-type option: ~a"
+            value)))
+      ((:name :host :version :author :token)
+       (is-char-string-? converted-type id)
+       value)
       (:port
-       (if (eq converted-type :number-string)
-           (second value)
-           (raise-type-error
-            converted-type
-            :number-string
-            id)))
+       (is-number-string-? converted-type id)
+       value)
       (t (error "unknown option, ~a" id)))))
+
+(defun is-char-string-? (converted-type id)
+  (or (eq converted-type :char-string)
+      (raise-type-error
+       converted-type
+       :char-string
+       id)))
+
+(defun is-number-string-? (converted-type id)
+  (or (eq converted-type :number-string)
+      (raise-type-error
+       converted-type
+       :number-string
+       id)))
+
+(defun is-avaliable-option-for-platform-? (id)
+  (case (to-keyword (gethash :@platform *compiler-options*))
+    (:web
+     (or (find id *avaliable-bot-web-options* :test #'eq)
+         (raise-bs-post-process-error
+          "unavaliable bot option ~a for web platform"
+          id)))
+    ((:telegram :tg)
+     (or (find id *avaliable-bot-telegram-options* :test #'eq)
+         (raise-bs-post-process-error
+          "unavaliable bot option ~a for telegram platform"
+          id)))))
 
 (defun raise-type-error (input-type expected-type option)
   (raise-bs-post-process-error
