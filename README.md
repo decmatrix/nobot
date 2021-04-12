@@ -1,4 +1,4 @@
-# NOBOT platform [![PRE Release](https://img.shields.io/badge/Conventional%20Commits-0.0.1-yellow.svg)](https://conventionalcommits.org)
+# NOBOT platform [![version](https://img.shields.io/badge/version-0.0.1-blue.svg)](https://semver.org)
 
 ## Description
 Engine for creation bots 
