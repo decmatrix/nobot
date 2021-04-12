@@ -91,6 +91,8 @@
                 "<convert-tokens>"
                 "<convert-with-pos>"
                 "<use-lazy-tokens>"))
+       (unless (probe-file ,source)
+         (raise-bs-lexer-error "file ~a not exist" ,source))
        (let* ((*source* (case ,type
                           (:file
                            (make-instance
@@ -98,8 +100,7 @@
                             :fstream (open
                                       ,source
                                       :direction :input
-                                      :if-does-not-exist (raise-bs-lexer-error
-                                                          "file ~a not exist" ,source))
+                                      :if-does-not-exist nil)
                             :source ,source
                             :type ,type))
                           (:string

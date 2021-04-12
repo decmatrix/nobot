@@ -213,8 +213,7 @@
         (:or
          (:rule gotov-expr)
          (:rule say-expr)
-         (:rule save-to-expr)
-         (:rule get-from-expr)))
+         (:rule save-to-expr)))
 
       (define-rule gotov-expr ()
         (:and
