@@ -5,7 +5,7 @@
 ## Description
 Engine for creation chat-bots. Language `BotScript` and translator for it.
 
-## Requierements
+## Requirements
 * OS: Linux debian branch, MacOS BigSure and more
 
 ## How to work
