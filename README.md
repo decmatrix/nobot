@@ -4,7 +4,7 @@
 Engine for creation chat-bots. Language `BotScript` and translator for it.
 
 ## Requierements
-* OS: Linux, MacOS
+* OS: Linux debian branch, MacOS BigSure and more
 
 ## How to work
 NOBOT platform is engine for creation chat-bots. Platform consist of language `BotScript` and translator for it.
