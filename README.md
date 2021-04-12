@@ -1,5 +1,7 @@
 # NOBOT platform [![version](https://img.shields.io/badge/version-0.0.1alpha-blue.svg)](https://semver.org)
 
+![nobot logo](https://github.com/bohdan-sokolovskyi/nobot/blob/master/resources/images/nobot_logo_old.png)
+
 ## Description
 Engine for creation chat-bots. Language `BotScript` and translator for it.
 
