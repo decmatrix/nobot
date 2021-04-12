@@ -3,17 +3,17 @@
 ## Description
 Engine for creation bots. Language `BotScript` and translator for it.
 
-## Requierements:
+## Requierements
 * OS: Linux, MacOS
 
-## How to work:
+## How to work
 
 
-## Installing:
+## Installing
 1. `make install`
 2. run `nobot` and pass args if needed
 
-## Uninstalling:
+## Uninstalling
 1. `make uninstall`
 
 ![Nobot logo](https://github.com/bohdan-sokolovskyi/nobot/blob/master/nobot/resources/images/nobot_logo.png)
