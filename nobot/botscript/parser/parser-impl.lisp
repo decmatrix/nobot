@@ -219,7 +219,7 @@
       (define-rule gotov-expr ()
         (:and
          (:terminal keyword "gotov" :exclude-from-tree)
-         (:rule gotov-arg)))
+         (:rule* gotov-arg)))
 
       (define-rule gotov-arg ()
         (:or

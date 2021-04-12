@@ -91,6 +91,9 @@
 (defparameter *avaliable-values-of-arch-type-opt*
   '("chat"))
 
+(defparameter *avaliable-state-point-options*
+  '(:act))
+
 (defvar *parser-result*)
 (defvar *table*)
 (defvar *custom-get-sub-tree*)
@@ -184,11 +187,12 @@
         (third var-decl)))
 
 (defun process-state-point-decl (state-point-decl)
-  (setf (gethash (to-keyword
-                  (second
-                   (second state-point-decl)))
-                 *table*)
-        (third state-point-decl)))
+  (let ((id (to-keyword
+             (second
+              (second state-point-decl)))))
+    (is-avaliable-state-point-opt-? id)
+    (setf (gethash id *table*)
+          (third state-point-decl))))
 
 (defun process-state-decl (state-decl)
   (setf (gethash (to-keyword
@@ -291,6 +295,12 @@
          (raise-bs-post-process-error
           "unavaliable bot option ~a for telegram platform"
           id)))))
+
+(defun is-avaliable-state-point-opt-? (id)
+  (or (find id *avaliable-state-point-options* :test #'eq)
+      (raise-bs-post-process-error
+       "unavaliable state point options: ~a"
+       id)))
 
 (defun raise-type-error (input-type expected-type option)
   (raise-bs-post-process-error
