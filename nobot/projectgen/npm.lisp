@@ -4,8 +4,16 @@
 
 (uiop:define-package :nobot/projectgen/npm
     (:use :cl)
+  (:import-from :osicat
+                #:read-link)
+  (:import-from :cl-fad
+                #:directory-exists-p
+                #:pathname-parent-directory
+                #:pathname-directory-pathname)
   (:import-from :copy-directory
                 #:copy)
+  (:import-from :nobot/toplevel/error-handling
+                #:raise-projectgen-error)
   (:import-from :alexandria
                 #:plist-hash-table)
   (:import-from :yason
@@ -77,9 +85,9 @@
               "1. install NodeJS platform on your computer using the next command: `~a`~%"
               (resolve-node-install-command))
       (format stream
-              "2. run instaling dependencies using the next command: `npm install`~%")
+              "2. run install dependencies using the next command: `npm install`~%")
       (format stream
-              "3. run your bot server using the next command: `npm start`")
+              "3. run your bot server using the next command: `npm start`~%")
       (format stream
               "4. enjoy your bot!~%"))))
 
@@ -88,14 +96,14 @@
     ((uiop:os-macosx-p)
      "brew install node")
     ((uiop:os-unix-p)
-     "sudo apt-get install node")))
+     "sudo apt-get install node")
+    (t (raise-projectgen-error
+        "unsupported type of operation system: ~a"
+        (software-type)))))
 
 ;;TODO: here trash, try rewrite it
 (defun copy-bot-lib ()
-  (let ((lib-path
-         (pathname
-          (format nil "~abotlib/wisteria-js/"
-                  (get-root-dir))))
+  (let ((lib-path (resolve-lib-path))
         (lib-path-in-project
          (pathname
           (format nil "~abotlib/" *project-path*)))
@@ -122,6 +130,23 @@
        (pathname
         (format nil "~aresources/" lib-path))
        resources))))
+
+(defun resolve-lib-path ()
+  (let ((lib-path
+         (pathname
+          (format nil "~abotlib/wisteria-js/"
+                  (pathname-parent-directory (get-root-dir))))))
+    (if (directory-exists-p lib-path)
+        lib-path
+        (cond
+          ((or (uiop:os-macosx-p)
+               (uiop:os-unix-p))
+           (format nil "~abotlib/wisteria-js/"
+                   (pathname-parent-directory
+                    (pathname-directory-pathname (read-link "/usr/local/bin/nobot")))))
+          (t (raise-projectgen-error
+              "unsupported type of operation system: ~a"
+              (software-type)))))))
 
 (defun get-file-path (&key name type)
   (merge-pathnames

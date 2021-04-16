@@ -40,5 +40,5 @@ else
 endif
 
 clean:
-	(rm -rf release nobot-platform || :)
+	(sudo rm -rf release nobot-platform || :)
 	(find $(project-dir) -name '*.fasl' -print0 | xargs -0 rm || :)

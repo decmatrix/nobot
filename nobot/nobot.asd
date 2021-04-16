@@ -24,6 +24,8 @@
                  "lisp-unit"
                  "cl-ppcre"
                  "unix-opts"
-                 "yason")
+                 "yason"
+                 "osicat"
+                 "cl-fad")
     :in-order-to ((asdf:test-op (asdf:load-op :nobot/tests)))
     :perform (asdf:test-op (o c) (uiop:symbol-call :nobot/tests :run-unit-tests)))
