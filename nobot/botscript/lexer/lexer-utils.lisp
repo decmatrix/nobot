@@ -134,25 +134,29 @@
   (eq ch #\"))
 
 (defun terminal-to (to key terminal)
-  "to: :sym || :description or sym || description"
+  "to: :sym || :description or sym || description, for key :?"
   (let ((to (if (keywordp to)
                 to
                 (reintern to :keyword)))
         (key (if (keywordp key)
                  key
                  (reintern key :keyword))))
-    (if (find to '(:sym :description) :test #'eq)
-        (case key
-          (:delimiter
-           (delimiter-to terminal to))
-          (:keyword
-           (when (is-keyword-? terminal)
-             (let ((sym (to-symbol terminal)))
-               (if (eq to :sym)
-                   sym
-                   (format nil "~a keyword" terminal)))))
-          (t (error "unknown char or sym: ~a" terminal)))
-        (error "unknown `to` value arg: ~a, expected: :sym ot :description" to))))
+    (cond
+      ((eq key :?)
+       (or (terminal-to to :delimiter terminal)
+           (terminal-to to :keyword terminal)))
+      ((find to '(:sym :description) :test #'eq)
+       (case key
+         (:delimiter
+          (delimiter-to terminal to))
+         (:keyword
+          (when (is-keyword-? terminal)
+            (let ((sym (to-symbol terminal)))
+              (if (eq to :sym)
+                  sym
+                  (format nil "~a keyword" terminal)))))
+         (t (error "unknown char or sym: ~a" key))))
+      (t (error "unknown `to` value arg: ~a, expected: :sym ot :description" to)))))
 
 (defun raise-lexer-error (on-error &optional val on-fixed-pos)
   ":on-char, :on-close-comment, :on-string"

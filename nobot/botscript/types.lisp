@@ -10,4 +10,5 @@
   (:export #:get-from-type
            #:get-type-value-list
            #:convert-type
-           #:type->keyword))
+           #:type->keyword
+           #:keyword->type))

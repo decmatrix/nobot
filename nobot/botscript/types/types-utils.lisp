@@ -20,7 +20,8 @@
            #:$get-description
            #:get-from-type
            #:get-type-value-list
-           #:type->keyword))
+           #:type->keyword
+           #:keyword->type))
 
 (in-package :nobot/botscript/types/types-utils)
 
@@ -63,6 +64,9 @@ What need: [:value, :description]"))
                              word)
     (to-keyword it)
     (error "is not type: ~a" str-type)))
+
+(defun keyword->type (keyword)
+  (intern (string-upcase (set-<> (string keyword))) :cl-user))
 
 (defun convert-type (type &key only-to-symbol)
   (let ((str-type (string type))

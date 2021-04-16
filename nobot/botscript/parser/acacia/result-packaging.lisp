@@ -37,6 +37,8 @@
                     :source-type source-type
                     :source source))
 
-(defun pack-parse-tree (parse-tree)
+(defun pack-parse-tree (parse-tree source-type source)
   (make-instance 'acacia-packed-result
-                 :parse-tree parse-tree))
+                 :parse-tree parse-tree
+                 :source-type source-type
+                 :source source))

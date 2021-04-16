@@ -5,6 +5,9 @@
 (uiop:define-package :nobot/projectgen/common
     (:use :cl
           :nobot/botscript/post)
+  (:import-from :cl-fad
+                #:delete-directory-and-files
+                #:directory-exists-p)
   (:import-from :nobot/utils
                 #:to-keyword
                 #:get-pwd)
@@ -118,9 +121,11 @@
 
 (defun make-project-path (project-name)
   (let ((project-path
-         (merge-pathnames
-          (get-pwd)
-          (make-pathname :name project-name))))
+         (pathname (format nil "~a./~a/"
+                           (get-pwd)
+                           project-name))))
+    (when (directory-exists-p project-path)
+      (delete-directory-and-files project-path))
     (ensure-directories-exist project-path)
     project-path))
 

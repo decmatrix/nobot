@@ -9,9 +9,9 @@
                 #:awhen
                 #:it)
   (:import-from :alexandria
-                #:rcurry)
-  (:import-from :nobot/botscript/lexer
-                #:terminal-to)
+                #:curry)
+  (:import-from :nobot/botscript/types
+                #:keyword->type)
   (:import-from :nobot/utils
                 #:to-keyword)
   (:import-from :nobot/botscript/types/types-utils
@@ -102,7 +102,7 @@
 (defun botscript-post-process ()
   (let* ((*custom-get-sub-tree*
           (get-custom-sub-tree-getter
-           (rcurry #'terminal-to :sym)))
+           #'keyword->type))
          (*parser-result* (get-parser-result *context*))
          (parse-tree (acacia-get-parse-tree *parser-result*))
          (*compiler-options*
@@ -161,8 +161,7 @@
               (second
                (second option)))))
         (value (second
-                (second
-                 (third option)))))
+                (third option))))
     (when (is-avaliable-option-? id :compiler)
       (setf (gethash id *table*)
             (awhen (is-avaliable-value-and-type-? id value)
@@ -190,9 +189,19 @@
   (let ((id (to-keyword
              (second
               (second state-point-decl)))))
-    (is-avaliable-state-point-opt-? id)
     (setf (gethash id *table*)
-          (third state-point-decl))))
+          (process-options-of-state-point (cdr (third state-point-decl))))))
+
+(defun process-options-of-state-point (options)
+  (let ((table (make-hash-table :test #'eq)))
+    (mapc
+     (lambda (option)
+       (let ((id (to-keyword (second (second option))))
+             (value (to-keyword (second (third option)))))
+         (is-avaliable-state-point-opt-? id)
+         (setf (gethash id table) value)))
+     options)
+    table))
 
 (defun process-state-decl (state-decl)
   (setf (gethash (to-keyword
@@ -209,17 +218,15 @@
               :start-from-stmt)))))
 
 (defmethod check-start-from-id ((obj botscript-post-process-info))
-  (let ((start-from-id (get-start-from-id obj)))
-    (unless (gethash (get-state-points-declarations obj) start-from-id)
-      (raise-bs-post-process-error
-       "undefined state point ~a~a"
-       start-from-id
-       (make-source-msg)))))
+  (unless (get-start-from-id obj)
+    (raise-bs-post-process-error
+     "undefined start from point ~a"
+     (make-source-msg))))
 
 (defun is-avaliable-option-? (option type)
   (case type
     (:bot
-     (if (find option *avaliable-bot-common-options* :test #'eq)
+     (or (find option *avaliable-bot-common-options* :test #'eq)
          (is-avaliable-option-for-platform-? option)
          (raise-bs-post-process-error
           "not avaliable bot option: ~a~a"
@@ -235,10 +242,13 @@
     (t (error "unknown type ~a" type))))
 
 (defun is-avaliable-value-and-type-? (id value)
-  (let ((converted-type
-         (convert-type (first value)))
-        (value (string-trim '(#\Space #\Tab #\Newline)
-                            (string-downcase (second value)))))
+  (let* ((converted-type
+          (convert-type (first value)))
+         (value (second value))
+         (value (if (stringp value)
+                    (string-trim '(#\Space #\Tab #\Newline #\")
+                                 (string-downcase value))
+                    value)))
     (case id
       (:@codegen
        (is-char-string-? converted-type id)
@@ -299,7 +309,7 @@
 (defun is-avaliable-state-point-opt-? (id)
   (or (find id *avaliable-state-point-options* :test #'eq)
       (raise-bs-post-process-error
-       "unavaliable state point options: ~a"
+       "unavaliable state point option: ~a"
        id)))
 
 (defun raise-type-error (input-type expected-type option)

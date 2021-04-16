@@ -67,19 +67,19 @@
     (:parser
      (progn
        (log-info "parse botscript...")
-       (setf (get-parser-result *context*) value)))
+       (setf (get-parser-result *context*) (funcall value))))
     (:post-processing
      (progn
-       (log-info "botscrit post processing...")
-       (setf (get-post-processing-result *context*) value)))
+       (log-info "botscript post processing...")
+       (setf (get-post-processing-result *context*) (funcall value))))
     (:project-generation
      (progn
        (log-info "project generation...")
-       (setf (get-projectgen-result *context*) value)))
+       (setf (get-projectgen-result *context*) (funcall value))))
     (:code-generation
      (progn
        (log-info "code generation...")
-       (setf (get-code-gen-result *context*) value)))))
+       (setf (get-code-gen-result *context*) (funcall value))))))
 
 (defmacro with-translator-context ((&key source-type source) &body body)
   `(let ((*context*

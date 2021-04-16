@@ -7,7 +7,7 @@
   (:import-from :copy-directory
                 #:copy)
   (:import-from :alexandria
-                #:hash-table-plist)
+                #:plist-hash-table)
   (:import-from :yason
                 #:encode)
   (:import-from :nobot/utils
@@ -44,7 +44,7 @@
          file-path
          :direction :output)
       (encode
-       (hash-table-plist
+       (plist-hash-table
         `(
           "name"        ,(get-project-name *project*)
           "version"     ,(get-project-version *project*)
@@ -52,10 +52,12 @@
           "main"        "index.js"
           "type"        "module"
           "author"      ,(get-project-author *project*)
-          "scripts"     ,(hash-table-plist
-                          '("test" "echo \"Error: no test specified\" && exit 1"))
+          "scripts"     ,(plist-hash-table
+                          '("test" "echo \"Error: no test specified\" && exit 1")
+                          :test #'equal)
           "postinstall" "cd botlib && npm install"
-          "license"     "<none>"))
+          "license"     "<none>")
+        :test #'equal)
        stream))))
 
 (defun generate-readme ()
@@ -92,11 +94,11 @@
 (defun copy-bot-lib ()
   (let ((lib-path
          (pathname
-          (format nil "~a./botlib/wisteria-js/"
+          (format nil "~abotlib/wisteria-js/"
                   (get-root-dir))))
         (lib-path-in-project
          (pathname
-          (format nil "~a./botlib/" *project-path*)))
+          (format nil "~abotlib/" *project-path*)))
         (package-json
          (make-pathname
           :name "package"
@@ -109,14 +111,17 @@
      (merge-pathnames
       lib-path-in-project
       package-json))
-    (copy
-     (pathname
-      (format nil "~a./src/" lib-path))
-     lib-path-in-project)
-    (copy
-     (pathname
-      (format nil "~a./resources/" lib-path))
-     lib-path-in-project)))
+    (let ((src (format nil "~asrc/" lib-path-in-project)))
+      (ensure-directories-exist src)
+      (copy
+       (pathname
+        (format nil "~asrc/" lib-path))
+       src))
+    (let ((resources (format nil "~aresources/" lib-path-in-project)))
+      (copy
+       (pathname
+        (format nil "~aresources/" lib-path))
+       resources))))
 
 (defun get-file-path (&key name type)
   (merge-pathnames

@@ -35,7 +35,10 @@
               (parse
                ($conf-get-start-rule))))
          (if ,pack-result
-             (pack-parse-tree ,parse-tree)
+             (pack-parse-tree
+              ,parse-tree
+              ($conf-get-source-type)
+              ($conf-get-source))
              ,parse-tree)))))
 
 (defun parse (start-rule)

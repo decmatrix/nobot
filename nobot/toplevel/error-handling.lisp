@@ -74,5 +74,10 @@
        nil)
      (bs-parser-error (c)
        (declare (ignore c))
+       nil)
+     (bs-post-process-error (c)
+       (declare (ignore c))
+       nil)
+     (projectgen-error (c)
+       (declare (ignore c))
        nil)))
-

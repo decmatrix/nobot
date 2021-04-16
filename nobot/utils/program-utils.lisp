@@ -5,7 +5,8 @@
 (uiop:define-package :nobot/utils/program-utils
     (:use :cl)
   (:import-from :cl-fad
-                #:pathname-directory-pathname)
+                #:pathname-directory-pathname
+                #:pathname-parent-directory)
   (:import-from :unix-opts)
   (:import-from :cl-ppcre
                 #:scan)
@@ -37,4 +38,5 @@
   (truename "."))
 
 (defun get-root-dir ()
-  (pathname-directory-pathname sb-ext:*core-pathname*))
+  (pathname-parent-directory
+   (pathname-directory-pathname sb-ext:*core-pathname*)))
