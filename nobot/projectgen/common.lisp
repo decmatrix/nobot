@@ -72,7 +72,7 @@
     :type pathname
     :reader projectgen-get-path)))
 
-(defgeneric create-project (post-process-instance))
+(defgeneric create-project (project-type))
 
 (defun generate-project ()
   (let ((*project*

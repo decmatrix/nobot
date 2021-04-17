@@ -61,10 +61,11 @@
           "type"        "module"
           "author"      ,(get-project-author *project*)
           "scripts"     ,(plist-hash-table
-                          '("test" "echo \"Error: no test specified\" && exit 1")
+                          '("start" "node index.js"
+                            "postinstall" "cd botlib && npm install")
                           :test #'equal)
-          "postinstall" "cd botlib && npm install"
-          "license"     "<none>")
+          "private"     "true"
+          "license"     "")
         :test #'equal)
        stream))))
 
