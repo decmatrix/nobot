@@ -16,8 +16,6 @@
   (:import-from :nobot/utils
                 #:get-program-version
                 #:get-date-now)
-  (:import-from :nobot/botscript/types
-                #:type->keyword)
   (:import-from :nobot/codegen/utils
                 #:with-new-file
                 #:$file-stream)
@@ -99,7 +97,7 @@
                    ,@ (maphash
                        (lambda (key value)
                          (list (string-downcase (string key))
-                               (translate :js (type->keyword value) value)))
+                               (translate :js (car value) value)))
                        (get-var-declarations *post-process-result*)))))))
 
 (defun generate-import ()
@@ -135,7 +133,7 @@
                 (format nil "Version: ~a~%" version)
                 ""))))
 
-;;TODO rewrite with pattern-matching
+;;TODO rewrite with pattern-matching (see optima)
 (defmethod translate ((lang (eql :js)) (sort (eql :stmt)) tree)
   `(:stmt ,(translate :js :expr (second tree))))
 
@@ -158,15 +156,15 @@
 
 (defmethod tranlsate ((lang (eql :js)) (sort (eql :eql-expr)) tree)
   (let ((sub-tree (second tree)))
-    (translate :js (type->keyword (first sub-tree)) sub-tree)))
+    (translate :js (first sub-tree) sub-tree)))
 
 (defmethod translate ((lang (eql :js)) (sort (eql :literal-or-id)) tree)
   (let ((sub-tree (second tree)))
-    (translate :js (type->keyword (first sub-tree)) sub-tree)))
+    (translate :js (first sub-tree) sub-tree)))
 
 (defmethod tranlsate ((lang (eql :js)) (sort (eql :literal)) tree)
   (let ((sub-tree (second tree)))
-    (translate :js (type->keyword (first sub-tree)) sub-tree)))
+    (translate :js (first sub-tree) sub-tree)))
 
 (defmethod translate ((lang (eql :js)) (sort (eql :item-list)) tree)
   (mapcar (curry :js :literal) (cdr tree)))
@@ -186,7 +184,7 @@
 
 (defmethod translate ((lang (eql :js)) (sort (eql :expr)) tree)
   (let ((sub-tree (second tree)))
-    (translate :js (type->keyword (first sub-tree)) sub-tree)))
+    (translate :js (first sub-tree) sub-tree)))
 
 (defmethod tranlsate ((lang (eql :js)) (sort (eql :gotov-expr)) tree)
   `(:chain-expr "controller"
@@ -198,7 +196,7 @@
                 (:call-expr "say"
                             ,(mapcar
                               (lambda (sub-tree)
-                                (translate :js (type->keyword (first sub-tree)) sub-tree))
+                                (translate :js (first sub-tree) sub-tree))
                               (cdr tree)))))
 
 (defmethod translate ((lang (eql :js)) (sort (eql :save-to-expr)) tree)

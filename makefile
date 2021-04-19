@@ -7,7 +7,7 @@ project-dir=nobot/
 
 OS:=$(shell uname -s)
 
-.PHONY: all build install uninstall clean
+.PHONY: all build install uninstall reinstall clean
 
 all: build install
 
@@ -18,27 +18,29 @@ build: clean
 	sbcl --disable-debugger \
 		 --load make-image.lisp
 
+reinstall: uninstall install
+
 install: build
 	mv release nobot-platform
 ifeq ($(OS),Darwin)
-	sudo cp -r nobot-platform /usr/local/Cellar/
-	sudo ln -s /usr/local/Cellar/nobot-platform/bin/nobot-pt.bin /usr/local/bin/nobot
+	cp -r nobot-platform /usr/local/Cellar/
+	ln -s /usr/local/Cellar/nobot-platform/bin/nobot-pt.bin /usr/local/bin/nobot
 else ifeq ($(OS),Linux)
-	sudo cp -r nobot-platform /usr/local/
-	sudo ln -s /usr/local/nobot-platform/nobot-pt.bin /usr/local/bin/nobot
+	cp -r nobot-platform /usr/local/
+	ln -s /usr/local/nobot-platform/nobot-pt.bin /usr/local/bin/nobot
 else
 	$(error unsupported operation system: $(OS))
 endif
 
 uninstall: clean
 ifeq ($(OS),Darwin)
-	sudo rm -rf /usr/local/Cellar/nobot-platform/ && rm -rf /usr/local/bin/nobot
+	rm -rf /usr/local/Cellar/nobot-platform/ && rm -rf /usr/local/bin/nobot
 else ifeq ($(OS),Linux)
-	sudo rm -rf /usr/local/nobot-platform/ && rm -rf /usr/local/bin/nobot
+	rm -rf /usr/local/nobot-platform/ && rm -rf /usr/local/bin/nobot
 else
 	$(error unsupported operation system)
 endif
 
 clean:
-	(sudo rm -rf release nobot-platform || :)
+	(rm -rf release nobot-platform || :)
 	(find $(project-dir) -name '*.fasl' -print0 | xargs -0 rm || :)

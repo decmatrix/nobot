@@ -25,15 +25,13 @@
   (:export #:create-project
            #:generate-project
            #:*project*
+           ;; projectgen info
            #:get-project-path
            #:get-project-type
            #:get-project-lang
            #:get-project-name
            #:get-project-version
-           #:get-project-author
-           ;; projectgen info
-           #:projectgen-get-path
-           #:projectgen-info))
+           #:get-project-author))
 
 (in-package :nobot/projectgen/common)
 
@@ -66,12 +64,6 @@
     :type pathname
     :reader get-project-path)))
 
-(defclass projectgen-info ()
-  ((path
-    :initarg :projectgen-path
-    :type pathname
-    :reader projectgen-get-path)))
-
 (defgeneric create-project (project-type))
 
 (defun generate-project ()
@@ -79,7 +71,7 @@
          (make-bot-project
           (get-post-processing-result *context*))))
     (create-project (get-project-type *project*))
-    (make-projectgen-info)))
+    *project*))
 
 (defun make-bot-project (post-process-instance)
   (let* ((*parser-result* (get-parser-result *context*))
@@ -128,11 +120,6 @@
       (delete-directory-and-files project-path))
     (ensure-directories-exist project-path)
     project-path))
-
-(defun make-projectgen-info ()
-  (make-instance
-   'projectgen-info
-   :projectgen-path (get-project-path *project*)))
 
 (defun make-source-msg ()
   (if (eq (acacia-get-source-type *parser-result*) :file)

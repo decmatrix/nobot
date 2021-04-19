@@ -18,7 +18,7 @@
 ;;;;;;;;;;;;;;;;;;;;;; js code printer ;;;;;;;;;;;;;;;;;;;;;;
 (defmacro print-js-code-from-tree ((stream) lisp-form)
   `(let ((*stream* ,stream))
-     (pprint-js-tree ',lisp-form)))
+     (pprint-js-tree ,lisp-form)))
 
 ;;TODO check extra args
 ;;TODO add newlines

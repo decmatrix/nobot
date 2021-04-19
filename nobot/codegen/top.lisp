@@ -6,8 +6,7 @@
     (:use :cl)
   (:import-from :nobot/projectgen/common
                 #:get-project-path
-                #:get-project-lang
-                #:get-project-type)
+                #:get-project-lang)
   (:import-from :nobot/botscript/types
                 #:type->keyword)
   (:import-from :nobot/toplevel/context
@@ -35,15 +34,14 @@
         (projectgen-result
          (get-projectgen-result *context*)))
     (generate-output-code
-     (get-project-type projectgen-result)
+     (get-project-path projectgen-result)
      (get-project-lang projectgen-result))
     (make-codegen-info)))
 
 (defun make-codegen-info ()
   (make-instance 'codegen-info))
 
-
 (defgeneric translate (lang sort tree))
 
-(defmethod translate :before (lang sort tree)
-  (call-next-method lang (type->keyword sort) tree))
+(defmethod translate (lang sort tree)
+  (translate lang (type->keyword sort) tree))
