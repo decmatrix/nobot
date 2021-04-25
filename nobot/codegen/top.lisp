@@ -43,5 +43,6 @@
 
 (defgeneric translate (lang sort tree))
 
+;; TODO: rewrite
 (defmethod translate (lang sort tree)
   (translate lang (type->keyword sort) tree))

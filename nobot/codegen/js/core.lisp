@@ -100,37 +100,44 @@
                                (translate :js (car value) value)))
                        (get-var-declarations *post-process-result*)))))))
 
+;; TODO: in post rewrite str -> keyword
 (defun generate-import ()
-  (case (gethash :@platform *compiler-options*)
-    (:web
-     '(:import ("Bot" "WebApplication") "botlib/src/wisteria.js"))
-    (:telegram
-     '(:import ("Bot" "TelegramApplication") "botlib/src/wisteria.js"))))
+  (let ((option (gethash :@platform *compiler-options*)))
+    (cond
+      ((find option '("web") :test #'equal)
+       '(:import ("Bot" "WebApplication") "botlib/src/wisteria.js"))
+      ((find option '(:tg :telegram) :test #'equal)
+       '(:import ("Bot" "TelegramApplication") "botlib/src/wisteria.js"))
+      (t (error "unknown option: ~a" (string-upcase option))))))
 
+;; TODO: in post rewrite str -> keyword
 (defun generate-application ()
-  `(:const "application"
-           ,(case (gethash :platform *compiler-options*)
-              (:web
-               `(:new-object "WebApplication"
-                             (:object
-                              ("host" (:str ,(or (gethash :host *bot-options*)
-                                                 "localhost")))
-                              ("port" (:num ,(or (gethash :port *bot-options*)
-                                                 3000))))))
-              (:telegram
-               `(:new-object "TelegramApplication"
-                             (:object
-                              ("token" (:str ,(gethash :token *bot-options*)))))))))
+  (let ((option (gethash :@platform *compiler-options*)))
+    `(:const "application"
+             ,(cond
+                ((find option '("web") :test #'equal)
+                 `(:new-object "WebApplication"
+                               (:object
+                                ("host" (:str ,(or (gethash :host *bot-options*)
+                                                   "localhost")))
+                                ("port" (:num ,(or (gethash :port *bot-options*)
+                                                   3000))))))
+                ((find option '(:tg :telegram) :test #'equal)
+                 `(:new-object "TelegramApplication"
+                               (:object
+                                ("token" (:str ,(gethash :token *bot-options*))))))
+                (t (error "unknown option: ~a" (string-upcase option)))))))
 
+;;TODO: try remove hard code spaces in comments
 (defun generate-rest-of-info-comment ()
   (let ((author (gethash :author *bot-options*))
         (version (gethash :version *bot-options*)))
     (format nil "~a~a"
             (if author
-                (format nil "Author: ~a~%" author)
+                (format nil "   Author: ~a~%" author)
                 "")
             (if version
-                (format nil "Version: ~a~%" version)
+                (format nil "   Version: ~a~%" version)
                 ""))))
 
 ;;TODO rewrite with pattern-matching (see optima)
@@ -148,13 +155,13 @@
   (translate :js :logic-expr (second tree)))
 
 (defmethod translate ((lang (eql :js)) (sort (eql :logic-expr)) tree)
-  (translate :js :comparison-expr (second tree)))
+  (translate :js :equal-expr (second tree)))
 
-(defmethod tranlsate ((lang (eql :js)) (sort (eql :comparison-expr)) tree)
+(defmethod translate ((lang (eql :js)) (sort (eql :equal-expr)) tree)
   `(:eq (translate :js :eql-expr (second tree))
         (translate :js :eql-expr (thord tree))))
 
-(defmethod tranlsate ((lang (eql :js)) (sort (eql :eql-expr)) tree)
+(defmethod translate ((lang (eql :js)) (sort (eql :eql-sub-expr)) tree)
   (let ((sub-tree (second tree)))
     (translate :js (first sub-tree) sub-tree)))
 
@@ -162,12 +169,12 @@
   (let ((sub-tree (second tree)))
     (translate :js (first sub-tree) sub-tree)))
 
-(defmethod tranlsate ((lang (eql :js)) (sort (eql :literal)) tree)
+(defmethod translate ((lang (eql :js)) (sort (eql :literal)) tree)
   (let ((sub-tree (second tree)))
     (translate :js (first sub-tree) sub-tree)))
 
 (defmethod translate ((lang (eql :js)) (sort (eql :item-list)) tree)
-  (mapcar (curry :js :literal) (cdr tree)))
+  (mapcar (curry #'translate :js :literal) (cdr tree)))
 
 (defmethod translate ((lang (eql :js)) (sort (eql :id)) tree)
   (second tree))
@@ -186,7 +193,7 @@
   (let ((sub-tree (second tree)))
     (translate :js (first sub-tree) sub-tree)))
 
-(defmethod tranlsate ((lang (eql :js)) (sort (eql :gotov-expr)) tree)
+(defmethod translate ((lang (eql :js)) (sort (eql :gotov-expr)) tree)
   `(:chain-expr "controller"
                 (:call-expr "next"
                             (:str ,(translate :js :id (second tree))))))

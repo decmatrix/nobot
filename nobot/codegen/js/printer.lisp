@@ -23,75 +23,74 @@
 ;;TODO check extra args
 ;;TODO add newlines
 ;;TODO add whitespaces
-(defun print-js-tree (tree)
-  (mapc #'pprint-js-tree tree))
-
 (defun pprint-js-tree (tree)
-  (let ((root (car tree)))
-    (case root
-      (:js
-       (mapc #'pprint-js-tree (cdr tree)))
-      (:multi-comment
-       (format *stream* "/* ~a */" (second tree)))
-      (:import
-       (format *stream* "import {~{~a~^, ~}} from ~a;"
-               (second tree)
-               (third tree)))
-      (:const
-       (format *stream* "const ~a = ~a;"
-               (second tree)
-               (let ((*stream* nil))
-                 (pprint-js-tree (third tree)))))
-      (:new-object
-       (format *stream* "new ~a(~{~a~^, ~});"
-               (second tree)
-               (let ((*stream* nil))
-                 (mapcar #'pprint-js-tree (cddr tree)))))
-      (:object
-       (format *stream* "{~{~a~^, ~}}"
-               (mapcar
-                (lambda (key-val)
-                  (format nil "~a: ~a"
-                          (car key-val)
-                          (let ((*stream* nil))
-                            (pprint-js-tree (second key-val)))))
-                (cdr tree))))
-      (:stmt
-       (format *stream* "~a;"
-               (let ((*stream* nil))
-                 (pprint-js-tree (second tree)))))
-      (:chain-expr
-       (format *stream* "~{~a~^.~}"
-               (let ((*stream* nil))
-                 (mapcar #'pprint-js-tree (cddr tree)))))
-      (:list
-       (format *stream* "[~{~a~^, ~}]"
-               (let ((*stream* nil))
-                 (mapcar #'pprint-js-tree (cdr tree)))))
-      (:call-expr
-       (format *stream* "~a(~{~a~^, ~})"
-               (second tree)
-               (let ((*stream* nil))
-                 (mapcar #'pprint-js-tree (cddr tree)))))
-      (:if-stmt
-       (format *stream* "if(~a) {~{~a~^~%~}} ~a"
-               (pprint-js-tree (second tree))
-               (mapcar #'pprint-js-tree (third tree))
-               (let ((else (fourth tree)))
-                 (if (null else)
-                     ""
-                     (format nil "else {~{~a~^~%~}}"
-                             (mapcar #'pprint-js-tree else))))))
-      (:arrow-fun
-       (format *stream* "(~{~a~^, ~}) => {~{~a~^~%~}}"
-               (second tree)
-               (let ((*stream* nil))
-                 (mapcar #'pprint-js-tree (cddr tree)))))
-      ((:str :number)
-       (format *stream* "~a" (second tree)))
-      (:null
-       (format *stream* "null"))
-      (t (error "unknown js rule ~a" root)))))
+  (if (not (listp tree))
+      tree
+      (let ((root (car tree)))
+        (case root
+          (:js
+           (mapc #'pprint-js-tree (cdr tree)))
+          (:multi-comment
+           (format *stream* "/* ~a */" (second tree)))
+          (:import
+           (format *stream* "import {~{~a~^, ~}} from ~a;"
+                   (second tree)
+                   (third tree)))
+          (:const
+           (format *stream* "const ~a = ~a;"
+                   (second tree)
+                   (let ((*stream* nil))
+                     (pprint-js-tree (third tree)))))
+          (:new-object
+           (format *stream* "new ~a(~{~a~^, ~});"
+                   (second tree)
+                   (let ((*stream* nil))
+                     (mapcar #'pprint-js-tree (cddr tree)))))
+          (:object
+           (format *stream* "{~{~a~^, ~}}"
+                   (mapcar
+                    (lambda (key-val)
+                      (format nil "~a: ~a"
+                              (car key-val)
+                              (let ((*stream* nil))
+                                (pprint-js-tree (second key-val)))))
+                    (cdr tree))))
+          (:stmt
+           (format *stream* "~a;"
+                   (let ((*stream* nil))
+                     (pprint-js-tree (second tree)))))
+          (:chain-expr
+           (format *stream* "~{~a~^.~}"
+                   (let ((*stream* nil))
+                     (mapcar #'pprint-js-tree (cddr tree)))))
+          (:list
+           (format *stream* "[~{~a~^, ~}]"
+                   (let ((*stream* nil))
+                     (mapcar #'pprint-js-tree (cdr tree)))))
+          (:call-expr
+           (format *stream* "~a(~{~a~^, ~})"
+                   (second tree)
+                   (let ((*stream* nil))
+                     (mapcar #'pprint-js-tree (cddr tree)))))
+          (:if-stmt
+           (format *stream* "if(~a) {~{~a~^~%~}} ~a"
+                   (pprint-js-tree (second tree))
+                   (mapcar #'pprint-js-tree (third tree))
+                   (let ((else (fourth tree)))
+                     (if (null else)
+                         ""
+                         (format nil "else {~{~a~^~%~}}"
+                                 (mapcar #'pprint-js-tree else))))))
+          (:arrow-fun
+           (format *stream* "(~{~a~^, ~}) => {~{~a~^~%~}}"
+                   (second tree)
+                   (let ((*stream* nil))
+                     (mapcar #'pprint-js-tree (cddr tree)))))
+          ((:str :num)
+           (format *stream* "~a" (second tree)))
+          (:null
+           (format *stream* "null"))
+          (t (error "unknown js rule ~a" root))))))
 
 ;; example
 ;; (:js (:multi-comment
