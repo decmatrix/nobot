@@ -41,7 +41,7 @@ bot {
         on-b: {
             save ?input to user-name;
 
-            if "root" in ?input {
+            if "root" == ?input {
                say "Hello, root!";
             } else {
               say "Hello," user-name ". So new what?";

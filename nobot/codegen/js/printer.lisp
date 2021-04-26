@@ -13,11 +13,15 @@
 
 (in-package :nobot/codegen/js/printer)
 
+(defparameter *indent-ch* #\Space)
+(defparameter *indent-step* 2)
 (defvar *stream*)
+(defvar *indent* 0)
 
 ;;;;;;;;;;;;;;;;;;;;;; js code printer ;;;;;;;;;;;;;;;;;;;;;;
 (defmacro print-js-code-from-tree ((stream) lisp-form)
   `(let ((*stream* ,stream))
+     ;;(print ,lisp-form)
      (pprint-js-tree ,lisp-form)))
 
 ;;TODO check extra args
@@ -31,18 +35,18 @@
           (:js
            (mapc #'pprint-js-tree (cdr tree)))
           (:multi-comment
-           (format *stream* "/* ~a */" (second tree)))
+           (format *stream* "/* ~%~a */~%" (second tree)))
           (:import
-           (format *stream* "import {~{~a~^, ~}} from ~a;"
+           (format *stream* "import {~{~a~^, ~}} from \"~a\";~%"
                    (second tree)
                    (third tree)))
           (:const
-           (format *stream* "const ~a = ~a;"
+           (format *stream* "const ~a = ~a;~%"
                    (second tree)
                    (let ((*stream* nil))
                      (pprint-js-tree (third tree)))))
           (:new-object
-           (format *stream* "new ~a(~{~a~^, ~});"
+           (format *stream* "new ~a(~{~a~^, ~})"
                    (second tree)
                    (let ((*stream* nil))
                      (mapcar #'pprint-js-tree (cddr tree)))))
@@ -56,11 +60,16 @@
                                 (pprint-js-tree (second key-val)))))
                     (cdr tree))))
           (:stmt
-           (format *stream* "~a;"
+           ;;TODO: TOOOOOOO BAD!
+           (format *stream* "~a~a;~%"
+                   (if (eq (car (second tree)) :if-stmt)
+                       ""
+                       (repeat-n *indent* *indent-ch*))
                    (let ((*stream* nil))
                      (pprint-js-tree (second tree)))))
           (:chain-expr
-           (format *stream* "~{~a~^.~}"
+           (format *stream* "~a.~{~a~^~%.~}"
+                   (second tree)
                    (let ((*stream* nil))
                      (mapcar #'pprint-js-tree (cddr tree)))))
           (:list
@@ -73,89 +82,54 @@
                    (let ((*stream* nil))
                      (mapcar #'pprint-js-tree (cddr tree)))))
           (:if-stmt
-           (format *stream* "if(~a) {~{~a~^~%~}} ~a"
-                   (pprint-js-tree (second tree))
-                   (mapcar #'pprint-js-tree (third tree))
+           ;;TODO: fix this many lets
+           (format *stream* "~aif(~a) {~%~{~a~^~}~a} ~a"
+                   (repeat-n *indent* *indent-ch*)
+                   (let ((*stream* nil))
+                     (pprint-js-tree (second tree)))
+                   (let ((*stream* nil)
+                         (*indent* (+ *indent* *indent-step*)))
+                     (mapcar #'pprint-js-tree (third tree)))
+                   (repeat-n *indent* *indent-ch*)
                    (let ((else (fourth tree)))
                      (if (null else)
                          ""
-                         (format nil "else {~{~a~^~%~}}"
-                                 (mapcar #'pprint-js-tree else))))))
-          (:arrow-fun
-           (format *stream* "(~{~a~^, ~}) => {~{~a~^~%~}}"
-                   (second tree)
+                         (format nil "else {~%~{~a~^~}~a}"
+                                 (let ((*stream* nil)
+                                       (*indent* (+ *indent* *indent-step*)))
+                                   (mapcar #'pprint-js-tree else))
+                                 (repeat-n *indent* *indent-ch*))))))
+          (:eq
+           ;;TODO: fix this many lets
+           (format *stream* "~a === ~a"
                    (let ((*stream* nil))
+                     (pprint-js-tree (second tree)))
+                   (let ((*stream* nil))
+                     (pprint-js-tree (third tree)))))
+          (:arrow-fun
+           (format *stream* "(~{~a~^, ~}) => {~%~{~a~^~}}"
+                   (second tree)
+                   (let ((*stream* nil)
+                         ;;TODO: hard code
+                         (*indent* (+ *indent* *indent-step*)))
                      (mapcar #'pprint-js-tree (cddr tree)))))
-          ((:str :num)
+          (:template-str
+           (format *stream* "`~{~a~^~}`"
+                   (let ((*stream* nil))
+                     (mapcar
+                      (lambda (sub-tree)
+                        (if (and (listp sub-tree) (eq :str (car sub-tree)))
+                            (second sub-tree)
+                            (format nil "${~a}"
+                                    (pprint-js-tree sub-tree))))
+                      (cdr tree)))))
+          (:str
+           (format *stream* "\"~a\"" (second tree)))
+          (:num
            (format *stream* "~a" (second tree)))
           (:null
            (format *stream* "null"))
           (t (error "unknown js rule ~a" root))))))
 
-;; example
-;; (:js (:multi-comment
-;;   "Bot Tom generated by NOBOT platform v.0.1 in XX.XX.XX
-;;    Author: Bohdan Sokolovskyi
-;;    Version: 0.1")
-;;  (:import ("Bot" "TelegramApplication" "WebApplication") "botlib/src/wisteria.js")
-;;  (:const "bot"
-;;          (:new-object "Bot"
-;;                       (:object
-;;                        ("name" (:str "Tom"))
-;;                        ("type" (:str "chat"))
-;;                        ("startFrom" (:str "a")))))
-;;  (:const "application"
-;;          (:new-object "WebApplication"
-;;                       (:object
-;;                        ("host" (:str "localhost"))
-;;                        ("port" (:num 3000)))))
-;;  (:chain-expr "bot"
-;;               (:call-expr "use"
-;;                           (:object
-;;                            "userName"
-;;                            (:null))))
-;;  ;; generate by map fun
-;;  (:chain-expr "bot"
-;;               (:call-expr "on"
-;;                           (:str "a")
-;;                           (:if-expr (:eq "inputMsg" (:str "Hello"))
-;;                                     (:body
-;;                                      (:chain-expr "controller"
-;;                                                   (:call-expr "say"
-;;                                                               (:str "Hello, what is your name?")))
-;;                                      (:chain-expr "controller"
-;;                                                   (:call-expr "next"
-;;                                                               (:str "b"))))
-;;                                     (:body
-;;                                      (:chain-expr "controller"
-;;                                                   (:call-expr "next"
-;;                                                               (:str "def")))))))
-;;  (:chain-expr "bot"
-;;               (:call-expr "on"
-;;                           (:str "b")
-;;                           (:arrow-fun ("inputMsg" "controller")
-;;                                       (:body
-;;                                        (:chain-expr "controller"
-;;                                                     (:call-expr "save"
-;;                                                                 "inputMsg"
-;;                                                                 (:str "userName")))
-;;                                        (:chain-expr "controller"
-;;                                                     (:call-expr "next"
-;;                                                                 (:str "a")))))))
-;;  (:chain-expr "bot"
-;;               (:call-expr "on"
-;;                           (:str "def")
-;;                           (:arrow-fun "inputMsg" "controller"
-;;                                       (:body
-;;                                        (:chain-expr "controller"
-;;                                                     (:call-expr "say"
-;;                                                                 "Sorry, i don't understand you"))
-;;                                        (:chain-expr "controller"
-;;                                                     (:call-expr "next"
-;;                                                                 (:str "a")))))))
-;;  (:chain-expr "bot"
-;;               (:call-expr ))
-;;  (:chain-expr "application"
-;;               (:call-expr "configure"
-;;                           "bot")
-;;               (:call-expr "run")))
+(defun repeat-n (n obj)
+  (format nil "~v@{~a~:*~}" n obj))

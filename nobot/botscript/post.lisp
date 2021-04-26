@@ -246,31 +246,34 @@
           (convert-type (first value)))
          (value (second value))
          (value (if (stringp value)
-                    (string-trim '(#\Space #\Tab #\Newline #\")
-                                 (string-downcase value))
+                    (string-trim '(#\")
+                                 value)
                     value)))
     (case id
       (:@codegen
        (is-char-string-? converted-type id)
-       (if (find value *avaliable-values-of-codegen-opt* :test #'equal)
-           value
-           (raise-bs-post-process-error
-            "unavailable value of @codegen option: ~a"
-            value)))
+       (let ((value (string-downcase value)))
+         (if (find value *avaliable-values-of-codegen-opt* :test #'equal)
+             value
+             (raise-bs-post-process-error
+              "unavailable value of @codegen option: ~a"
+              value))))
       (:@platform
        (is-char-string-? converted-type id)
-       (if (find value *avaliable-values-of-platform-opt* :test #'equal)
-           value
-           (raise-bs-post-process-error
-            "unavaliable value of @platform option: ~a"
-            value)))
+       (let ((value (string-downcase value)))
+         (if (find value *avaliable-values-of-platform-opt* :test #'equal)
+             value
+             (raise-bs-post-process-error
+              "unavaliable value of @platform option: ~a"
+              value))))
       (:@arch-type
        (is-char-string-? converted-type id)
-       (if (find value *avaliable-values-of-arch-type-opt* :test #'equal)
-           value
-           (raise-bs-post-process-error
-            "unavaliable value of @arch-type option: ~a"
-            value)))
+       (let ((value (string-downcase value)))
+         (if (find value *avaliable-values-of-arch-type-opt* :test #'equal)
+             value
+             (raise-bs-post-process-error
+              "unavaliable value of @arch-type option: ~a"
+              value))))
       ((:name :host :version :author :token)
        (is-char-string-? converted-type id)
        value)

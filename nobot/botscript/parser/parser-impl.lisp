@@ -286,9 +286,9 @@
 
       (define-rule equal-expr ()
         (:and
-         (:rule* eq-sub-expr)
+         (:rule eq-sub-expr)
          (:terminal delimiter "==" :exclude-from-tree)
-         (:rule* eq-sub-expr)))
+         (:rule eq-sub-expr)))
 
       (define-rule eq-sub-expr ()
         (:or

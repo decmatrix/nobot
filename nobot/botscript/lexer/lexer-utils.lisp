@@ -91,7 +91,7 @@
                 "<convert-tokens>"
                 "<convert-with-pos>"
                 "<use-lazy-tokens>"))
-       (unless (probe-file ,source)
+       (when (and (eq type :file) (not (probe-file ,source)))
          (raise-bs-lexer-error "file ~a not exist" ,source))
        (let* ((*source* (case ,type
                           (:file

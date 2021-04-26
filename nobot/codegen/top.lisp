@@ -7,6 +7,8 @@
   (:import-from :nobot/projectgen/common
                 #:get-project-path
                 #:get-project-lang)
+  (:import-from :nobot/botscript/post
+                #:get-state-points-declarations)
   (:import-from :nobot/botscript/types
                 #:type->keyword)
   (:import-from :nobot/toplevel/context
@@ -18,7 +20,8 @@
            #:generate-code
            #:generate-output-code
            #:codegen-info
-           #:translate))
+           #:translate
+           #:find-state-name))
 
 (in-package :nobot/codegen/top)
 
@@ -40,6 +43,15 @@
 
 (defun make-codegen-info ()
   (make-instance 'codegen-info))
+
+(defun find-state-name (name)
+  (let (res)
+    (maphash
+     (lambda (key val)
+       (when (eq (gethash :act val) name)
+         (setf res (string-downcase (string key)))))
+     (get-state-points-declarations *post-process-result*))
+    res))
 
 (defgeneric translate (lang sort tree))
 
