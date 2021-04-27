@@ -3,7 +3,7 @@
 
 
 (uiop:define-package :nobot/projectgen/npm
-    (:use :cl)
+    (:use :cl :yason)
   (:import-from :osicat
                 #:read-link)
   (:import-from :cl-fad
@@ -14,10 +14,6 @@
                 #:copy)
   (:import-from :nobot/toplevel/error-handling
                 #:raise-projectgen-error)
-  (:import-from :alexandria
-                #:plist-hash-table)
-  (:import-from :yason
-                #:encode)
   (:import-from :nobot/utils
                 #:copy-file
                 #:get-root-dir
@@ -50,24 +46,25 @@
     (with-open-file
         (stream
          file-path
-         :direction :output)
-      (encode
-       (plist-hash-table
-        `(
-          "name"        ,(get-project-name *project*)
-          "version"     ,(get-project-version *project*)
-          "description" "generatet bot by NOBOT platform"
-          "main"        "index.js"
-          "type"        "module"
-          "author"      ,(get-project-author *project*)
-          "scripts"     ,(plist-hash-table
-                          '("start" "node index.js"
-                            "postinstall" "cd botlib && npm install")
-                          :test #'equal)
-          "private"     "true"
-          "license"     "")
-        :test #'equal)
-       stream))))
+         :direction :output
+         :if-exists :supersede)
+      (with-output (stream :indent t)
+        (with-object ()
+          (encode-object-elements
+           "name"        (get-project-name *project*)
+           "author"      (get-project-author *project*)
+           "version"     (get-project-version *project*)
+           "private"     "true"
+           "license"     ""
+           "description" "generated bot by NOBOT platform"
+           "type"        "module"
+           "main"        "index.js")
+          (with-object-element ("scripts")
+            (with-object ()
+              (encode-object-elements
+               "start"       "node index.js"
+               "postinstall" "cd botlib && npm install")))))
+      (format stream "~%"))))
 
 (defun generate-readme ()
   (let ((file-path (get-file-path

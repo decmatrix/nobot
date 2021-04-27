@@ -109,7 +109,7 @@
         (make-source-msg)))))
 
 (defun make-project-name (bot-name)
-  (format nil "~a-project" bot-name))
+  (format nil "~a-project" (string-downcase bot-name)))
 
 (defun make-project-path (project-name)
   (let ((project-path
