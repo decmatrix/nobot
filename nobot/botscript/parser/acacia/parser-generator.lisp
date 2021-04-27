@@ -19,6 +19,8 @@
   (:import-from :nobot/utils
                 #:reintern
                 #:to-symbol)
+  (:import-from :nobot/botscript/types
+                #:type->keyword)
   (:import-from :nobot/botscript/lexer/token
                 #:token-typep
                 #:token-value-equal-to
@@ -32,9 +34,9 @@
 
 (in-package :nobot/botscript/parser/acacia/parser-generator)
 
-(defgeneric rule-> (rule-name &key first-fail-no-error)
-  (:method (rule-name &key first-fail-no-error)
-    (declare (ignore first-fail-no-error))
+(defgeneric rule-> (rule-name &key first-fail-no-error not-first)
+  (:method (rule-name &key first-fail-no-error not-first)
+    (declare (ignore first-fail-no-error not-first))
     (error 'acacia-undefined-rule
            :rule rule-name)))
 
@@ -44,22 +46,24 @@
 
 (defmacro define-rule (rule-name () body)
   (let ((rule-name (intern (string rule-name) :keyword)))
-    `(defmethod rule-> ((rule-name (eql ,rule-name)) &key first-fail-no-error)
-       (declare (ignorable first-fail-no-error))
+    `(defmethod rule-> ((rule-name (eql ,rule-name)) &key first-fail-no-error not-first)
+       (declare (ignorable first-fail-no-error not-first))
        ,(build-rule-body `(,body) `,rule-name))))
 
 (defun build-rule-body (quote-body-tree rule-name)
   (labels ((%build (body-tree &key
                               first-fail-no-error
-                              merge-sub-trees)
+                              merge-sub-trees
+                              not-first)
              (let ((root (car body-tree)))
                (case root
                  ((:rule :rule*)
                   (destructuring-bind (rule-name)
                       (cdr body-tree)
                     `(awhen (rule-> ,(to-kword rule-name)
-                                    :first-fail-no-error (or ,first-fail-no-error
-                                                             first-fail-no-error))
+                                    :first-fail-no-error ,(or first-fail-no-error
+                                                              'first-fail-no-error)
+                                    :not-first ,not-first)
                        (remove nil ,(if (eq root :rule*)
                                         '(cdr it)
                                         '(list it))))))
@@ -70,7 +74,8 @@
                       (error 'acacia-empty-body-of-rule
                              :rule :and))
                     `(awhen ,(%build first-rule
-                                     :first-fail-no-error first-fail-no-error
+                                     :first-fail-no-error (or first-fail-no-error
+                                                              'first-fail-no-error)
                                      :merge-sub-trees t)
                        ;;TODO: no need using this remove function
                        (remove
@@ -80,7 +85,9 @@
                            (list ($conf-rule->term-sym ,rule-name)))
                          it
                          ,@ (mapcar
-                             (rcurry #'%build :merge-sub-trees t)
+                             (rcurry #'%build
+                                     :merge-sub-trees t
+                                     :not-first t)
                              (cdr sub-rules)))))))
                  (:or
                   (let* ((sub-rules (cdr body-tree))
@@ -104,7 +111,8 @@
                                              :first-fail-no-error t
                                              :merge-sub-trees t)))
                             it
-                            (unless first-fail-no-error
+                            (unless (and (not (or ,not-first
+                                                  not-first)) first-fail-no-error)
                               (raise-bs-parser-error
                                "error on rule ~a" ,rule-name))))
                        (cond
@@ -135,9 +143,7 @@
                                (if ,exclude-from-tree
                                    (list nil)
                                    (list (convert-token next :with-pos nil)))
-                               (if ,(if first-fail-no-error
-                                        t
-                                        'first-fail-no-error)
+                               (if ,(and (not not-first) first-fail-no-error)
                                    (progn
                                      ($conf-mv-ptr-to-prev-token)
                                      nil)
@@ -148,14 +154,14 @@
                                                 (cons (car it)
                                                       (1+ (cdr it)))))))
                                      (raise-bs-parser-error
-                                      "expected get: ~a, but got: ~a, at position line - ~a, column - ~a~a"
+                                      "expected ~a, but got ~a, at position line - ~a, column - ~a~a"
                                       ,(if val
                                            `($conf-terminal->description ',sym ,val)
                                            `($conf-token-rule->description ',sym))
                                       (if next
                                           ,(if val
                                                `($conf-terminal->description
-                                                 ',sym
+                                                 (type->keyword (get-token-type next))
                                                  (value-of-token next))
                                                `($conf-token-rule->description
                                                  (get-token-type next)))

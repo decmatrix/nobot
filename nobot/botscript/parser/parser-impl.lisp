@@ -280,7 +280,7 @@
          (:rule logic-expr)))
 
       (define-rule logic-expr ()
-        (:and
+        (:or
          (:rule equal-expr)
          (:rule in-expr)))
 
