@@ -96,30 +96,51 @@
                       (error 'acacia-empty-body-of-rule
                              :rule :or))
                     ;;TODO: see issue #4
-                    `(awhen
-                         (append
-                          (unless ,merge-sub-trees
-                            (list ($conf-rule->term-sym ,rule-name)))
-                          (aif (or
-                                ,@ (mapcar (rcurry #'%build
-                                                   :first-fail-no-error t
-                                                   :merge-sub-trees t)
-                                           (butlast sub-rules))
-                                ,(if (is-empty-rule last-rule)
-                                     t
-                                     (%build last-rule
-                                             :first-fail-no-error t
-                                             :merge-sub-trees t)))
-                            it
-                            (unless (and (not (or ,not-first
-                                                  not-first)) first-fail-no-error)
-                              (raise-bs-parser-error
-                               "error on rule ~a" ,rule-name))))
-                       (cond
-                         ((eq (cdr it) t)
-                          (list (car it)))
-                         ((cdr it) (remove nil it))
-                         (t nil)))))
+                    (with-gensyms (pos-list)
+                      `(awhen
+                           (append
+                            (unless ,merge-sub-trees
+                              (list ($conf-rule->term-sym ,rule-name)))
+                            (aif (or
+                                  ,@ (mapcar (rcurry #'%build
+                                                     :first-fail-no-error t
+                                                     :merge-sub-trees t)
+                                             (butlast sub-rules))
+                                  ,(if (is-empty-rule last-rule)
+                                       t
+                                       (%build last-rule
+                                               :first-fail-no-error t
+                                               :merge-sub-trees t)))
+                              it
+                              (unless (and (not (or ,not-first
+                                                    not-first))
+                                           first-fail-no-error)
+                                (with-next-token ()
+                                  (let ((,pos-list
+                                         (if next
+                                             (get-position next)
+                                             (awhen (get-position ($conf-prev-token))
+                                               (cons (car it)
+                                                     (1+ (cdr it)))))))
+                                    (raise-bs-parser-error
+                                     "expected ~a, but got ~a, at position line - ~a, column - ~a~a"
+                                     ($conf-rule->description ,rule-name)
+                                     (if next
+                                         ($conf-terminal->description
+                                          (type->keyword (get-token-type next))
+                                          (value-of-token next))
+                                         "end of source")
+                                     (cdr ,pos-list)
+                                     (car ,pos-list)
+                                     (if (eq ($conf-get-source-type) :file)
+                                         (format nil ", file: ~a."
+                                                 ($conf-get-source))
+                                         ".")))))))
+                         (cond
+                           ((eq (cdr it) t)
+                            (list (car it)))
+                           ((cdr it) (remove nil it))
+                           (t nil))))))
                  (:terminal
                   (destructuring-bind (sym &optional val exclude-from-tree)
                       (cdr body-tree)
