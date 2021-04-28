@@ -110,12 +110,16 @@
 
 (defmethod update-pos (ch (obj from-source-code-node))
   (if (eq ch #\newline)
-      (incf (get-position-y obj))
+      (progn
+        (incf (get-position-y obj))
+        (setf (get-position-x obj) 0))
       (incf (get-position-x obj))))
 
 (defmethod undo-update-pos (ch (obj from-source-code-node))
   (if (eq ch #\newline)
-      (decf (get-position-y obj))
+      (progn
+        (decf (get-position-y obj))
+        (setf (get-position-x obj) 0))
       (decf (get-position-x obj))))
 
 (defmethod push-char-to-buffer (ch (obj from-source-code-node))

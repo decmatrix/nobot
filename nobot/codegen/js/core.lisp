@@ -185,7 +185,7 @@
     (translate :js (first sub-tree) sub-tree)))
 
 (defmethod translate ((lang (eql :js)) (sort (eql :item-list)) tree)
-  (mapcar (curry #'translate :js :literal) (cdr tree)))
+  `(:list ,@(mapcar (curry #'translate :js :literal) (cdr tree))))
 
 (defmethod translate ((lang (eql :js)) (sort (eql :id)) tree)
   (second tree))
