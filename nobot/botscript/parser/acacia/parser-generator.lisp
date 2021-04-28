@@ -27,8 +27,7 @@
                 #:value-of-token
                 #:convert-token
                 #:get-token-type
-                #:get-position
-                )
+                #:get-position)
   (:export #:define-rule
            #:rule->))
 
@@ -123,7 +122,7 @@
                                                (cons (car it)
                                                      (1+ (cdr it)))))))
                                     (raise-bs-parser-error
-                                     "expected ~a, but got ~a, at position line - ~a, column - ~a~a"
+                                     "expected ~a, but got ~a, at position [~a:~a]~a"
                                      ($conf-rule->description ,rule-name)
                                      (if next
                                          ($conf-terminal->description
@@ -133,21 +132,17 @@
                                      (cdr ,pos-list)
                                      (car ,pos-list)
                                      (if (eq ($conf-get-source-type) :file)
-                                         (format nil ", file: ~a."
+                                         (format nil ", file: ~a"
                                                  ($conf-get-source))
-                                         ".")))))))
+                                         "")))))))
                          (cond
                            ((eq (cdr it) t)
                             (list (car it)))
                            ((cdr it) (remove nil it))
                            (t nil))))))
-                 (:terminal
-                  (destructuring-bind (sym &optional val exclude-from-tree)
+                 ((:terminal :terminal*)
+                  (destructuring-bind (sym &optional val)
                       (cdr body-tree)
-                    (unless (or (null exclude-from-tree)
-                                (eq exclude-from-tree :exclude-from-tree))
-                      (error 'acacia-unknown-argument-of-rule
-                             :unknown-arg exclude-from-tree))
                     (with-gensyms (converted-sym converted-val pos-list)
                       `(with-next-token ()
                          (let ((,converted-sym ($conf-token-rule->token-sym ',sym))
@@ -161,7 +156,7 @@
                                 ,(if val
                                      `(token-value-equal-to next ,converted-val)
                                      t))
-                               (if ,exclude-from-tree
+                               (if ,(eq root :terminal*)
                                    (list nil)
                                    (list (convert-token next :with-pos nil)))
                                (if ,(and (not not-first) first-fail-no-error)
@@ -175,7 +170,7 @@
                                                 (cons (car it)
                                                       (1+ (cdr it)))))))
                                      (raise-bs-parser-error
-                                      "expected ~a, but got ~a, at position line - ~a, column - ~a~a"
+                                      "expected ~a, but got ~a, at position [~a:~a]~a"
                                       ,(if val
                                            `($conf-terminal->description ',sym ,val)
                                            `($conf-token-rule->description ',sym))
@@ -190,9 +185,9 @@
                                       (cdr ,pos-list)
                                       (car ,pos-list)
                                       (if (eq ($conf-get-source-type) :file)
-                                          (format nil ", file: ~a."
+                                          (format nil ", file: ~a"
                                                   ($conf-get-source))
-                                          "."))))))))))
+                                          ""))))))))))
                  (t (error 'acacia-unknown-parser-rule
                            :unknown-rule root))))))
     (let* ((body-tree (car quote-body-tree))

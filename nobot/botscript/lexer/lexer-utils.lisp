@@ -167,7 +167,7 @@
       (case on-error
         (:on-char
          (assert val)
-         (format nil "unknown symbol \"~a\"" val))
+         (format nil "unknown symbol '~a'" val))
         (:on-close-comment
          "comment closing expected")
         (:on-string
@@ -175,7 +175,7 @@
         (t
          (error "unknown type of arg `on-error`: ~a, see fun doc"
                 on-error)))
-      " at position: line - ~a, column - ~a~a")
+      " at position [~a:~a]~a")
      (if on-fixed-pos
          (cdr fix-pos)
          (get-position-y *source*))
