@@ -6,7 +6,8 @@
     (:use :cl)
   (:import-from :nobot/toplevel/context
                 #:with-translator-context
-                #:regist)
+                #:regist
+                #:with-total-time)
   (:import-from :nobot/botscript
                 #:parse-file
                 #:botscript-post-process)
@@ -30,15 +31,17 @@
   (with-translator-context (:source-type :file
                             :source file)
     (with-logger ((configure-logger))
-      (toplevel-error-handler
-        ;; Level 1: parse source file and get instance with tree of code
-        (regist :parser (lambda () (parse-file file :return-instance t))) ;; remove passing args, use context
-        ;; Level 2: post parsing processing
-        (regist :post-processing (lambda () (botscript-post-process)))
-        ;; Level 3: generate project
-        (regist :project-generation (lambda () (generate-project)))
-        ;; Level 4: generate code
-        (regist :code-generation (lambda () (generate-code)))))))
+      (with-total-time ()
+        (toplevel-error-handler
+          ;; Level 1: parse source file and get instance with tree of code
+          ;;TODO: ;; remove passing args, use context
+          (regist :parser (lambda () (parse-file file :return-instance t)))
+          ;; Level 2: post parsing processing
+          (regist :post-processing (lambda () (botscript-post-process)))
+          ;; Level 3: generate project
+          (regist :project-generation (lambda () (generate-project)))
+          ;; Level 4: generate code
+          (regist :code-generation (lambda () (generate-code))))))))
 
 (defun *run-and-burn-in-runtime* ()
   ;; WIP

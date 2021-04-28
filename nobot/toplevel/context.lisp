@@ -6,7 +6,12 @@
     (:use :cl)
   (:import-from :nobot/logger
                 #:log-info)
+  (:import-from :alexandria
+                #:with-gensyms)
+  (:import-from :nobot/utils
+                #:with-time)
   (:export #:*context*
+           #:with-total-time
            #:with-translator-context
            #:add-info-log
            #:add-debug-log
@@ -62,24 +67,37 @@
     :initform nil
     :accessor get-code-gen-result
     )))
+
 (defun regist (option value)
   (case option
     (:parser
-     (progn
-       (log-info "parse botscript...")
-       (setf (get-parser-result *context*) (funcall value))))
+     (setf (get-parser-result *context*)
+           (multiple-value-bind (bench-time res)
+               (with-time ()
+                 (funcall value))
+             (log-info "parsed botscript... (~f s)" bench-time)
+             res)))
     (:post-processing
-     (progn
-       (log-info "botscript post processing...")
-       (setf (get-post-processing-result *context*) (funcall value))))
+     (setf (get-post-processing-result *context*)
+           (multiple-value-bind (bench-time res)
+               (with-time ()
+                 (funcall value))
+             (log-info "botscript post processed... (~f s)" bench-time)
+             res)))
     (:project-generation
-     (progn
-       (log-info "project generation...")
-       (setf (get-projectgen-result *context*) (funcall value))))
-    (:code-generation
-     (progn
-       (log-info "code generation...")
-       (setf (get-code-gen-result *context*) (funcall value))))))
+     (setf (get-projectgen-result *context*)
+           (multiple-value-bind (bench-time res)
+               (with-time ()
+                 (funcall value))
+             (log-info "project generated... (~f s)" bench-time)
+             res)))
+    (:code-generation  
+     (setf (get-code-gen-result *context*)
+           (multiple-value-bind (bench-time res)
+               (with-time ()
+                 (funcall value))
+             (log-info "code generated... (~f s)" bench-time)
+             res)))))
 
 (defmacro with-translator-context ((&key source-type source) &body body)
   `(let ((*context*
@@ -137,3 +155,11 @@
           (eq source-type :string))
       t
       (error "Unknown source type: ~a" source-type)))
+
+(defmacro with-total-time (() &body body)
+  (with-gensyms (bench-time res)
+    `(multiple-value-bind (,bench-time ,res)
+         (with-time ()
+           ,@body)
+       (log-info "total time: ~f s" ,bench-time)
+       ,res)))
