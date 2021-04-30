@@ -53,6 +53,7 @@
                           :source-type (get-source-type (get-tokens-source))
                           :source (get-source (get-tokens-source)))
                          :pack-result return-instance)
+      
       (define-rule script ()
         (:and
          (:rule compiler-options)

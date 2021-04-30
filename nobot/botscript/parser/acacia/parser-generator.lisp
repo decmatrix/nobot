@@ -63,31 +63,33 @@
                                     :first-fail-no-error ,(or first-fail-no-error
                                                               'first-fail-no-error)
                                     :not-first ,not-first)
-                       (remove nil ,(if (eq root :rule*)
-                                        '(cdr it)
-                                        '(list it))))))
+                       ,(if (eq root :rule*)
+                            '(cdr it)
+                            'it))))
                  (:and
                   (let* ((sub-rules (cdr body-tree))
                          (first-rule (car sub-rules)))
                     (unless sub-rules
                       (error 'acacia-empty-body-of-rule
                              :rule :and))
-                    `(awhen ,(%build first-rule
-                                     :first-fail-no-error (or first-fail-no-error
-                                                              'first-fail-no-error)
-                                     :merge-sub-trees t)
-                       ;;TODO: no need using this remove function
-                       (remove
-                        nil
-                        (append
-                         (unless ,merge-sub-trees
-                           (list ($conf-rule->term-sym ,rule-name)))
-                         it
-                         ,@ (mapcar
-                             (rcurry #'%build
-                                     :merge-sub-trees t
-                                     :not-first t)
-                             (cdr sub-rules)))))))
+                    (with-gensyms (res)
+                      `(awhen ,(%build first-rule
+                                       :first-fail-no-error (or first-fail-no-error
+                                                                'first-fail-no-error)
+                                       :merge-sub-trees t)
+                         (let ((,res (list ,@ (mapcar
+                                               (rcurry #'%build
+                                                       :merge-sub-trees t
+                                                       :not-first nil)
+                                               (cdr sub-rules)))))
+                           (unless (member nil ,res)
+                             (remove
+                              t
+                              (append
+                               (unless ,merge-sub-trees
+                                 (list ($conf-rule->term-sym ,rule-name)))
+                               (list it)
+                               ,res))))))))
                  (:or
                   (let* ((sub-rules (cdr body-tree))
                          (last-rule (lastcar sub-rules)))
@@ -95,51 +97,31 @@
                       (error 'acacia-empty-body-of-rule
                              :rule :or))
                     ;;TODO: see issue #4
-                    (with-gensyms (pos-list)
-                      `(awhen
-                           (append
-                            (unless ,merge-sub-trees
-                              (list ($conf-rule->term-sym ,rule-name)))
-                            (aif (or
-                                  ,@ (mapcar (rcurry #'%build
-                                                     :first-fail-no-error t
-                                                     :merge-sub-trees t)
-                                             (butlast sub-rules))
-                                  ,(if (is-empty-rule last-rule)
-                                       t
-                                       (%build last-rule
-                                               :first-fail-no-error t
-                                               :merge-sub-trees t)))
-                              it
-                              (unless (and (not (or ,not-first
-                                                    not-first))
-                                           first-fail-no-error)
-                                (with-next-token ()
-                                  (let ((,pos-list
-                                         (if next
-                                             (get-position next)
-                                             (awhen (get-position ($conf-prev-token))
-                                               (cons (car it)
-                                                     (1+ (cdr it)))))))
-                                    (raise-bs-parser-error
-                                     "expected ~a, but got ~a, at position [~a:~a]~a"
-                                     ($conf-rule->description ,rule-name)
-                                     (if next
-                                         ($conf-terminal->description
-                                          (type->keyword (get-token-type next))
-                                          (value-of-token next))
-                                         "end of source")
-                                     (cdr ,pos-list)
-                                     (car ,pos-list)
-                                     (if (eq ($conf-get-source-type) :file)
-                                         (format nil ", file: ~a"
-                                                 ($conf-get-source))
-                                         "")))))))
-                         (cond
-                           ((eq (cdr it) t)
-                            (list (car it)))
-                           ((cdr it) (remove nil it))
-                           (t nil))))))
+                    (with-gensyms (head res)
+                      `(let ((,res
+                              (aif (or
+                                    ,@ (mapcar (rcurry #'%build
+                                                       :first-fail-no-error t
+                                                       :merge-sub-trees t)
+                                               (butlast sub-rules))
+                                    ,(if (is-empty-rule last-rule)
+                                         t
+                                         (%build last-rule
+                                                 :first-fail-no-error t
+                                                 :merge-sub-trees t)))
+                                ;;(print it)
+                                it
+                                (unless (and (not (or ,not-first
+                                                      not-first))
+                                             first-fail-no-error)
+                                  (raise-parser-error ,rule-name)))))
+                         (let ((,head ,(unless merge-sub-trees
+                                         `(list ($conf-rule->term-sym ,rule-name)))))
+                          ;;(print ,res)
+                           (cond
+                             ((eq ,res t) (list ,res))
+                             (,res
+                              (append ,head (list ,res)))))))))
                  ((:terminal :terminal*)
                   (destructuring-bind (sym &optional val)
                       (cdr body-tree)
@@ -157,8 +139,8 @@
                                      `(token-value-equal-to next ,converted-val)
                                      t))
                                (if ,(eq root :terminal*)
-                                   (list nil)
-                                   (list (convert-token next :with-pos nil)))
+                                   t
+                                   (convert-token next :with-pos nil))
                                (if ,(and (not not-first) first-fail-no-error)
                                    (progn
                                      ($conf-mv-ptr-to-prev-token)
@@ -206,3 +188,26 @@
 ;;TODO: use to-kword from nobot utils
 (defun to-kword (sym)
   (reintern sym :keyword))
+
+(defun raise-parser-error (rule-name)
+  (with-next-token ()
+    (let ((pos-list
+           (if next
+               (get-position next)
+               (awhen (get-position ($conf-prev-token))
+                 (cons (car it)
+                       (1+ (cdr it)))))))
+      (raise-bs-parser-error
+       "expected ~a, but got ~a, at position [~a:~a]~a"
+       ($conf-rule->description rule-name)
+       (if next
+           ($conf-terminal->description
+            (type->keyword (get-token-type next))
+            (value-of-token next))
+           "end of source")
+       (cdr pos-list)
+       (car pos-list)
+       (if (eq ($conf-get-source-type) :file)
+           (format nil ", file: ~a"
+                   ($conf-get-source))
+           "")))))
