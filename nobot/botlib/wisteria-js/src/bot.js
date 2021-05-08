@@ -123,8 +123,7 @@ class StateResolver {
         let controller = new StateController(this.#sessionData);
         this.#stateContainer.get(this.#nextState)(msg, controller);
         this.#nextState = controller.getNextState();
-        console.log(this.#nextState);
-        //TODO: here maybe not only text messages
+
         return controller.getInternalData();
     }
 }
