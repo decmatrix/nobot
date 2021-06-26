@@ -50,7 +50,6 @@ class WebApplication extends Application {
         this.#app.use(this.#baseUrl, (req, res, next) => {
             //TODO: try better solution
             if(req.session.bot === undefined) {
-                console.log('HERE');
                 req.session.bot = bot.buildSession();
             }
 

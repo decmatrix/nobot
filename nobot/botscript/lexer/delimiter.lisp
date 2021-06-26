@@ -71,11 +71,6 @@
   :sym-idea "comma"
   :description "comma")
 
-;; (define-delimiter *str-delimiter-table* *sym-delimiter-table*
-;;   :del "="
-;;   :sym-idea "assign"
-;;   :description "assign")
-
 (define-delimiter *str-delimiter-table* *sym-delimiter-table*
   :del ":"
   :sym-idea "colon"
