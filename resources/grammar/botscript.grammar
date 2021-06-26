@@ -55,10 +55,10 @@
 
 <state-actions-declarations> ::= 'state-actions' '{' <state-actions-decls> '}'
 
-<state-actions-decls> ::= <state-decl> <state-actions-decls>
+<state-actions-decls> ::= <state-action-decl> <state-actions-decls>
                           | <empty>
 
-<state-decl> ::= <id> ':' '{' <stmt-list> '}'
+<state-action-decl> ::= <id> ':' '{' <stmt-list> '}'
 
 <stmt-list> ::= <stmt> <stmt-list>
                 | <empty>
@@ -101,7 +101,7 @@
 
 <equal-expr> ::= <eq-sub-expr> '==' <eq-sub-expr>
 
-<in-expr> ::= <left-in-expr> in <right-in-expr>
+<in-expr> ::= <left-in-expr> 'in' <right-in-expr>
 
 <left-in-expr> ::= <char-string>
                    | <id>
