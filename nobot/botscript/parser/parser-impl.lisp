@@ -69,7 +69,7 @@
         (:and
          (:rule compiler-option-name)
          (:rule string-or-number)
-         (:terminal delimiter ";" :exclude-from-tree)))
+         (:terminal* delimiter ";")))
 
       (define-rule compiler-option-name ()
         (:or
@@ -79,21 +79,21 @@
 
       (define-rule bot-declaration ()
         (:and
-         (:terminal keyword "bot" :exclude-from-tree)
-         (:terminal delimiter "{" :exclude-from-tree)
+         (:terminal* keyword "bot")
+         (:terminal* delimiter "{")
          (:rule bot-options)
          (:rule var-declarations)
          (:rule start-from-stmt)
          (:rule state-points-declarations)
          (:rule state-actions-declarations)
-         (:terminal delimiter "}" :exclude-from-tree)))
+         (:terminal* delimiter "}")))
 
       (define-rule bot-options ()
         (:and
-         (:terminal keyword "options" :exclude-from-tree)
-         (:terminal delimiter "{" :exclude-from-tree)
+         (:terminal* keyword "options")
+         (:terminal* delimiter "{")
          (:rule* bot-options-list)
-         (:terminal delimiter "}" :exclude-from-tree)))
+         (:terminal* delimiter "}")))
 
       (define-rule bot-options-list ()
         (:or
@@ -105,16 +105,16 @@
       (define-rule bot-option ()
         (:and
          (:terminal id)
-         (:terminal delimiter ":" :exclude-from-tree)
+         (:terminal* delimiter ":")
          (:rule string-or-number)
-         (:terminal delimiter ";" :exclude-from-tree)))
+         (:terminal* delimiter ";")))
 
       (define-rule var-declarations ()
         (:and
-         (:terminal keyword "vars" :exclude-from-tree)
-         (:terminal delimiter "{" :exclude-from-tree)
+         (:terminal* keyword "vars")
+         (:terminal* delimiter "{")
          (:rule* var-decls-list)
-         (:terminal delimiter "}" :exclude-from-tree)))
+         (:terminal* delimiter "}")))
 
       (define-rule var-decls-list ()
         (:or
@@ -126,23 +126,23 @@
       (define-rule var-decl ()
         (:and
          (:terminal id)
-         (:terminal delimiter ":" :exclude-from-tree)
+         (:terminal* delimiter ":")
          (:rule* literal)
-         (:terminal delimiter ";" :exclude-from-tree)))
+         (:terminal* delimiter ";")))
 
       (define-rule start-from-stmt ()
         (:and
-         (:terminal keyword "start" :exclude-from-tree)
-         (:terminal keyword "from" :exclude-from-tree)
+         (:terminal* keyword "start")
+         (:terminal* keyword "from")
          (:terminal id)
-         (:terminal delimiter ";" :exclude-from-tree)))
+         (:terminal* delimiter ";")))
 
       (define-rule state-points-declarations ()
         (:and
-         (:terminal keyword "state-points" :exclude-from-tree)
-         (:terminal delimiter "{" :exclude-from-tree)
+         (:terminal* keyword "state-points")
+         (:terminal* delimiter "{")
          (:rule* state-points-decls)
-         (:terminal delimiter "}" :exclude-from-tree)))
+         (:terminal* delimiter "}")))
 
       (define-rule state-points-decls ()
         (:or
@@ -154,10 +154,10 @@
       (define-rule state-point-decl ()
         (:and
          (:terminal id)
-         (:terminal delimiter ":" :exclude-from-tree)
-         (:terminal delimiter "{" :exclude-from-tree)
+         (:terminal* delimiter ":")
+         (:terminal* delimiter "{")
          (:rule state-point-options)
-         (:terminal delimiter "}" :exclude-from-tree)))
+         (:terminal* delimiter "}")))
 
       (define-rule state-point-options ()
         (:or
@@ -169,16 +169,16 @@
       (define-rule state-point-option ()
         (:and
          (:terminal id)
-         (:terminal delimiter ":" :exclude-from-tree)
+         (:terminal* delimiter ":")
          (:terminal id)
-         (:terminal delimiter ";" :exclude-from-tree)))
+         (:terminal* delimiter ";")))
 
       (define-rule state-actions-declarations ()
         (:and
-         (:terminal keyword "state-actions" :exclude-from-tree)
-         (:terminal delimiter "{" :exclude-from-tree)
+         (:terminal* keyword "state-actions")
+         (:terminal* delimiter "{")
          (:rule* state-actions-decls)
-         (:terminal delimiter "}" :exclude-from-tree)))
+         (:terminal* delimiter "}")))
 
       (define-rule state-actions-decls ()
         (:or
@@ -190,10 +190,10 @@
       (define-rule state-decl ()
         (:and
          (:terminal id)
-         (:terminal delimiter ":" :exclude-from-tree)
-         (:terminal delimiter "{" :exclude-from-tree)
+         (:terminal* delimiter ":")
+         (:terminal* delimiter "{")
          (:rule stmt-list)
-         (:terminal delimiter "}" :exclude-from-tree)))
+         (:terminal* delimiter "}")))
 
       (define-rule stmt-list ()
         (:or
@@ -207,7 +207,7 @@
          (:rule if-stmt)
          (:and
           (:rule expr)
-          (:terminal delimiter ";" :exclude-from-tree))))
+          (:terminal* delimiter ";"))))
 
       (define-rule expr ()
         (:or
@@ -217,7 +217,7 @@
 
       (define-rule gotov-expr ()
         (:and
-         (:terminal keyword "gotov" :exclude-from-tree)
+         (:terminal* keyword "gotov")
          (:rule* gotov-arg)))
 
       (define-rule gotov-arg ()
@@ -227,7 +227,7 @@
 
       (define-rule say-expr ()
         (:and
-         (:terminal keyword "say" :exclude-from-tree)
+         (:terminal* keyword "say")
          (:rule* say-expr-args)))
 
       (define-rule say-expr-args ()
@@ -251,43 +251,43 @@
 
       (define-rule save-to-expr ()
         (:and
-         (:terminal keyword "save" :exclude-from-tree)
+         (:terminal* keyword "save")
          (:rule* literal-or-id-or-input)
-         (:terminal keyword "to" :exclude-from-tree)
+         (:terminal* keyword "to")
          (:terminal id)))
 
       (define-rule if-stmt ()
         (:and
-         (:terminal keyword "if" :exclude-from-tree)
+         (:terminal* keyword "if")
          (:rule cond-expr)
-         (:terminal delimiter "{" :exclude-from-tree)
+         (:terminal* delimiter "{")
          (:rule stmt-list)
-         (:terminal delimiter "}" :exclude-from-tree)
+         (:terminal* delimiter "}")
          (:rule else-block)))
 
       (define-rule else-block ()
         (:or
          (:and
-          (:terminal keyword "else" :exclude-from-tree)
-          (:terminal delimiter "{" :exclude-from-tree)
+          (:terminal* keyword "else")
+          (:terminal* delimiter "{")
           (:rule stmt-list)
-          (:terminal delimiter "}" :exclude-from-tree))
+          (:terminal* delimiter "}"))
          (:empty)))
 
-      ;;TODO: redundant AND rule fir single RULE rule
+      ;;TODO: redundant AND rule for single RULE rule
       (define-rule cond-expr ()
         (:and
          (:rule logic-expr)))
 
       (define-rule logic-expr ()
-        (:and
+        (:or
          (:rule equal-expr)
          (:rule in-expr)))
 
       (define-rule equal-expr ()
         (:and
          (:rule eq-sub-expr)
-         (:terminal delimiter "==" :exclude-from-tree)
+         (:terminal* delimiter "==")
          (:rule eq-sub-expr)))
 
       (define-rule eq-sub-expr ()
@@ -300,7 +300,7 @@
       (define-rule in-expr ()
         (:and
          (:rule* left-in-expr)
-         (:terminal keyword "in" :exclude-from-tree)
+         (:terminal* keyword "in")
          (:rule* right-in-expr)))
 
       (define-rule left-in-expr ()
@@ -336,9 +336,9 @@
 
       (define-rule item-list ()
         (:and
-         (:terminal delimiter "[" :exclude-from-tree)
+         (:terminal* delimiter "[")
          (:rule* literal-list)
-         (:terminal delimiter "]" :exclude-from-tree)))
+         (:terminal* delimiter "]")))
 
       (define-rule literal-list ()
         (:or
@@ -350,7 +350,7 @@
       (define-rule rest-literal-list ()
         (:or
          (:and
-          (:terminal delimiter "," :exclude-from-tree)
+          (:terminal* delimiter ",")
           (:rule literal)
           (:rule* rest-literal-list))
          (:empty)))

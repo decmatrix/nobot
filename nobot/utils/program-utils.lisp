@@ -7,6 +7,8 @@
   (:import-from :cl-fad
                 #:pathname-directory-pathname)
   (:import-from :unix-opts)
+  (:import-from :alexandria
+                #:with-gensyms)
   (:import-from :cl-ppcre
                 #:scan)
   (:export #:is-valid-file-format-?
@@ -14,7 +16,8 @@
            #:when-option
            #:it-opt
            #:get-pwd
-           #:get-root-dir))
+           #:get-root-dir
+           #:with-time))
 
 (in-package :nobot/utils/program-utils)
 
@@ -38,3 +41,12 @@
 
 (defun get-root-dir ()
   (pathname-directory-pathname sb-ext:*core-pathname*))
+
+(defmacro with-time (() &body body)
+  (with-gensyms (start-time res)
+    `(let ((,start-time (get-internal-real-time))
+           (,res (progn ,@body)))
+       (values
+        (/ (- (get-internal-real-time) ,start-time)
+           internal-time-units-per-second)
+        ,res))))

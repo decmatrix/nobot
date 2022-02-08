@@ -7,7 +7,8 @@
   (:import-from :alexandria
                 #:with-gensyms)
   (:import-from :nobot/logger
-                #:log-error)
+                #:log-error
+                #:log-warn)
   (:export
    ;; Level 1 errors
    #:raise-bs-lexer-error
@@ -80,4 +81,8 @@
        nil)
      (projectgen-error (c)
        (declare (ignore c))
+       nil)
+     (sb-sys::interactive-interrupt (c)
+       (declare (ignore c))
+       (log-warn "NOBOT interrupted!")
        nil)))
