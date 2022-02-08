@@ -17,7 +17,7 @@ const bot = new Bot({
 // });
 
 const application = new TelegramApplication({
-   token: '1783807678:AAGHn8spvjEa8SJzR9oJeNcNeYIRQgI3ldw'
+   token: '***********************************'
 });
 
 bot.use({
