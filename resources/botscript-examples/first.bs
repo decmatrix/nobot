@@ -11,7 +11,7 @@ bot-opts {
   name: "Tobi",
   port: 8081,
   host: "localhost",
-  tg-token "123445dfeogjeg"
+  tg-token "**********"
 }
 
 letd greetings = ["Hi", "Hello", "Hey you"]
